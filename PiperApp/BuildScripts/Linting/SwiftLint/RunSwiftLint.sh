@@ -1,4 +1,4 @@
-#!/bin/bash -x -e
+#!/bin/bash -x
 
 # SPDX-License-Identifier: MIT
 # Copyright (c) 2026 Ihor Shevchuk
