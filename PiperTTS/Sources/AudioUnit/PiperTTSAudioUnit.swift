@@ -226,15 +226,14 @@ public class PiperTTSAudioUnit: AVSpeechSynthesisProviderAudioUnit {
 }
 
 extension PiperTTSAudioUnit: PiperDelegate {
-    public func piperDidReceiveSamples(_ samples: UnsafePointer<Float>, withSize count: Int) {
-        let buf = UnsafeBufferPointer(start: samples, count: count)
+    public func piperDidReceiveSamples(_ samples: UnsafePointer<Float>, withSize size: Int) {
+        let buf = UnsafeBufferPointer(start: samples, count: size)
 
-        // swiftlint:disable:next empty_count
-        if count == 0 { return }
+        if size == 0 { return }
 
         if let modelFormat = model?.audioFormat,
            modelFormat.sampleRate != format.sampleRate {
-            let inputCount = count
+            let inputCount = size
             let inputSampleRate = modelFormat.sampleRate
             let outputSampleRate = format.sampleRate
             let upsampleRatio = outputSampleRate / inputSampleRate
