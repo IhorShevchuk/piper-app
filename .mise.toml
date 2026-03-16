@@ -31,7 +31,7 @@ flag "--reporter <reporter>" help="Reporter type" default="xcode" { choices "xco
 flag "--fix" help="Attempt to fix lint issues"
 '''
 run = '''
-./PiperApp/BuildScripts/Linting/SwiftLint/RunSwiftLint.sh
+./PiperApp/BuildScripts/Linting/SwiftLint/RunSwiftLint.sh ${usage_fix:+--fix} --reporter ${usage_reporter}
 '''
 
 [tasks.build]
