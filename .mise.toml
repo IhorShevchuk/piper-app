@@ -38,13 +38,13 @@ run = '''
 description = "Build for Simulator (default) or Device with a build number"
 usage = '''
 arg "<build_number>" help="The CI build number"
-arg "[target]" help="Build target" default="simulator" { choices "simulator" "device" }
+arg "[target]" help="Build target" default="ios-simulator" { choices "ios-simulator" "ios-device" }
 '''
 run = '''
-# usage_target defaults to "simulator"
+# usage_target defaults to "ios-simulator"
 # usage_build_number is the second positional argument
 
-if [ "$usage_target" = "device" ]; then
+if [ "$usage_target" = "ios-device" ]; then
    ./PiperApp/BuildScripts/Scripts/BuildDevice.sh "$usage_build_number"
 else
   ./PiperApp/BuildScripts/Scripts/BuildSimulator.sh "$usage_build_number"

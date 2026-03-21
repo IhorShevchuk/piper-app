@@ -47,14 +47,14 @@ jobs:
         shell: bash
 
       - name: Install Apple Certificate
-        if: inputs.platform == 'device'
+        if: inputs.platform == 'ios-device'
         uses: apple-actions/import-codesign-certs@v6
         with:
           p12-file-base64: ${{ secrets.BUILD_CERTIFICATE_BASE64 }}
           p12-password: ${{ secrets.P12_PASSWORD }}
 
       - name: Install Provisioning Profiles
-        if: inputs.platform == 'device'
+        if: inputs.platform == 'ios-device'
         env:
           APP_PROFILE: ${{ secrets.APP_PROVISION_PROFILE_BASE64 }}
           EXT_PROFILE: ${{ secrets.EXT_PROVISION_PROFILE_BASE64 }}
@@ -95,7 +95,7 @@ jobs:
           mise run build $BUILD_NUMBER $BUILD_TARGET
 
       - name: Store IPA
-        if: inputs.platform == 'device'
+        if: inputs.platform == 'ios-device'
         uses: actions/upload-artifact@v7
         with:
           name: Piper-iOS-${{ env.BUILD_NUMBER }}
@@ -103,7 +103,7 @@ jobs:
           retention-days: 3
 
       - name: Upload To App Store Connect
-        if: inputs.platform == 'device'
+        if: inputs.platform == 'ios-device'
         run: |
           UPLOAD_FILES=(
             "${{ env.BUILD_OUTPUT }}/binary/iOS/Piper.ipa"
