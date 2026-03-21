@@ -1,0 +1,134 @@
+name: Shared Build
+
+on:
+  workflow_call:
+    inputs:
+      platform:
+        required: true
+        type: string
+    secrets:
+      BUILD_CERTIFICATE_BASE64:
+        required: true
+      P12_PASSWORD:
+        required: true
+      APP_PROVISION_PROFILE_BASE64:
+        required: true
+      EXT_PROVISION_PROFILE_BASE64:
+        required: true
+      APPLE_ID_USERNAME:
+        required: true
+      APPLE_ID_APP_SPECIFIC_PASSWORD:
+        required: true
+
+jobs:
+  build:
+    runs-on: macos-latest
+
+    env:
+      CI_BUILD: "1"
+      BUILD_OUTPUT: "${{ github.workspace }}/BuildOutput"
+      BUILD_TARGET: ${{ inputs.platform }}
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v6
+        with:
+          clean: true
+          submodules: false
+
+      - name: Setup Mise
+        uses: jdx/mise-action@v4
+
+      - name: Set Build Number
+        run: |
+          echo "BUILD_NUMBER=$GITHUB_RUN_NUMBER" >> $GITHUB_ENV
+          source PiperApp/BuildScripts/Configs/version.xcconfig
+          echo "Full Version: $MARKETING_VERSION($GITHUB_RUN_NUMBER)"
+        shell: bash
+
+      - name: Install Apple Certificate
+        if: inputs.platform == 'device'
+        uses: apple-actions/import-codesign-certs@v6
+        with:
+          p12-file-base64: ${{ secrets.BUILD_CERTIFICATE_BASE64 }}
+          p12-password: ${{ secrets.P12_PASSWORD }}
+
+      - name: Install Provisioning Profiles
+        if: inputs.platform == 'device'
+        env:
+          APP_PROFILE: ${{ secrets.APP_PROVISION_PROFILE_BASE64 }}
+          EXT_PROFILE: ${{ secrets.EXT_PROVISION_PROFILE_BASE64 }}
+        run: |
+          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
+
+          APP_PATH=$RUNNER_TEMP/app.mobileprovision
+          echo -n "$APP_PROFILE" | base64 --decode -o $APP_PATH
+          EXT_PATH=$RUNNER_TEMP/ext.mobileprovision
+          echo -n "$EXT_PROFILE" | base64 --decode -o $EXT_PATH
+
+          cp $APP_PATH ~/Library/MobileDevice/Provisioning\ Profiles
+          cp $EXT_PATH ~/Library/MobileDevice/Provisioning\ Profiles
+
+      - name: Select Xcode
+        env:
+          XCODE_VERSION: "26.3"
+        run: |
+          APPLICATIONS_FOLDER="/Applications"
+
+          TARGET="${APPLICATIONS_FOLDER}/Xcode_${XCODE_VERSION}.app"
+          if [ -d "$TARGET" ]; then
+            sudo xcode-select -s "$TARGET"
+          fi
+
+          xcode-select -p
+          xcodebuild -version
+
+      - name: Prepare Project
+        run: |
+          rm -fr *.xcodeproj || true
+          rm -fr *.xcworkspace || true
+          mise run install
+          mise run generate
+
+      - name: Build
+        run: |
+          mise run build $BUILD_NUMBER $BUILD_TARGET
+
+      - name: Store IPA
+        if: inputs.platform == 'device'
+        uses: actions/upload-artifact@v7
+        with:
+          name: Piper-iOS-${{ env.BUILD_NUMBER }}
+          path: ${{ env.BUILD_OUTPUT }}/binary/iOS/Piper.ipa
+          retention-days: 3
+
+      - name: Upload To App Store Connect
+        if: inputs.platform == 'device'
+        run: |
+          UPLOAD_FILES=(
+            "${{ env.BUILD_OUTPUT }}/binary/iOS/Piper.ipa"
+          )
+          echo "Uploading to App Store..."
+          for FILE in "${UPLOAD_FILES[@]}"; do
+            echo "Uploading $FILE ..."
+            xcrun altool --upload-app  \
+              -f "$FILE" \
+              -u "${{ secrets.APPLE_ID_USERNAME }}" \
+              -p "${{ secrets.APPLE_ID_APP_SPECIFIC_PASSWORD }}" \
+              -t ios
+          done
+
+      - name: Clean up
+        if: always()
+        run: |
+          echo "Keychains before removing temp keychain"
+          security list-keychains | echo "Failed to list keychains"
+          KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
+          security lock-keychain $KEYCHAIN_PATH | echo "Failed to lock keychain at path $KEYCHAIN_PATH"
+          security delete-keychain $KEYCHAIN_PATH | echo "Failed to delete keychain at path $KEYCHAIN_PATH"
+          echo "Keychains after removing temp keychain"
+          security list-keychains | echo "Failed to list keychains"
+          rm ~/Library/MobileDevice/Provisioning\ Profiles/build_pp.mobileprovision | echo "Failed to remove provision profile"
+          rm $RUNNER_TEMP/$FASTLANE_CONFIG_NAME | echo "Failed to remove fastlane config"
+          rm ~/.gitconfig | echo "Failed to remove ~/.gitconfig"
+          rm ~/.ssh/key-* | echo "Failed to clean ssh keys"

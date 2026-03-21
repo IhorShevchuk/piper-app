@@ -37,125 +37,14 @@ permissions:
 
 jobs:
   Build:
-    runs-on: macos-latest
-    env:
-      CI_BUILD: "1"
-      BUILD_OUTPUT: "${{ github.workspace }}/BuildOutput"
-      BUILD_TARGET: "${{ github.event_name == 'push' && 'device' || 'simulator' }}"
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v6
-        with:
-          clean: true 
-          submodules: false
+    strategy:
+      matrix:
+        platform: ${{ github.event_name == 'pull_request' && fromJSON('["simulator"]') || fromJSON('["device"]') }}
 
-      - name: Setup Mise
-        uses: jdx/mise-action@v4
-
-      - name: Set Build Number
-        run: |
-          echo "BUILD_NUMBER=$GITHUB_RUN_NUMBER" >> $GITHUB_ENV
-          # Extract version for logging only
-          source PiperApp/BuildScripts/Configs/version.xcconfig
-          echo "Full Version: $MARKETING_VERSION($GITHUB_RUN_NUMBER)"
-        shell: bash
-
-      - name: Install Apple Certificate
-        uses: apple-actions/import-codesign-certs@v6
-        if: env.BUILD_TARGET == 'device'
-        with:
-          p12-file-base64: ${{ secrets.BUILD_CERTIFICATE_BASE64 }}
-          p12-password: ${{ secrets.P12_PASSWORD }}
-
-      - name: Install Provisioning Profiles
-        if: env.BUILD_TARGET == 'device'
-        env:
-          APP_PROFILE: ${{ secrets.APP_PROVISION_PROFILE_BASE64 }}
-          EXT_PROFILE: ${{ secrets.EXT_PROVISION_PROFILE_BASE64 }}
-        run: |
-          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
-
-          APP_PATH=$RUNNER_TEMP/app.mobileprovision
-          echo -n "$APP_PROFILE" | base64 --decode -o $APP_PATH
-          EXT_PATH=$RUNNER_TEMP/ext.mobileprovision
-          echo -n "$EXT_PROFILE" | base64 --decode -o $EXT_PATH
-
-          cp $APP_PATH ~/Library/MobileDevice/Provisioning\ Profiles
-          cp $EXT_PATH ~/Library/MobileDevice/Provisioning\ Profiles
-
-      - name: Xcode version
-        env:
-          XCODE_VERSION: "26.3"
-        run: |
-          APPLICATIONS_FOLDER="/Applications"
-          echo "Installed Xcode versions:"
-          for XCODE in "${APPLICATIONS_FOLDER}"/Xcode*.app; do
-          echo "== $XCODE =="
-          "$XCODE/Contents/Developer/usr/bin/xcodebuild" -version
-          echo ""
-          done
-          
-          TARGET="${APPLICATIONS_FOLDER}/Xcode_${XCODE_VERSION}.app"
-          if [ -d "$TARGET" ]; then
-            echo "Switching to Xcode ${XCODE_VERSION}"
-            sudo xcode-select -s "$TARGET"
-          else
-            echo "Xcode ${XCODE_VERSION} not installed, keeping default"
-          fi
-          echo ""
-          echo "Active Xcode:"
-          xcode-select -p
-          xcodebuild -version
-
-      - name: Prepare Project
-        run: |
-          rm -fr *.xcodeproj | echo "Failed to remove project"
-          rm -fr *.xcworkspace | echo "Failed to remove workspace"
-          mise run install
-          mise run generate
-
-      - name: Build
-        run: |
-          mise run build $BUILD_NUMBER $BUILD_TARGET
-
-      - name: Store IPA
-        if: env.BUILD_TARGET == 'device'
-        uses: actions/upload-artifact@v7
-        with:
-          name: Piper-Build-${{ env.BUILD_NUMBER }}
-          path: ${{ env.BUILD_OUTPUT }}/binary/iOS/Piper.ipa
-          retention-days: 3
-      
-      - name: Upload To App Store Connect
-        if: env.BUILD_TARGET == 'device'
-        run: |
-          UPLOAD_FILES=(
-            "${{ env.BUILD_OUTPUT }}/binary/iOS/Piper.ipa"
-          )
-          echo "Uploading to App Store..."
-          for FILE in "${UPLOAD_FILES[@]}"; do
-            echo "Uploading $FILE ..."
-            xcrun altool --upload-app  \
-              -f "$FILE" \
-              -u "${{ secrets.APPLE_ID_USERNAME }}" \
-              -p "${{ secrets.APPLE_ID_APP_SPECIFIC_PASSWORD }}" \
-              -t ios
-          done
-
-      - name: Clean up
-        if: ${{ always() }}
-        run: |
-          echo "Keychains before removing temp keychain"
-          security list-keychains | echo "Failed to list keychains"
-          KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
-          security lock-keychain $KEYCHAIN_PATH | echo "Failed to lock keychain at path $KEYCHAIN_PATH"
-          security delete-keychain $KEYCHAIN_PATH | echo "Failed to delete keychain at path $KEYCHAIN_PATH"
-          echo "Keychains after removing temp keychain"
-          security list-keychains | echo "Failed to list keychains"
-          rm ~/Library/MobileDevice/Provisioning\ Profiles/build_pp.mobileprovision | echo "Failed to remove provision profile"
-          rm $RUNNER_TEMP/$FASTLANE_CONFIG_NAME | echo "Failed to remove fastlane config"
-          rm ~/.gitconfig | echo "Failed to remove ~/.gitconfig"
-          rm ~/.ssh/key-* | echo "Failed to clean ssh keys"
+    uses: ./.github/workflows/build-shared.yml
+    with:
+      platform: ${{ matrix.platform }}
+    secrets: inherit
 
   Lint:
     runs-on: ubuntu-latest
