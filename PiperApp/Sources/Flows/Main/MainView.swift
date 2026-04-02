@@ -48,25 +48,12 @@ struct MainView: View {
         }
     }
     
-    @State var isShowingFileSelector = false
     func selectFromFiles() -> some View {
-        Button {
-            isShowingFileSelector.toggle()
+        NavigationLink {
+            ImportVoiceHostModelView(hostModel: ImportVoiceHostModel(piper: hostModel.piper, delegate: hostModel))
         } label: {
             Text("update_model_in_app")
         }
-        .fileImporter(isPresented: $isShowingFileSelector,
-                      allowedContentTypes: [Constants.jsonUTI, Constants.modelUTI],
-                      allowsMultipleSelection: true,
-                      onCompletion: { results in
-            
-            switch results {
-            case .success(let fileURLs):
-                hostModel.selected(files: fileURLs)
-            case .failure(let error):
-                Log.error("Failed to import model files: \(error)")
-            }
-        })
     }
     
     @ViewBuilder

@@ -1,0 +1,110 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Ihor Shevchuk
+
+import SwiftUI
+import PiperAppUtils
+
+struct ImportVoiceHostModelView: View {
+    
+    @StateObject var hostModel: ImportVoiceHostModel
+    @Environment(\.dismiss) var dismiss
+    
+    @ViewBuilder
+    func importButton(image: ImageResource,
+                      title: String,
+                      subtitle: String = "",
+                      fileName: String,
+                      isPresented: Binding<Bool>,
+                      isSelected: Bool) -> some View {
+        Button {
+            isPresented.wrappedValue.toggle()
+        } label: {
+            VStack {
+                Image(image)
+                    .resizable()
+                    .frame(
+                        minWidth: 30, maxWidth: 170,
+                        minHeight: 30, maxHeight: 170
+                    )
+                    .scaledToFit()
+                    .padding(.all, 20)
+                    .tint(isSelected ? Color(.label) : Color(.gray) )
+                VStack {
+                    Text(title)
+                        .font(.title2)
+                    Text(subtitle)
+                        .font(.footnote)
+                    Text(fileName)
+                        .font(.headline)
+                }
+                .foregroundStyle(Color(.label))
+            }
+        }
+        .buttonStyle(BorderlessButtonStyle())
+        .accessibilityAddTraits(isSelected ? .isSelected : [])
+        .accessibilityElement(children: .combine)
+    }
+    
+    @State var isShowingModelFileSelector = false
+    @State var isShowingJsonFileSelector = false
+    var body: some View {
+        NavigationStack {
+            List {
+                Section {
+                    HStack {
+                        Spacer()
+                        importButton(image: .onnx,
+                                     title: "select_model".localized,
+                                     subtitle: "onnx_file".localized,
+                                     fileName: hostModel.viewModel.selectedModel,
+                                     isPresented: $isShowingModelFileSelector,
+                                     isSelected: !hostModel.viewModel.selectedModel.isEmpty)
+                            .fileImporter(isPresented: $isShowingModelFileSelector,
+                                          allowedContentTypes: [Constants.modelUTI],
+                                          onCompletion: { results in
+                                switch results {
+                                case .success(let fileURL):
+                                    hostModel.select(model: fileURL)
+                                case .failure(let error):
+                                    Log.error("Failed to import model file: \(error)")
+                                }
+                            })
+                        Spacer()
+                        Divider()
+                        Spacer()
+                        importButton(image: .json,
+                                     title: "select_json".localized,
+                                     fileName: hostModel.viewModel.selectedJSON,
+                                     isPresented: $isShowingJsonFileSelector,
+                                     isSelected: !hostModel.viewModel.selectedJSON.isEmpty)
+                            .fileImporter(isPresented: $isShowingJsonFileSelector,
+                                          allowedContentTypes: [Constants.jsonUTI],
+                                          onCompletion: { results in
+                                switch results {
+                                case .success(let fileURL):
+                                    hostModel.select(json: fileURL)
+                                case .failure(let error):
+                                    Log.error("Failed to import json file: \(error)")
+                                }
+                            })
+                        Spacer()
+                    }
+                }
+                
+                Button {
+                    hostModel.install()
+                } label: {
+                    Text("update_model_in_app")
+                }
+                .disabled(hostModel.viewModel.selectedJSON.isEmpty ||
+                          hostModel.viewModel.selectedModel.isEmpty)
+            }
+            .navigationTitle("update_model_in_app")
+            .onAppear {
+                hostModel.viewModel.onDismiss = {
+                    dismiss()
+                }
+            }
+        }
+    }
+}
