@@ -28,7 +28,7 @@ struct ImportVoiceHostModelView: View {
                     )
                     .scaledToFit()
                     .padding(.all, 20)
-                    .tint(isSelected ? Color(.label) : Color(.gray) )
+                    .tint(isSelected ? Color(.colorOfText) : Color(.gray) )
                 VStack {
                     Text(title)
                         .font(.title2)
@@ -37,7 +37,7 @@ struct ImportVoiceHostModelView: View {
                     Text(fileName)
                         .font(.headline)
                 }
-                .foregroundStyle(Color(.label))
+                .foregroundStyle(Color(.colorOfText))
             }
         }
         .buttonStyle(BorderlessButtonStyle())
