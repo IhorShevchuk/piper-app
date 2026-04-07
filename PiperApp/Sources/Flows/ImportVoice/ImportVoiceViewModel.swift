@@ -21,4 +21,6 @@ struct ImportVoiceViewModel {
     var selectedModelURL: URL?
     var selectedJSONURL: URL?
     var onDismiss: (() -> Void)?
+    var error: Error?
+    var showErrorMessage: Bool = false
 }

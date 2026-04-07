@@ -105,6 +105,11 @@ struct ImportVoiceHostModelView: View {
                     dismiss()
                 }
             }
+            .alert("error", isPresented: $hostModel.viewModel.showErrorMessage, actions: {
+                Button("ok", role: .cancel) { }
+            }, message: {
+                Text(hostModel.viewModel.error?.humanReadableError ?? "unknown_error".localized)
+            })
         }
     }
 }

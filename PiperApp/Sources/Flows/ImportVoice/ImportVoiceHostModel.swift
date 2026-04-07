@@ -20,10 +20,12 @@ class ImportVoiceHostModel: @unchecked Sendable, ObservableObject {
     func select(model: URL?) {
         guard let model else {
             Log.error("Failed to find model file")
+            viewModel.selectedModelURL = nil
             return
         }
         if !model.startAccessingSecurityScopedResource() {
             Log.error("Failed to access model file")
+            viewModel.selectedModelURL = nil
             return
         }
         defer {
@@ -39,10 +41,12 @@ class ImportVoiceHostModel: @unchecked Sendable, ObservableObject {
     func select(json: URL?) {
         guard let json else {
             Log.error("Failed to find json file")
+            viewModel.selectedJSONURL = nil
             return
         }
         if !json.startAccessingSecurityScopedResource() {
             Log.error("Failed to access json file")
+            viewModel.selectedJSONURL = nil
             return
         }
         defer {
@@ -50,11 +54,22 @@ class ImportVoiceHostModel: @unchecked Sendable, ObservableObject {
             modelDidChange()
         }
         
-        // TODO: handle and display invalid JSON errors
-        
-        if FileManager.default.fileExists(atPath: json.path) {
-            viewModel.selectedJSONURL = json
+        if !FileManager.default.fileExists(atPath: json.path) {
+            viewModel.selectedJSONURL = nil
+           return
         }
+        
+        do {
+           _ = try ModelInfo.create(from: json)
+        } catch {
+            Log.error("Invalid JSON file: \(error)")
+            viewModel.error = error
+            viewModel.selectedJSONURL = nil
+            viewModel.showErrorMessage = true
+            return
+        }
+        
+        viewModel.selectedJSONURL = json
     }
     
     func install() {
@@ -105,5 +120,34 @@ class ImportVoiceHostModel: @unchecked Sendable, ObservableObject {
                 self.objectWillChange.send()
             }
         }
+    }
+}
+
+extension Error {
+    var humanReadableError: String {
+        if let error = self as? ModelInfo.Error {
+            switch error {
+            case .nilFileURL:
+                return "json_error_invalid_model_file_path".localized
+            }
+        }
+        
+        guard let decodingError = self as? DecodingError else {
+            return localizedDescription
+        }
+        
+        switch decodingError {
+        case .keyNotFound(let key, let context):
+            return String(localized: "json_error_missing_field_\(String(describing: key.stringValue))_at_\(String(describing: context.codingPath.map { $0.stringValue }.joined(separator: ".")))")
+        case .typeMismatch(let type, let context):
+            return String(localized: "json_error_type_mismatch_\(String(describing: type))_at_\(String(describing: context.codingPath.map { $0.stringValue }.joined(separator: ".")))")
+        case .valueNotFound(let type, let context):
+            return String(localized: "json_error_value_not_found_\(String(describing: type))_at_\(String(describing: context.codingPath.map { $0.stringValue }.joined(separator: ".")))")
+        case .dataCorrupted(let context):
+            return String(localized: "json_error_data_corrupted_\(String(describing: context.debugDescription))")
+        @unknown default:
+            break
+        }
+        return "An unknown decoding error occurred."
     }
 }
