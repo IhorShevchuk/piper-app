@@ -19,7 +19,7 @@ let package = Package(
     name: "Piper",
     dependencies: [
         .package(url: "https://github.com/IhorShevchuk/espeak-ng-spm.git", from: "2025.9.17"),
-        .package(url: "https://github.com/IhorShevchuk/piper-objc", from: "0.2.7")
+        .package(url: "https://github.com/IhorShevchuk/piper-objc", from: "0.2.8")
     ],
     targets: []  // Tuist uses this only to resolve deps; targets are in Project.swift via .external()
 )
