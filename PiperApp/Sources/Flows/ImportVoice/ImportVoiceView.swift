@@ -31,7 +31,7 @@ struct ImportVoiceHostModelView: View {
                     .tint(isSelected ? Color(.colorOfText) : Color(.gray) )
                 VStack {
                     Text(title)
-                        .font(.title2)
+                        .font(.title)
                     Text(subtitle)
                         .font(.footnote)
                     Text(fileName)
@@ -91,13 +91,18 @@ struct ImportVoiceHostModelView: View {
                     }
                 }
                 
-                Button {
-                    hostModel.install()
-                } label: {
-                    Text("update_model_in_app")
+                HStack {
+                    Spacer()
+                    Button {
+                        hostModel.install()
+                    } label: {
+                        Text("update_model_in_app")
+                            .font(.title2)
+                    }
+                    .disabled(hostModel.viewModel.selectedJSON.isEmpty ||
+                              hostModel.viewModel.selectedModel.isEmpty)
+                    Spacer()
                 }
-                .disabled(hostModel.viewModel.selectedJSON.isEmpty ||
-                          hostModel.viewModel.selectedModel.isEmpty)
             }
             .navigationTitle("update_model_in_app")
             .onAppear {

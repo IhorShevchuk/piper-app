@@ -95,12 +95,12 @@ struct VoiceItemView: View {
             VStack {
                 HStack {
                     Text(voiceTitle)
-                        .font(.body)
+                        .font(.title)
                     Spacer()
                 }
                 HStack {
                     Text(voice.voiceSizeString)
-                        .font(.footnote)
+                        .font(.body)
                     Spacer()
                 }
             }

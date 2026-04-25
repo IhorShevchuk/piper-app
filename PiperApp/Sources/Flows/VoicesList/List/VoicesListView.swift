@@ -16,20 +16,18 @@ struct VoicesListView: View {
             }),
                !voices.isEmpty {
                 List {
-                    Section(content: {
+                    Text("warning_not_tested_voices")
+                        .font(.title2)
+                    Section {
                         ForEach(voices, id: \.key) { voice in
                             VoiceItemView(hostModel: VoiceItemHostModel(piper: hostModel.piper,
                                                                         loader: hostModel.loader,
                                                                         voice: voice,
                                                                         delegate: hostModel.delegate))
                         }
-                    }, header: {
-                        Text("warning_not_tested_voices")
-                            .font(.footnote)
-                    }, footer: {
-                        Text("warning_big_voice_files")
-                            .font(.footnote)
-                    })
+                    }
+                    Text("warning_big_voice_files")
+                        .font(.title2)
                 }
             } else {
                 Text("no_voices")
@@ -51,6 +49,7 @@ struct VoicesListView: View {
                                 voicesList(for: language, title: title)
                             } label: {
                                 Text(title)
+                                    .font(.title2)
                             }
                         }
                     }

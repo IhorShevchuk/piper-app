@@ -45,6 +45,7 @@ struct MainView: View {
             VoicesListView(hostModel: VoicesListHostModel(piper: hostModel.piper, delegate: hostModel))
         } label: {
             Text("download_voice_model")
+                .font(.title2)
         }
     }
     
@@ -53,6 +54,7 @@ struct MainView: View {
             ImportVoiceHostModelView(hostModel: ImportVoiceHostModel(piper: hostModel.piper, delegate: hostModel))
         } label: {
             Text("update_model_in_app")
+                .font(.title2)
         }
     }
     
@@ -64,6 +66,7 @@ struct MainView: View {
             Image(systemName: icon)
                 .accessibilityHidden(true)
             Text(attributedText)
+                .font(.title2)
         }
     }
     
@@ -77,6 +80,7 @@ struct MainView: View {
                                 VoiceView(hostModel: VoiceHostModel(piper: hostModel.piper, modelPaths: model, delegate: hostModel))
                             } label: {
                                 Text(model.modelTitle)
+                                    .font(.title2)
                             }
                         }
                     }
