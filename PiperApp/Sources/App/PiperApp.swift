@@ -23,7 +23,10 @@ struct PiperApp: App {
         Window("piper_app_name".localized, id: "main") {
             mainContent
                 .frame(minWidth: 400, minHeight: 300)
+                .frame(idealWidth: 400, idealHeight: 300)
+                .frame(maxWidth: 800, maxHeight: 800)
         }
+        .windowResizability(.contentSize)
         #elseif os(iOS)
         WindowGroup {
             mainContent
