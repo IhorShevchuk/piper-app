@@ -43,10 +43,13 @@ struct AboutAppView: View {
                             .font(.subheadline)
                             .multilineTextAlignment(.center)
                     }
-                    
-                    AboutLibView(libTitle: String(localized: "license_main_app_\(platform)_title"),
-                                 url: "https://github.com/IhorShevchuk/piper-app",
-                                 description: String(localized: "license_main_app_description"))
+                    HStack {
+                        Spacer()
+                        AboutLibView(libTitle: String(localized: "license_main_app_\(platform)_title"),
+                                     url: "https://github.com/IhorShevchuk/piper-app",
+                                     description: String(localized: "license_main_app_description"))
+                        Spacer()
+                    }
                 }
                 
                 InfoViewRow(title: "audio_unit_status".localized, value: hostModel.viewModel.connectionStatus.string)
