@@ -182,7 +182,6 @@ class PiperAudioUnit {
         Log.debug("Disconnecting audio unit...")
         invalidateHealthCheckTimer()
         cancellables.removeAll()
-        NotificationCenter.default.removeObserver(self)
         if engine.isRunning {
             engine.stop()
         }
