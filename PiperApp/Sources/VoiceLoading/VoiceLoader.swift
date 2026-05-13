@@ -20,7 +20,7 @@ class VoiceLoader: NSObject {
         case wrongModelInfo
     }
     private enum Constants {
-        static let baseURL = "https://huggingface.co/rhasspy/piper-voices/resolve/main"
+        static let baseURL = "https://huggingface.co/IhorShevchuk/piper1-voices-fp16-quantized/resolve/main"
         static let sampesBaseURL = "https://rhasspy.github.io/piper-samples/samples"
         
         static var voicesURL: URL? {
