@@ -62,8 +62,8 @@ public struct ModelInfo: Decodable {
             (paths.info) == self
         }
     }
-    
-    static let separator = ">0<"
+
+    public static let separator = ">0<"
     public var voiceId: String {
         let components = [
             name,
