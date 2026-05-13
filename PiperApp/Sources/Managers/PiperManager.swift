@@ -46,7 +46,7 @@ class PiperManager {
         await setIsPlaying(true)
         if modelInfo.installedPath?.isInstalled == true {
             let piperVoiceId = if modelInfo.numberOfSpeakers > 1 {
-                "\(modelInfo.voiceId)_\(speakerId)"
+                "\(modelInfo.voiceId)\(Constants.speakerIdSeparator)\(speakerId)"
             } else {
                 modelInfo.voiceId
             }
