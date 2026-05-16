@@ -6,7 +6,7 @@
 </p>
 
 <h3 align="center">
-  Piper for iOS is now available on the App Store! 🎉<br>
+  Piper is now available on the App Store! 🎉<br>
   Experience high-quality <b>offline neural text-to-speech</b> directly on your device.<br><br>
   Want to try the latest features early?<br>
   Join the <a href="https://testflight.apple.com/join/Adkg5F5H">TestFlight Beta</a> 🚀
