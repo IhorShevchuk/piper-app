@@ -19,20 +19,31 @@ struct VoiceView: View {
     @ViewBuilder
     func playSampleView() -> some View {
         Section {
-            Button {
-                hostModel.play()
-            } label: {
-                CenteredContent {
-                    if hostModel.viewModel.isPlaying {
-                        buttonImageView(systemName: "stop")
-                        Text("stop")
-                    } else {
-                        buttonImageView(systemName: "play")
-                        Text("play_sample")
+            HStack {
+                Button {
+                    hostModel.play()
+                } label: {
+                    CenteredContent {
+                        if hostModel.viewModel.isPlaying {
+                            buttonImageView(systemName: "stop")
+                            Text("stop")
+                        } else {
+                            buttonImageView(systemName: "play")
+                            Text("play_sample")
+                        }
                     }
+                    .accessibilityElement(children: .combine)
                 }
-                .accessibilityElement(children: .combine)
+                .buttonStyle(.bordered)
+                
+                ShareLink("export_file".localized, item: VoiceFileTransferable(text: hostModel.viewModel.demoText, syntehesizer: hostModel),
+                          preview: SharePreview(hostModel.fileName + ".wav",
+                                                icon: Image("waveform")
+                                               ))
+                .tint(.accentColor)
+                .buttonStyle(.bordered)
             }
+
             .alignmentGuide(.listRowSeparatorLeading) { _ in
                 return 0
             }
@@ -50,14 +61,6 @@ struct VoiceView: View {
             TextField("sample_text".localized, text: $hostModel.viewModel.demoText, axis: .vertical)
                 .lineLimit(1...10)
                 .accessibilityLabel("sample_text: \(hostModel.viewModel.demoText)")
-            CenteredContent {
-                ShareLink(item: VoiceFileTransferable(text: hostModel.viewModel.demoText, syntehesizer: hostModel),
-                          preview: SharePreview(hostModel.fileName + ".wav",
-                                                icon: Image("waveform")))
-            }
-            .alignmentGuide(.listRowSeparatorLeading) { _ in
-                return 0
-            }
         }
     }
     
