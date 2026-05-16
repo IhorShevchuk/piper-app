@@ -83,3 +83,28 @@ class VoiceHostModel: @unchecked Sendable, ObservableObject {
         }
     }
 }
+
+extension VoiceHostModel: VoiceFileSyntehesizer {
+    
+    enum Error: Swift.Error {
+        case modelIsNotAvailable
+    }
+    
+    var fileName: String {
+        guard let modelInfo = viewModel.modelInfo else {
+           return UUID().uuidString
+        }
+        return "\(modelInfo.name)_\(Int.random(in: 0...10000))"
+    }
+    
+    func syntehesize(text: String, to file: String) async throws {
+        guard let modelInfo = viewModel.modelInfo else {
+            throw Error.modelIsNotAvailable
+        }
+        
+        try await self.piper.synthesizeToFile(text: viewModel.demoText,
+                                              to: file,
+                                              speakerId: self.viewModel.selectedSpeaker,
+                                              modelInfo: modelInfo)
+    }
+}

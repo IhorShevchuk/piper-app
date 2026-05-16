@@ -10,4 +10,8 @@ class AppManager {
     init() {
         try? FileManager.default.cleanTemporaryDirectory()
     }
+
+    deinit {
+        try? FileManager.default.cleanTemporaryDirectory()
+    }
 }

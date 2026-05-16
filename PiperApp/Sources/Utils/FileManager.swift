@@ -61,13 +61,12 @@ extension FileManager {
         case nilTemporaryDirectory
     }
     
-    private static var tempFolderInDocumentDirectory: URL? {
-        let fileManager = FileManager.default
-        let temporaryDirectoryURL = try? fileManager.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
-        return temporaryDirectoryURL?.appending(component: "downloads_temp")
+    static var tempFolderInDocumentDirectory: URL? {
+        let temporaryDirectoryURL = URL(filePath: NSTemporaryDirectory())
+        return temporaryDirectoryURL.appending(component: "temporary_folder")
     }
     
-    private func createDownloadTemporaryDirectoryIfNeeded() throws {
+    func createTemporaryDirectoryIfNeeded() throws {
         guard let temporaryDirectoryURL = FileManager.tempFolderInDocumentDirectory else {
             throw Error.nilTemporaryDirectory
         }
@@ -88,7 +87,7 @@ extension FileManager {
         guard let temporaryDirectoryURL = FileManager.tempFolderInDocumentDirectory else {
             throw Error.nilTemporaryDirectory
         }
-        try createDownloadTemporaryDirectoryIfNeeded()
+        try createTemporaryDirectoryIfNeeded()
         let movedFileURL = temporaryDirectoryURL.appendingPathComponent(UUID().uuidString)
         try self.copyItem(at: fileURL, to: movedFileURL)
         return movedFileURL

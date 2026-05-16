@@ -28,7 +28,7 @@ public class PiperTTSAudioUnit: AVSpeechSynthesisProviderAudioUnit {
 
     @objc override init(componentDescription: AudioComponentDescription, options: AudioComponentInstantiationOptions) throws {
 
-        self.format = AVAudioFormat.defaultFormat!
+        self.format = AVAudioFormat(commonFormat: .pcmFormatFloat32, sampleRate: 22050.0, channels: 1, interleaved: true)!
 
         outputBus = try AUAudioUnitBus(format: self.format)
         try super.init(componentDescription: componentDescription, options: options)

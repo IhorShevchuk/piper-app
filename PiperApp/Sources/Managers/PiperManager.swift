@@ -72,6 +72,19 @@ class PiperManager {
         await setIsPlaying(false)
     }
     
+    func synthesizeToFile(text: String,
+                          to file: String,
+                          speakerId: Int,
+                          modelInfo: ModelInfo) async throws {
+        let piperVoiceId = if modelInfo.numberOfSpeakers > 1 {
+            "\(modelInfo.voiceId)\(Constants.speakerIdSeparator)\(speakerId)"
+        } else {
+            modelInfo.voiceId
+        }
+        
+        try await audioUnit.save(text: text, piperVoiceId: piperVoiceId, to: file)
+    }
+    
     func install(paths: FileManager.ModelPaths?) async {
         do {
             await audioUnit.disconnect()

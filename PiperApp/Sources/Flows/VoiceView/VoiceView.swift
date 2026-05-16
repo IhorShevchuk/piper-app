@@ -50,6 +50,14 @@ struct VoiceView: View {
             TextField("sample_text".localized, text: $hostModel.viewModel.demoText, axis: .vertical)
                 .lineLimit(1...10)
                 .accessibilityLabel("sample_text: \(hostModel.viewModel.demoText)")
+            CenteredContent {
+                ShareLink(item: VoiceFileTransferable(text: hostModel.viewModel.demoText, syntehesizer: hostModel),
+                          preview: SharePreview(hostModel.fileName + ".wav",
+                                                icon: Image("waveform")))
+            }
+            .alignmentGuide(.listRowSeparatorLeading) { _ in
+                return 0
+            }
         }
     }
     
