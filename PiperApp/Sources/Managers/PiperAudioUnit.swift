@@ -152,12 +152,7 @@ class PiperAudioUnit {
             let unit = audioUnit.auAudioUnit
             try? unit.allocateRenderResourcesIfNeeded()
             
-            if self.engine.isRunning && unit.renderResourcesAllocated {
-                setStatus(.connected)
-            } else {
-                setStatus(.failedToConnect)
-            }
-            
+            setStatus(.connected)
             self.setUpEngineObservers()
             self.startHealthCheckTimer()
             Log.debug("Connected audio unit successfully.")
@@ -222,6 +217,9 @@ class PiperAudioUnit {
                 guard let self else {
                     return
                 }
+                if !self.isSynthesizing {
+                    try? await Task.sleep(for: .seconds(1.0))
+                }
                 while self.isSynthesizing {
                     try? await Task.sleep(for: .seconds(1.0))
                 }
@@ -257,11 +255,13 @@ class PiperAudioUnit {
         defer {
             bufferListPtr.pointee.mBuffers.mData?.deallocate()
             bufferListPtr.deallocate()
-            auAudioUnit.deallocateRenderResources()
         }
         
         try auAudioUnit.allocateRenderResourcesIfNeeded()
         try auAudioUnit.handleSpeechRequest(AVSpeechSynthesisProviderRequest(simpeText: text, piperId: piperVoiceId))
+        if !self.isSynthesizing {
+            try? await Task.sleep(for: .seconds(1.0))
+        }
         
         var actionFlags = AudioUnitRenderActionFlags()
         var timeStamp = AudioTimeStamp()
