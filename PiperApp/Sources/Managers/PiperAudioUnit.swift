@@ -7,22 +7,6 @@ import Combine
 import PiperAppUtils
 
 class PiperAudioUnit {
-    enum Status {
-        case connected
-        case disconnected
-        case failedToConnect
-        
-        var string: String {
-            switch self {
-            case .connected:
-                return "audio_unit_status_connected".localized
-            case .disconnected:
-                return "audio_unit_status_disconnected".localized
-            case .failedToConnect:
-                return "audio_unit_status_failed".localized
-            }
-        }
-    }
     
     enum AudioUnitError: Error {
         case notInitialized
@@ -309,6 +293,26 @@ class PiperAudioUnit {
         if let auAudioUnit = audioUnit?.auAudioUnit {
             if auAudioUnit.responds(to: #selector(AVSpeechSynthesisProviderAudioUnit.cancelSpeechRequest)) {
                 auAudioUnit.perform(#selector(AVSpeechSynthesisProviderAudioUnit.cancelSpeechRequest), with: nil)
+            }
+        }
+    }
+    
+}
+
+extension PiperAudioUnit {
+    enum Status {
+        case connected
+        case disconnected
+        case failedToConnect
+        
+        var string: String {
+            switch self {
+            case .connected:
+                return "audio_unit_status_connected".localized
+            case .disconnected:
+                return "audio_unit_status_disconnected".localized
+            case .failedToConnect:
+                return "audio_unit_status_failed".localized
             }
         }
     }
