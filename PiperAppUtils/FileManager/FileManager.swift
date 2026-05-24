@@ -92,7 +92,9 @@ extension FileManager {
         guard let folder = paths.modelFolder else {
             throw Error.nilModelFolderURL
         }
-        try createDirectory(at: folder, withIntermediateDirectories: true, attributes: nil)
+        try createDirectory(at: folder, withIntermediateDirectories: true, attributes: [
+            .protectionKey: FileProtectionType.none
+        ])
     }
 }
 

@@ -31,7 +31,9 @@ extension FileManager {
         let fileManager = FileManager.default
         try fileManager.createModelPathsFolder(paths: destination)
         try fileManager.copyItem(at: paths.json, to: destination.json)
+        try fileManager.markFileAsUnprotected(at: destination.json)
         try fileManager.copyItem(at: paths.model, to: destination.model)
+        try fileManager.markFileAsUnprotected(at: destination.model)
         var installedModels = FileManager.ModelPaths.installedModels
         installedModels.append(destination)
         FileManager.ModelPaths.installedModels = installedModels
@@ -71,7 +73,9 @@ extension FileManager {
             throw Error.nilTemporaryDirectory
         }
         if !FileManager.default.fileExists(atPath: temporaryDirectoryURL.path) {
-            try FileManager.default.createDirectory(at: temporaryDirectoryURL, withIntermediateDirectories: true)
+            try FileManager.default.createDirectory(at: temporaryDirectoryURL, withIntermediateDirectories: true, attributes:
+                                                        [.protectionKey: FileProtectionType.none]
+            )
         }
     }
     
@@ -91,6 +95,41 @@ extension FileManager {
         let movedFileURL = temporaryDirectoryURL.appendingPathComponent(UUID().uuidString)
         try self.copyItem(at: fileURL, to: movedFileURL)
         return movedFileURL
+    }
+    
+    private func markFileAsUnprotected(at url: URL) throws {
+        try setAttributes(
+            [.protectionKey: FileProtectionType.none],
+            ofItemAtPath: url.path
+        )
+    }
+    
+    func markModelsFolderAsUnprotected() {
+        guard let modelsFolderURL = FileManager.Constants.modelsFolderURL else {
+            return
+        }
+        
+        do {
+            try markFileAsUnprotected(at: modelsFolderURL)
+        } catch {
+            Log.error("Failed to mark models folder as unprotected: \(error)")
+        }
+        
+        guard let enumerator = FileManager.default.enumerator(
+            at: modelsFolderURL,
+            includingPropertiesForKeys: [.isDirectoryKey],
+            options: [.skipsHiddenFiles]
+        ) else {
+            return
+        }
+        
+        for case let fileURL as URL in enumerator {
+            do {
+                try markFileAsUnprotected(at: fileURL)
+            } catch {
+                Log.error("Failed to make file unprotected: \(error)")
+            }
+        }
     }
 }
 

@@ -9,6 +9,7 @@ class AppManager {
     lazy var loader = VoiceLoader()
     init() {
         try? FileManager.default.cleanTemporaryDirectory()
+        FileManager.default.markModelsFolderAsUnprotected()
     }
 
     deinit {
