@@ -161,8 +161,9 @@ public class PiperTTSAudioUnit: AVSpeechSynthesisProviderAudioUnit {
     }
 
     public override func synthesizeSpeechRequest(_ speechRequest: AVSpeechSynthesisProviderRequest) {
-        os_unfair_lock_lock(&outputDataLock)
         Log.debug("synthesizeSpeechRequest \(speechRequest.ssmlRepresentation)")
+        removeRequestAndCleanOutputData()
+        os_unfair_lock_lock(&outputDataLock)
         self.request = speechRequest
         os_unfair_lock_unlock(&outputDataLock)
         piper?.cancel()
@@ -178,9 +179,13 @@ public class PiperTTSAudioUnit: AVSpeechSynthesisProviderAudioUnit {
 
     func cleanUp() {
         Log.debug("cleanUp request:\(request?.ssmlRepresentation ?? "nil")")
-        request = nil
+        removeRequestAndCleanOutputData()
+    }
+    
+    private func removeRequestAndCleanOutputData() {
         piper?.cancel()
         os_unfair_lock_lock(&outputDataLock)
+        request = nil
         outputData = []
         outputOffset = 0
         os_unfair_lock_unlock(&outputDataLock)

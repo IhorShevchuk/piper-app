@@ -2,10 +2,9 @@
 // Copyright (c) 2026 Ihor Shevchuk
 
 import AVFoundation
-import PiperAppUtils
 
 extension AVSpeechSynthesisProviderRequest {
-    convenience init?(simpeText: String, piperId: String) {
+    public convenience init?(simpeText: String, piperId: String) {
         let voice = AVSpeechSynthesisProviderVoice.supportedVoices.first(where: { voice in
             return voice.identifier.hasSuffix(piperId)
         }) ?? AVSpeechSynthesisProviderVoice.supportedVoices.first
