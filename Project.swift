@@ -71,7 +71,7 @@ let project = Project(
                 .post(script: """
                               mise run lint
                               """,
-                      name: "Run SwiftLint Analizer")
+                      name: "Run SwiftLint Analyzer")
             ],
             dependencies: [
                 .target(name: sharedUtilsName, status: .required),
