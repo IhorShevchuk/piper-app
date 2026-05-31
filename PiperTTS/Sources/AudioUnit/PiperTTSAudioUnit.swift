@@ -120,7 +120,7 @@ public class PiperTTSAudioUnit: AVSpeechSynthesisProviderAudioUnit {
                 }
                 return doPerformRender(actionFlags: actionFlags, timestamp: timestamp, frameCount: frameCount, outputBusNumber: outputBusNumber, outputAudioBufferList: outputAudioBufferList, renderEvents: renderEvents, renderPull: renderPull)
             }
-            Log.error(type: .synthesizer, "Tryied \(outputRecurseCallNumber), without luck. Returning what have currently")
+            Log.error(type: .synthesizer, "Tried \(outputRecurseCallNumber), without luck. Returning what have currently")
         }
         
         outputRecurseCallNumber = 0
