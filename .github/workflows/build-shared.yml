@@ -8,21 +8,21 @@ on:
         type: string
     secrets:
       BUILD_CERTIFICATE_BASE64:
-        required: true
+        required: false
       P12_PASSWORD:
-        required: true
+        required: false
       APP_PROVISION_PROFILE_BASE64:
-        required: true
+        required: false
       EXT_PROVISION_PROFILE_BASE64:
-        required: true
+        required: false
       MAC_APP_PROVISION_PROFILE_BASE64:
-        required: true
+        required: false
       MAC_EXT_PROVISION_PROFILE_BASE64:
-        required: true
+        required: false
       APPLE_ID_USERNAME:
-        required: true
+        required: false
       APPLE_ID_APP_SPECIFIC_PASSWORD:
-        required: true
+        required: false
 
 jobs:
   build:
@@ -126,5 +126,4 @@ jobs:
           xcrun altool --upload-app  \
             -f "$FILE" \
             -u "${{ secrets.APPLE_ID_USERNAME }}" \
-            -p "${{ secrets.APPLE_ID_APP_SPECIFIC_PASSWORD }}" \
-          done
+            -p "${{ secrets.APPLE_ID_APP_SPECIFIC_PASSWORD }}"
