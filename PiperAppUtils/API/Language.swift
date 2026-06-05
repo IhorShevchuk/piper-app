@@ -12,11 +12,11 @@ public struct Language: Decodable {
     public let code: String
     public let family: String
     public let region: String
-    
+
     public var country: String {
         Locale.current.localizedString(forRegionCode: region) ?? region
     }
-    
+
     public var language: String {
         Locale.current.localizedString(forLanguageCode: family) ?? family
     }

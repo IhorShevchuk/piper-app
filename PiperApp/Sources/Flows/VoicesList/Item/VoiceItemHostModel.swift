@@ -14,7 +14,7 @@ class VoiceItemHostModel: @unchecked Sendable, ObservableObject {
     weak var delegate: ModelChangeDelegate?
     private var avPlayerRateObserver: NSKeyValueObservation!
     private var avItemStateObserver: NSKeyValueObservation!
-    
+
     private var audioPlayer: AVPlayer?
     init(piper: PiperManager,
          loader: VoiceLoader,
@@ -26,11 +26,11 @@ class VoiceItemHostModel: @unchecked Sendable, ObservableObject {
         self.delegate = delegate
         activatePlaybackMode()
     }
-    
+
     deinit {
         stopPlaying()
     }
-    
+
     func download(voice: Voice) {
         Task { [weak self] in
             guard let self else { return }
@@ -40,15 +40,15 @@ class VoiceItemHostModel: @unchecked Sendable, ObservableObject {
             }
             do {
                 for try await event in loader.download(voice: voice) {
-                    
+
                     switch event {
-                        
+
                     case .progress(let value):
                         await MainActor.run { [weak self] in
                             guard let self else { return }
                             self.viewModel.downloadProgress = value
                         }
-                        
+
                     case .finished(let modelPath):
                         await self.piper.install(paths: modelPath)
                         try? FileManager.default.removeItem(at: modelPath.json)
@@ -59,14 +59,14 @@ class VoiceItemHostModel: @unchecked Sendable, ObservableObject {
             } catch {
                 Log.error("Failed to download voices: \(error)")
             }
-            
+
             await MainActor.run {
                 self.viewModel.downloadProgress = 0.0
                 self.viewModel.isDownloading = false
             }
         }
     }
-    
+
     func remove(voice: Voice) {
         guard let installed = installed(voice) else {
             return
@@ -74,11 +74,11 @@ class VoiceItemHostModel: @unchecked Sendable, ObservableObject {
         piper.unstall(paths: installed)
         delegate?.modelDidChange()
     }
-    
+
     func isInstalled(_ voice: Voice) -> Bool {
         return installed(voice) != nil
     }
-    
+
     private func installed(_ voice: Voice) -> FileManager.ModelPaths? {
         self.piper.installedVoices.first { modelPath in
             guard let modelInfo = modelPath.info else {
@@ -87,7 +87,7 @@ class VoiceItemHostModel: @unchecked Sendable, ObservableObject {
             return modelInfo.dataset == voice.name && modelInfo.audio.quality == voice.quality
         }
     }
-    
+
     func stopPlaying() {
         NotificationCenter.default.removeObserver(self, name: AVPlayerItem.didPlayToEndTimeNotification, object: nil)
         NotificationCenter.default.removeObserver(self, name: AVPlayerItem.failedToPlayToEndTimeNotification, object: nil)
@@ -99,15 +99,15 @@ class VoiceItemHostModel: @unchecked Sendable, ObservableObject {
         viewModel.isSampleLoading = false
         setAudioSession(active: false)
     }
-    
+
     func playSample(voice: Voice) {
         guard let sampleURL = loader.sampleURL(for: voice) else {
             return
         }
-        
+
         setAudioSession(active: true)
         viewModel.isSampleLoading = true
-        
+
         let item = AVPlayerItem(url: sampleURL)
         NotificationCenter.default.addObserver(self, selector: #selector(self.playerItemDidPlayToEndTime(notification:)),
                                                name: AVPlayerItem.didPlayToEndTimeNotification,
@@ -119,7 +119,7 @@ class VoiceItemHostModel: @unchecked Sendable, ObservableObject {
         self.avPlayerRateObserver = audioPlayer?.observe(\.rate, options: [.new]) { [weak self] player, _ in
             self?.viewModel.isPlaying = player.rate == 1.0
         }
-        
+
         self.avItemStateObserver = item.observe(\.status, options: [.new]) { [weak self] item, _ in
             self?.viewModel.isSampleLoading = item.status != .readyToPlay && item.status != .failed
             if item.status == .failed {
@@ -129,11 +129,11 @@ class VoiceItemHostModel: @unchecked Sendable, ObservableObject {
         audioPlayer?.volume = 1.0
         audioPlayer?.play()
     }
-    
+
     @objc func playerItemDidPlayToEndTime(notification: NSNotification) {
         stopPlaying()
     }
-    
+
     func activatePlaybackMode() {
 #if !os(macOS)
         do {
@@ -143,7 +143,7 @@ class VoiceItemHostModel: @unchecked Sendable, ObservableObject {
         }
 #endif
     }
-    
+
     func setAudioSession(active: Bool) {
 #if !os(macOS)
         do {

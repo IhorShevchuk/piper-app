@@ -7,7 +7,7 @@ struct AboutLibView: View {
     let libTitle: String
     let url: String
     let description: String
-    
+
     var body: some View {
         VStack {
             Link(destination: URL(string: url)!) {

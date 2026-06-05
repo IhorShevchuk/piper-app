@@ -14,7 +14,7 @@ struct HelpView: View {
             Text(attributedText)
         }
     }
-    
+
     var body: some View {
         NavigationStack {
             ScrollView {

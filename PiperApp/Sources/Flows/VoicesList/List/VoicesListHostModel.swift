@@ -11,7 +11,7 @@ class VoicesListHostModel: @unchecked Sendable, ObservableObject {
     let loader: VoiceLoader
     var languages: [String: [Voice]] = [:]
     weak var delegate: ModelChangeDelegate?
-    
+
     init(piper: PiperManager,
          loader: VoiceLoader = AppManager.shared.loader,
          delegate: ModelChangeDelegate?) {
@@ -21,13 +21,13 @@ class VoicesListHostModel: @unchecked Sendable, ObservableObject {
         self.delegate = delegate
         loadVoices()
     }
-    
+
     func loadVoices() {
         Task {
             await MainActor.run {
                 self.viewModel.showLoadingIndicator = true
             }
-            
+
             await withTaskGroup(of: Void.self) { _ in
                 do {
                     let voices = try await self.loader.loadVoices()
@@ -43,7 +43,7 @@ class VoicesListHostModel: @unchecked Sendable, ObservableObject {
                     Log.error("Failed to load voices: \(error)")
                 }
             }
-            
+
             await MainActor.run {
                 self.viewModel.showLoadingIndicator = false
             }

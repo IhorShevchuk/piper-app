@@ -9,14 +9,14 @@ class ImportVoiceHostModel: @unchecked Sendable, ObservableObject {
     @Published var viewModel: ImportVoiceViewModel
     weak var delegate: ModelChangeDelegate?
     let piper: PiperManager
-    
+
     init(piper: PiperManager,
          delegate: ModelChangeDelegate?) {
         self.piper = piper
         viewModel = ImportVoiceViewModel()
         self.delegate = delegate
     }
-    
+
     func select(model: URL?) {
         guard let model else {
             Log.error("Failed to find model file")
@@ -32,12 +32,12 @@ class ImportVoiceHostModel: @unchecked Sendable, ObservableObject {
             model.stopAccessingSecurityScopedResource()
             modelDidChange()
         }
-        
+
         if FileManager.default.fileExists(atPath: model.path) {
             viewModel.selectedModelURL = model
         }
     }
-    
+
     func select(json: URL?) {
         guard let json else {
             Log.error("Failed to find json file")
@@ -53,12 +53,12 @@ class ImportVoiceHostModel: @unchecked Sendable, ObservableObject {
             json.stopAccessingSecurityScopedResource()
             modelDidChange()
         }
-        
+
         if !FileManager.default.fileExists(atPath: json.path) {
             viewModel.selectedJSONURL = nil
            return
         }
-        
+
         do {
            _ = try ModelInfo.create(from: json)
         } catch {
@@ -68,17 +68,17 @@ class ImportVoiceHostModel: @unchecked Sendable, ObservableObject {
             viewModel.showErrorMessage = true
             return
         }
-        
+
         viewModel.selectedJSONURL = json
     }
-    
+
     func install() {
         guard let paths = FileManager.ModelPaths(model: viewModel.selectedModelURL,
                                                  json: viewModel.selectedJSONURL) else {
             Log.error("Failed to find model or model JSON file")
             return
         }
-        
+
         Task { [weak self] in
             defer {
                 paths.model.stopAccessingSecurityScopedResource()
@@ -89,12 +89,12 @@ class ImportVoiceHostModel: @unchecked Sendable, ObservableObject {
                 Log.error("Failed to access model")
                 return
             }
-            
+
             if paths.json.startAccessingSecurityScopedResource() != true {
                 Log.error("Failed to access JSON")
                 return
             }
-            
+
             if (try? ModelInfo.create(from: paths.json)) == nil {
                 Log.error("Failed to create ModelInfo from modelJSON")
                 return
@@ -103,7 +103,7 @@ class ImportVoiceHostModel: @unchecked Sendable, ObservableObject {
             guard let self else {
                 return
             }
-            
+
             await self.piper.install(paths: paths)
             self.delegate?.modelDidChange()
             await MainActor.run { [weak self] in
@@ -111,7 +111,7 @@ class ImportVoiceHostModel: @unchecked Sendable, ObservableObject {
             }
         }
     }
-    
+
     func modelDidChange() {
         Task { [weak self] in
             guard let self else { return }
@@ -131,11 +131,11 @@ extension Error {
                 return "json_error_invalid_model_file_path".localized
             }
         }
-        
+
         guard let decodingError = self as? DecodingError else {
             return localizedDescription
         }
-        
+
         switch decodingError {
         case .keyNotFound(let key, let context):
             return String(localized: "json_error_missing_field_\(String(describing: key.stringValue))_at_\(String(describing: context.codingPath.map { $0.stringValue }.joined(separator: ".")))")

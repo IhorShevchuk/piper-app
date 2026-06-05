@@ -12,7 +12,7 @@ public struct ModelInfo: Decodable {
         case speakersInternal = "speaker_id_map"
         case numberOfSpeakersInternal = "num_speakers"
     }
-    
+
     public let dataset: String?
     public let piperVersion: String
     public let language: Language
@@ -25,15 +25,15 @@ public struct ModelInfo: Decodable {
     public var numberOfSpeakers: Int {
         numberOfSpeakersInternal ?? 1
     }
-    
+
     public var name: String {
         return dataset ?? "Unknown"
     }
-    
+
     public enum Error: Swift.Error {
         case nilFileURL
     }
-    
+
     public static func create(from fileURL: URL?) throws -> ModelInfo {
         guard let fileURL else {
             throw Error.nilFileURL
@@ -42,7 +42,7 @@ public struct ModelInfo: Decodable {
         let jsonDecoder = JSONDecoder()
         return try jsonDecoder.decode(ModelInfo.self, from: data)
     }
-    
+
     public static var installed: ModelInfo? {
         if FileManager.default.isInstalled {
             let modelInfoJson = FileManager.Constants.jsonModelURL
@@ -50,13 +50,13 @@ public struct ModelInfo: Decodable {
         }
         return nil
     }
-    
+
     public static var installedModels: [ModelInfo] {
         FileManager.ModelPaths.installedModels.compactMap { path in
             path.info
         }
     }
-    
+
     public var installedPath: FileManager.ModelPaths? {
         return FileManager.ModelPaths.installedModels.first { paths in
             (paths.info) == self
@@ -74,17 +74,17 @@ public struct ModelInfo: Decodable {
         ]
         return components.joined(separator: Self.separator)
     }
-    
+
     public static func installedModelInfo(for voiceId: String) -> ModelInfo? {
         let components = voiceId.split(separator: Self.separator)
         guard components.count == 5 else {
             return nil
         }
-        
+
         let name = String(components[0])
         let quality = String(components[1])
         let languageCode = String(components[3])
-        
+
         let numberOfSpeakersString = String(components[4]).components(separatedBy: Constants.speakerIdSeparator).first
         return installedModels.first { model in
             return model.name == name &&

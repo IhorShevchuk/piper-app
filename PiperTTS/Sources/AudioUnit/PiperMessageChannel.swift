@@ -14,18 +14,18 @@ class PiperMessageChannel: AUMessageChannel {
     init(delegate: PiperMessageChannelDelegate? = nil) {
         self.delegate = delegate
     }
-    
+
     func callAudioUnit(_ message: [AnyHashable: Any]) -> [AnyHashable: Any] {
         guard let delegate else {
             return [:]
         }
-        
+
         if message[MessageChannelKeys.kIsSyntehizerRunning] != nil {
             return [MessageChannelKeys.kIsSyntehizerRunning: delegate.isSyntehizerRunning]
         }
-        
+
         return [:]
     }
-    
+
     var callHostBlock: CallHostBlock?
 }

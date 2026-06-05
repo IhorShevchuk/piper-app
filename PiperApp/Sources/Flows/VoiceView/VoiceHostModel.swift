@@ -15,7 +15,7 @@ class VoiceHostModel: @unchecked Sendable, ObservableObject {
     private var playingCancellable: AnyCancellable?
     let piper: PiperManager
     weak var delegate: ModelChangeDelegate?
-    
+
     init(piper: PiperManager,
          modelPaths: FileManager.ModelPaths,
          delegate: ModelChangeDelegate?) {
@@ -31,19 +31,19 @@ class VoiceHostModel: @unchecked Sendable, ObservableObject {
             self.viewModel.isPlaying = isPlaying
         }
     }
-    
+
     deinit {
         let piper = self.piper
         Task {
             await piper.stopPlaying()
         }
     }
-    
+
     func updateSample() {
         guard let sampleJSONData = NSDataAsset(name: "Samples")?.data else {
             return
         }
-        
+
         do {
             let decoder = JSONDecoder()
             let samples = try decoder.decode([String: String].self, from: sampleJSONData)
@@ -55,7 +55,7 @@ class VoiceHostModel: @unchecked Sendable, ObservableObject {
             Log.error("Failed to decode samples: \(error)")
         }
     }
-    
+
     func uninstall() {
         Task {
             await piper.stopPlaying()
@@ -63,7 +63,7 @@ class VoiceHostModel: @unchecked Sendable, ObservableObject {
         piper.unstall(paths: viewModel.paths)
         delegate?.modelDidChange()
     }
-    
+
     func play() {
         guard let modelInfo = viewModel.modelInfo else {
             return
@@ -85,23 +85,23 @@ class VoiceHostModel: @unchecked Sendable, ObservableObject {
 }
 
 extension VoiceHostModel: VoiceFileSyntehesizer {
-    
+
     enum Error: Swift.Error {
         case modelIsNotAvailable
     }
-    
+
     var fileName: String {
         guard let modelInfo = viewModel.modelInfo else {
            return UUID().uuidString
         }
         return "\(modelInfo.name)_\(Int.random(in: 0...10000))"
     }
-    
+
     func syntehesize(text: String, to file: String) async throws {
         guard let modelInfo = viewModel.modelInfo else {
             throw Error.modelIsNotAvailable
         }
-        
+
         try await self.piper.synthesizeToFile(text: viewModel.demoText,
                                               to: file,
                                               speakerId: self.viewModel.selectedSpeaker,

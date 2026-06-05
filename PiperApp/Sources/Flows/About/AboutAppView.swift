@@ -5,9 +5,9 @@ import SwiftUI
 import PiperAppUtils
 
 struct AboutAppView: View {
-    
+
     @StateObject var hostModel: AboutAppHostModel
-    
+
 #if os(iOS)
     private let platform = "iOS"
 #elseif(os(macOS))
@@ -15,7 +15,7 @@ struct AboutAppView: View {
 #else
 #error("Unsupported platform")
 #endif
-    
+
     var body: some View {
         NavigationStack {
             List {
@@ -29,7 +29,7 @@ struct AboutAppView: View {
                             AboutLibView(libTitle: "Piper1-GPL",
                                          url: "https://github.com/OHF-Voice/piper1-gpl",
                                          description: String(localized: "license_piper_description"))
-                            
+
                             Spacer()
                             Divider()
                             Spacer()
@@ -51,7 +51,7 @@ struct AboutAppView: View {
                         Spacer()
                     }
                 }
-                
+
                 InfoViewRow(title: "audio_unit_status".localized, value: hostModel.viewModel.connectionStatus.string)
                 if hostModel.viewModel.connectionStatus != .connected {
                     Button {
@@ -62,9 +62,9 @@ struct AboutAppView: View {
                         }
                     }
                 }
-                
+
                 InfoViewRow(title: "app_version".localized, value: hostModel.viewModel.appVersion)
-                
+
                 if let feedbackURL = URL(string: "mailto:piper-feedback@ihor-shevchuk.dev?subject=Piper%20feedback") {
                     Link("share_feedback", destination: feedbackURL)
                 }

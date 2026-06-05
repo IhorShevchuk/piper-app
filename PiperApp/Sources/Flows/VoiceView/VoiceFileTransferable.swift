@@ -20,11 +20,11 @@ class VoiceFileTransferable {
         self.syntehesizer = syntehesizer
         self.filePath = VoiceFileTransferable.createFilePath(fileName: syntehesizer.fileName)
     }
-    
+
     func syntehesize() async throws {
         try await syntehesizer.syntehesize(text: text, to: self.filePath)
     }
-    
+
     private static func createFilePath(fileName: String) -> String {
         do {
             try FileManager.default.createTemporaryDirectoryIfNeeded()
@@ -48,11 +48,11 @@ extension VoiceFileTransferable: Transferable {
             return SentTransferredFile(URL(filePath: voiceFile.filePath))
         }
     }
-    
+
     public static func exportedContentTypes(visibility: TransferRepresentationVisibility = .all) -> [UTType] {
         return [.wav]
     }
-    
+
     var suggestedFilename: String? {
         return syntehesizer.fileName
     }

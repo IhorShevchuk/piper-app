@@ -4,6 +4,7 @@
 disabled_rules: # rule identifiers to exclude from running
   - todo
   - file_header
+  - trailing_whitespace
 opt_in_rules: # list of the rules that are disabled by default BUT enabled by our team
   - closing_brace
   - opening_brace
@@ -31,8 +32,9 @@ analyzer_rules:
 included: # paths to include during linting. `--path` is ignored if present.
 excluded: # paths to ignore during linting. Takes precedence over `included`.
   - ${SRCROOT}/Derived
-  - ${SRCROOT}/.build/
-  - ${SRCROOT}/Project.swift
+  - ${SRCROOT}/.build
+  - Derived
+  - .build
 
 # configurable rules can be customized from this configuration file
 # binary rules can set their severity level
@@ -41,7 +43,7 @@ closing_brace: error
 opening_brace:
   severity: error
 return_arrow_whitespace: error
-statement_position: 
+statement_position:
   severity: error
 colon:
   severity: error
@@ -50,20 +52,17 @@ force_try: error
 force_cast: error
 
 line_length: 1000
-type_name: 
+type_name:
   max_length:
     warning: 100
     error: 150
-    
+
 function_body_length:
   warning: 50
   error: 100
 
 cyclomatic_complexity:
   ignores_case_statements: true
-  
+
 identifier_name:
   allowed_symbols: [_]
-  
-trailing_whitespace:
-  ignores_empty_lines: true

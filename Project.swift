@@ -75,7 +75,7 @@ let project = Project(
             ],
             dependencies: [
                 .target(name: sharedUtilsName, status: .required),
-                .target(name: ttsExtensionName, status: .required),
+                .target(name: ttsExtensionName, status: .required)
             ],
             settings: .settings(configurations:
                                     [

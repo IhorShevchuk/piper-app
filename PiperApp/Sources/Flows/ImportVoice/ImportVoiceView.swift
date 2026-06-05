@@ -5,10 +5,10 @@ import SwiftUI
 import PiperAppUtils
 
 struct ImportVoiceHostModelView: View {
-    
+
     @StateObject var hostModel: ImportVoiceHostModel
     @Environment(\.dismiss) var dismiss
-    
+
     @ViewBuilder
     func importButton(image: ImageResource,
                       title: String,
@@ -44,7 +44,7 @@ struct ImportVoiceHostModelView: View {
         .accessibilityAddTraits(isSelected ? .isSelected : [])
         .accessibilityElement(children: .combine)
     }
-    
+
     @State var isShowingModelFileSelector = false
     @State var isShowingJsonFileSelector = false
     var body: some View {
@@ -90,7 +90,7 @@ struct ImportVoiceHostModelView: View {
                         Spacer()
                     }
                 }
-                
+
                 HStack {
                     Spacer()
                     Button {

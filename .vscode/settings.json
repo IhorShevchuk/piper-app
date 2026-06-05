@@ -1,4 +1,5 @@
 {
-    "lldb.library": "/Applications/Xcode.app/Contents/SharedFrameworks/LLDB.framework/Versions/A/LLDB",
-    "lldb.launch.expressions": "native"
+    "swiftlint.configPath": "PiperApp/BuildScripts/Linting/SwiftLint/swiftlint.yml",
+    "files.trimTrailingWhitespace": true,
+    "files.insertFinalNewline": true
 }

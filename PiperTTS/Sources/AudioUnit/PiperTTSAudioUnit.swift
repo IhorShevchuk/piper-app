@@ -10,18 +10,18 @@ import Accelerate
 public class PiperTTSAudioUnit: AVSpeechSynthesisProviderAudioUnit {
     private var outputBus: AUAudioUnitBus
     private var _outputBusses: AUAudioUnitBusArray!
-    
+
     private var request: AVSpeechSynthesisProviderRequest?
 
     private var format: AVAudioFormat
 
     var piper: Piper?
     var model: ModelInfo?
-    
+
     private var outputDataLock = os_unfair_lock_s()
     private var outputData: ContiguousArray<Float> = []
     private var outputRecurseCallNumber = 0
-    
+
     private let outputRecurseCallNumberMax: UInt32 = 200
     private let baseDelayMicroseconds: UInt32 = 500
     private let maxBufferDurationSeconds: Double = 5.0
@@ -31,16 +31,16 @@ public class PiperTTSAudioUnit: AVSpeechSynthesisProviderAudioUnit {
 
         self.format = AVAudioFormat(commonFormat: .pcmFormatFloat32, sampleRate: 22050.0, channels: 1, interleaved: true)!
         self.maxSamplesCount = Int(self.format.sampleRate * maxBufferDurationSeconds)
-        
+
         outputBus = try AUAudioUnitBus(format: self.format)
         try super.init(componentDescription: componentDescription, options: options)
         _outputBusses = AUAudioUnitBusArray(audioUnit: self, busType: AUAudioUnitBusType.output, busses: [outputBus])
     }
-    
+
     public override var outputBusses: AUAudioUnitBusArray {
         return _outputBusses
     }
-    
+
     public override func allocateRenderResources() throws {
         try super.allocateRenderResources()
         Log.debug("allocateRenderResources")
@@ -71,7 +71,7 @@ public class PiperTTSAudioUnit: AVSpeechSynthesisProviderAudioUnit {
     ) -> AUAudioUnitStatus {
         return doPerformRender(actionFlags: actionFlags, timestamp: timestamp, frameCount: frameCount, outputBusNumber: outputBusNumber, outputAudioBufferList: outputAudioBufferList, renderEvents: renderEvents, renderPull: renderPull)
     }
-    
+
     // swiftlint:disable:next function_parameter_count function_body_length
     private func doPerformRender(
       actionFlags: UnsafeMutablePointer<AudioUnitRenderActionFlags>,
@@ -82,19 +82,19 @@ public class PiperTTSAudioUnit: AVSpeechSynthesisProviderAudioUnit {
       renderEvents: UnsafePointer<AURenderEvent>?,
       renderPull: AURenderPullInputBlock?
     ) -> AUAudioUnitStatus {
-        
+
         guard let piper = self.piper else {
             Log.error("Piper is nil while request for rendering came.")
             return kAudioComponentErr_InstanceInvalidated
         }
-        
+
         if request == nil {
             Log.debug(type: .synthesizer, "Request is nil. Cleaning up.")
             actionFlags.pointee = .offlineUnitRenderAction_Complete
             self.cleanUp()
             return noErr
         }
-        
+
         let intFrameCount = Int(frameCount)
         let availableCount: Int
         os_unfair_lock_lock(&outputDataLock)
@@ -111,7 +111,7 @@ public class PiperTTSAudioUnit: AVSpeechSynthesisProviderAudioUnit {
                 self.cleanUp()
                 return noErr
             }
-            
+
             outputRecurseCallNumber += 1
             if outputRecurseCallNumber < outputRecurseCallNumberMax && !completedRendering {
                 Log.error(type: .synthesizer, "Rendering in progress no data. Trying one more time: \(outputRecurseCallNumber)")
@@ -127,9 +127,9 @@ public class PiperTTSAudioUnit: AVSpeechSynthesisProviderAudioUnit {
             }
             Log.error(type: .synthesizer, "Tried \(outputRecurseCallNumber), without luck. Returning what have currently")
         }
-        
+
         outputRecurseCallNumber = 0
-        
+
         let actualCopied = min(availableCount, intFrameCount)
         outputAudioBufferList.pointee.mNumberBuffers = 1
         var unsafeBuffer = UnsafeMutableAudioBufferListPointer(outputAudioBufferList)[0]
@@ -164,7 +164,7 @@ public class PiperTTSAudioUnit: AVSpeechSynthesisProviderAudioUnit {
         piper?.synthesizeSSML(speechRequest.ssmlRepresentation,
                               speakerId: speechRequest.voice.identifier.speakerId)
     }
-    
+
     public override func cancelSpeechRequest() {
         Log.debug("cancelSpeechRequest")
         cleanUp()
@@ -174,7 +174,7 @@ public class PiperTTSAudioUnit: AVSpeechSynthesisProviderAudioUnit {
         Log.debug("cleanUp request:\(request?.ssmlRepresentation ?? "nil")")
         removeRequestAndCleanOutputData()
     }
-    
+
     private func removeRequestAndCleanOutputData() {
         os_unfair_lock_lock(&outputDataLock)
         request = nil
@@ -182,18 +182,18 @@ public class PiperTTSAudioUnit: AVSpeechSynthesisProviderAudioUnit {
         os_unfair_lock_unlock(&outputDataLock)
         piper?.cancel()
     }
-    
+
     private func pauseUntil(maxDelayFactor: UInt32, or condition: @escaping () -> Bool) {
         let maxDelaySeconds = Double(baseDelayMicroseconds * maxDelayFactor) / 1_000_000
         let checkIntervalSeconds = maxDelaySeconds / 5.0
 
         let startTime = Date()
-        
+
         while !condition() && Date().timeIntervalSince(startTime) < maxDelaySeconds {
             RunLoop.current.run(mode: .default, before: Date().addingTimeInterval(checkIntervalSeconds))
         }
     }
-    
+
     private func createPiperIfNeeded(voiceIdentifier: String) {
         guard let model = ModelInfo.installedModelInfo(for: voiceIdentifier),
         let paths = model.installedPath else {
@@ -215,7 +215,7 @@ public class PiperTTSAudioUnit: AVSpeechSynthesisProviderAudioUnit {
         }
         set { }
     }
-    
+
     public override func messageChannel(for channelName: String) -> AUMessageChannel {
         Log.debug("Creating message channel for \(channelName)")
         return PiperMessageChannel(delegate: self)
@@ -234,12 +234,12 @@ extension PiperTTSAudioUnit: PiperDelegate {
             let count = outputData.count
             let isRequestActive = request != nil
             os_unfair_lock_unlock(&outputDataLock)
-            
+
             if !isRequestActive {
                 Log.debug("Ignoring data as request is cancelled")
                 return
             }
-            
+
             if count < maxSamplesCount {
                  break
             }

@@ -5,18 +5,18 @@ import SwiftUI
 
 @main
 struct PiperApp: App {
-    
+
 #if os(iOS)
     @UIApplicationDelegateAdaptor private var appDelegate: ApplicationDelegate
 #elseif os(macOS)
     @NSApplicationDelegateAdaptor private var appDelegate: ApplicationDelegate
 #endif
-    
+
     @ViewBuilder
     var mainContent: some View {
         MainView(hostModel: mainModel)
     }
-    
+
     let mainModel = MainHostModel(piper: AppManager.shared.piper)
     var body: some Scene {
         #if os(macOS)

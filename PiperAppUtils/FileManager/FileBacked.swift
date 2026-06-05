@@ -9,7 +9,7 @@ struct FileBacked<Value: Codable> {
     private let defaultValue: Value
     private let encoder = JSONEncoder()
     private let decoder = JSONDecoder()
-    
+
     init(
         default defaultValue: @autoclosure @escaping () -> Value,
         urlProvider: @escaping () -> URL?,
@@ -17,7 +17,7 @@ struct FileBacked<Value: Codable> {
         self.urlProvider = urlProvider
         self.defaultValue = defaultValue()
     }
-    
+
     var wrappedValue: Value {
         get {
             load() ?? defaultValue
@@ -42,7 +42,7 @@ private extension FileBacked {
             return nil
         }
     }
-    
+
     func save(_ value: Value) {
         guard let url = urlProvider() else {
             Log.error("Path to data file is nil. Skipping save.")

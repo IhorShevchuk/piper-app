@@ -5,9 +5,9 @@ import SwiftUI
 import PiperAppUtils
 
 struct VoicesListView: View {
-    
+
     @StateObject var hostModel: VoicesListHostModel
-    
+
     @ViewBuilder
     func voicesList(for language: String, title: String) -> some View {
         NavigationStack {
@@ -35,7 +35,7 @@ struct VoicesListView: View {
         }
         .navigationTitle(title)
     }
-    
+
     var body: some View {
         NavigationStack {
             if hostModel.viewModel.showLoadingIndicator {

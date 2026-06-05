@@ -8,12 +8,12 @@ extension AVSpeechSynthesisProviderRequest {
         let voice = AVSpeechSynthesisProviderVoice.supportedVoices.first(where: { voice in
             return voice.identifier.hasSuffix(piperId)
         }) ?? AVSpeechSynthesisProviderVoice.supportedVoices.first
-        
+
         guard let voice else {
             Log.error("No supported voices. Can't play text.")
             return nil
         }
-        
+
         self.init(
           ssmlRepresentation: "<speak>\(simpeText)</speak>",
           voice: voice

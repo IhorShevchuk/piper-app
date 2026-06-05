@@ -16,11 +16,11 @@ public enum Constants {
     public static var modelJSONFileNameWithExtension: String {
         return "\(modelFileNameWithExtension).\(jsonModelExtension)"
     }
-    
+
     public static var modelsJSONFileName: String {
         return "\(modelsFolderName).\(jsonModelExtension)"
     }
-    
+
     public static let jsonUTI: UTType = .json
     public static let modelUTI: UTType = .init(filenameExtension: modelExtensiom) ?? .item
 }

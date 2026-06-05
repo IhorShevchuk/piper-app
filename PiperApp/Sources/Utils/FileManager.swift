@@ -10,16 +10,16 @@ extension FileManager {
         case invalidDestinationURLs
         case cantParseModelInfo
     }
-    
+
     func install(paths: ModelPaths?) throws {
         guard let paths else {
             throw InstallError.invalidSourceFiles
         }
-        
+
         guard let destination = ModelPaths.installNew else {
             throw InstallError.invalidDestinationURLs
         }
-        
+
         do {
             if let installedPath = paths.info?.installedPath {
                 try uninstall(paths: installedPath)
@@ -27,7 +27,7 @@ extension FileManager {
         } catch {
             Log.debug("Error happened while uninstalling. Error: \(error)")
         }
-        
+
         let fileManager = FileManager.default
         try fileManager.createModelPathsFolder(paths: destination)
         try fileManager.copyItem(at: paths.json, to: destination.json)
@@ -38,13 +38,13 @@ extension FileManager {
         installedModels.append(destination)
         FileManager.ModelPaths.installedModels = installedModels
     }
-    
+
     func uninstall(paths: ModelPaths?) throws {
-        
+
         guard let installed = paths else {
             throw InstallError.invalidDestinationURLs
         }
-        
+
         var installedModels = FileManager.ModelPaths.installedModels
         installedModels.removeAll(where: { path in
             path == paths
@@ -53,21 +53,21 @@ extension FileManager {
         let fileManager = FileManager.default
         try fileManager.removeItem(at: installed.model)
         try fileManager.removeItem(at: installed.json)
-        
+
         if let modelFolder = installed.modelFolder {
             try fileManager.removeItem(at: modelFolder)
         }
     }
-    
+
     enum Error: Swift.Error {
         case nilTemporaryDirectory
     }
-    
+
     static var tempFolderInDocumentDirectory: URL? {
         let temporaryDirectoryURL = URL(filePath: NSTemporaryDirectory())
         return temporaryDirectoryURL.appending(component: "temporary_folder")
     }
-    
+
     func createTemporaryDirectoryIfNeeded() throws {
         guard let temporaryDirectoryURL = FileManager.tempFolderInDocumentDirectory else {
             throw Error.nilTemporaryDirectory
@@ -78,7 +78,7 @@ extension FileManager {
             )
         }
     }
-    
+
     func cleanTemporaryDirectory() throws {
         guard let temporaryDirectoryURL = FileManager.tempFolderInDocumentDirectory else {
             throw Error.nilTemporaryDirectory
@@ -86,7 +86,7 @@ extension FileManager {
         let fileManager = FileManager.default
         try fileManager.removeItem(at: temporaryDirectoryURL)
     }
-    
+
     func moveToTemporaryDirectory(fileURL: URL) throws -> URL {
         guard let temporaryDirectoryURL = FileManager.tempFolderInDocumentDirectory else {
             throw Error.nilTemporaryDirectory
@@ -96,25 +96,25 @@ extension FileManager {
         try self.copyItem(at: fileURL, to: movedFileURL)
         return movedFileURL
     }
-    
+
     private func markFileAsUnprotected(at url: URL) throws {
         try setAttributes(
             [.protectionKey: FileProtectionType.none],
             ofItemAtPath: url.path
         )
     }
-    
+
     func markModelsFolderAsUnprotected() {
         guard let modelsFolderURL = FileManager.Constants.modelsFolderURL else {
             return
         }
-        
+
         do {
             try markFileAsUnprotected(at: modelsFolderURL)
         } catch {
             Log.error("Failed to mark models folder as unprotected: \(error)")
         }
-        
+
         guard let enumerator = FileManager.default.enumerator(
             at: modelsFolderURL,
             includingPropertiesForKeys: [.isDirectoryKey],
@@ -122,7 +122,7 @@ extension FileManager {
         ) else {
             return
         }
-        
+
         for case let fileURL as URL in enumerator {
             do {
                 try markFileAsUnprotected(at: fileURL)
@@ -138,7 +138,7 @@ extension FileManager.ModelPaths {
         guard let modelInfo = info else {
             return "Unknown"
         }
-        
+
         return "\(modelInfo.name.capitalized) \(modelInfo.language.code.localizedLanguageFromCode)"
     }
 }

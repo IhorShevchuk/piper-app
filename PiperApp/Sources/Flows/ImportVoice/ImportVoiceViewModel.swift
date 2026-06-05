@@ -17,7 +17,7 @@ struct ImportVoiceViewModel {
         }
         return selectedJSONURL.lastPathComponent
     }
-    
+
     var selectedModelURL: URL?
     var selectedJSONURL: URL?
     var onDismiss: (() -> Void)?

@@ -8,7 +8,7 @@ import PiperAppUtils
 class MainHostModel: @unchecked Sendable, ObservableObject {
     @Published var viewModel: MainViewModel
     let piper: PiperManager
-    
+
     init(piper: PiperManager) {
         self.piper = piper
         viewModel = MainViewModel(installedModels: piper.installedVoices.sorted(by: { model1, model2 in
@@ -16,7 +16,7 @@ class MainHostModel: @unchecked Sendable, ObservableObject {
         }))
         connect()
     }
-    
+
     func connect() {
         Task {
 #if DEBUG
@@ -25,21 +25,21 @@ class MainHostModel: @unchecked Sendable, ObservableObject {
             await self.piper.audioUnit.connect()
         }
     }
-    
+
     func selected(files: [URL]) {
         if files.count != 2 {
             Log.error("Wrong number of files selected: \(files.count)")
             return
         }
-        
+
         let model = files.model
         let modelJSON = files.json
-        
+
         guard let paths = FileManager.ModelPaths(model: model, json: modelJSON) else {
             Log.error("Failed to find model or model JSON file")
             return
         }
-        
+
         Task { [weak self] in
             defer {
                 paths.model.stopAccessingSecurityScopedResource()
@@ -50,12 +50,12 @@ class MainHostModel: @unchecked Sendable, ObservableObject {
                 Log.error("Failed to access model")
                 return
             }
-            
+
             if paths.json.startAccessingSecurityScopedResource() != true {
                 Log.error("Failed to access JSON")
                 return
             }
-            
+
             if (try? ModelInfo.create(from: paths.json)) == nil {
                 Log.error("Failed to create ModelInfo from modelJSON")
                 return
@@ -64,7 +64,7 @@ class MainHostModel: @unchecked Sendable, ObservableObject {
             guard let self else {
                 return
             }
-            
+
             await self.piper.install(paths: paths)
             self.modelDidChange()
         }

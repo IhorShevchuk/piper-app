@@ -13,7 +13,7 @@ extension AUAudioUnit {
             try allocateRenderResources()
         }
     }
-    
+
     func handleSpeechRequest(_ request: AVSpeechSynthesisProviderRequest?) throws {
         if responds(to: #selector(AVSpeechSynthesisProviderAudioUnit.synthesizeSpeechRequest(_:))) {
             perform(#selector(AVSpeechSynthesisProviderAudioUnit.synthesizeSpeechRequest(_:)), with: request)

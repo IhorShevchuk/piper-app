@@ -22,35 +22,35 @@ class VoiceLoader: NSObject {
     private enum Constants {
         static let baseURL = "https://huggingface.co/IhorShevchuk/piper1-voices-fp16-quantized/resolve/main"
         static let sampesBaseURL = "https://rhasspy.github.io/piper-samples/samples"
-        
+
         static var voicesURL: URL? {
             return URL(string: "\(Constants.baseURL)/voices.json")
         }
     }
-    
+
     private var continuations: [Int: CheckedContinuation<URL, Swift.Error>] = [:]
     private var observations: [Int: NSKeyValueObservation] = [:]
-    
+
     private lazy var operationQueue: OperationQueue = {
         OperationQueue()
     }()
-    
+
     private lazy var urlSession: URLSession = {
         URLSession(configuration: .default,
                    delegate: self,
                    delegateQueue: operationQueue)
     }()
-    
+
     private func load<Item: Decodable>(url: URL?) async throws -> Item {
         guard let url else {
             throw Error.nilURL
         }
-        
+
         let (data, _) = try await URLSession.shared.data(from: url)
         let decoder = JSONDecoder()
         return try decoder.decode(Item.self, from: data)
     }
-    
+
     func loadVoices() async throws -> [Voice] {
         let allVoices: [String: Voice] = try await load(url: Constants.voicesURL)
         return Array(allVoices.values)
@@ -62,7 +62,7 @@ class VoiceLoader: NSObject {
         let path = "\(languageFamily)/\(languageCode)/\(voice.name)/\(voice.quality)/speaker_\(speaker).mp3"
         return URL(string: "\(Constants.sampesBaseURL)/\(path)")
     }
-    
+
     func download(voice: Voice) -> AsyncThrowingStream<DownloadEvent, Swift.Error> {
         AsyncThrowingStream { continuation in
             Task {
@@ -84,7 +84,7 @@ class VoiceLoader: NSObject {
                         baseProgress: 0.0,
                         continuation: continuation
                     )
-                    
+
                     if (try? ModelInfo.create(from: jsonLocalURL)) == nil {
                         try? FileManager.default.removeItem(at: jsonLocalURL)
                         throw Error.wrongModelInfo
@@ -112,7 +112,7 @@ class VoiceLoader: NSObject {
             }
         }
     }
-    
+
     private func downloadFile(
         from url: URL,
         weight: Double,
@@ -138,10 +138,10 @@ class VoiceLoader: NSObject {
 }
 
 extension VoiceLoader: URLSessionDownloadDelegate {
-    
+
     func urlSession(_ session: URLSession, downloadTask: URLSessionDownloadTask, didFinishDownloadingTo location: URL) {
         let id = downloadTask.taskIdentifier
-        
+
         do {
             let tempLocation = try FileManager.default.moveToTemporaryDirectory(fileURL: location)
             continuations[id]?.resume(returning: tempLocation)
@@ -149,7 +149,7 @@ extension VoiceLoader: URLSessionDownloadDelegate {
             Log.error("Failed to move file to temporary location: \(error)")
             continuations[id]?.resume(throwing: error)
         }
-        
+
         continuations[id] = nil
         observations[id]?.invalidate()
         observations[id] = nil

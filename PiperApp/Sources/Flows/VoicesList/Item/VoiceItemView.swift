@@ -5,12 +5,12 @@ import SwiftUI
 import PiperAppUtils
 
 struct VoiceItemView: View {
-    
+
     @StateObject var hostModel: VoiceItemHostModel
     var voice: Voice {
         hostModel.viewModel.voice
     }
-    
+
     @ViewBuilder
     private func imageView(systemName: String) -> some View {
         let buttonSize = 50.0
@@ -19,10 +19,10 @@ struct VoiceItemView: View {
             .frame(width: buttonSize, height: buttonSize)
             .foregroundColor(.accentColor)
     }
-    
+
     @ViewBuilder
     private func playDemo() -> some View {
-        
+
         if hostModel.viewModel.isPlaying {
             Button {
                 hostModel.stopPlaying()
@@ -46,7 +46,7 @@ struct VoiceItemView: View {
             .buttonStyle(PlainButtonStyle())
         }
     }
-    
+
     @State var unstallConfirmationShown: Bool = false
     @ViewBuilder
     private func download() -> some View {
@@ -84,9 +84,9 @@ struct VoiceItemView: View {
                 .buttonStyle(PlainButtonStyle())
             }
         }
-       
+
     }
-    
+
     var body: some View {
         let voiceTitle = voice.name.capitalized + " " + voice.quality + " "
         HStack {
