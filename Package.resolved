@@ -14,8 +14,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/IhorShevchuk/piper-objc",
       "state" : {
-        "revision" : "1e5ab6c96850e6b56c2c64dc2ed41a7166f4ab4e",
-        "version" : "0.2.14"
+        "revision" : "d8b795420790d0ec29b5cc28d58d8b617fb3c1ab",
+        "version" : "0.2.16"
       }
     },
     {
@@ -23,8 +23,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/IhorShevchuk/piper1-gpl-spm.git",
       "state" : {
-        "revision" : "85ccf3dc51d15fc51ed4829c62a45a41c74bfa2a",
-        "version" : "0.1.4"
+        "revision" : "393b00c198da7cb6c6ce88cbe77d261e00a9b897",
+        "version" : "0.1.5"
       }
     }
   ],
