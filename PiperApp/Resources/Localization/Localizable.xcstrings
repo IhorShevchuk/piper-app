@@ -120,7 +120,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "转到**设置 -> 可访问性 -> VoiceOver@@语音**。"
+            "value" : "转到 **设置 → 辅助功能 → VoiceOver → 语音**。"
           }
         }
       }
@@ -161,7 +161,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "打开 **VoiceOuter 实用程序 → 语音** 。"
+            "value" : "打开 **VoiceOver 实用程序 → 语音**。"
           }
         }
       }
@@ -196,7 +196,7 @@
         "ur-PK" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "**Add Rotor Voice** پر ٹیپ کریں، **Piper** کے نیچے اپنی انسٹال کردہ آواز تلاش کریں، اور اسے منتخب کریں۔​\n\n"
+            "value" : "**Add Rotor Voice** پر ٹیپ کریں، **Piper** کے نیچے اپنی انسٹال کردہ آواز تلاش کریں، اور اسے منتخب کریں۔"
           }
         },
         "zh-Hans" : {
@@ -237,7 +237,7 @@
         "ur-PK" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "**Add** پر کلک کریں، پھر انسٹال شدہ آواز کو منتخب کریں۔\n\n"
+            "value" : "**Add** پر کلک کریں، پھر انسٹال شدہ آواز کو منتخب کریں۔"
           }
         },
         "zh-Hans" : {
@@ -278,7 +278,7 @@
         "ur-PK" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "اگر آواز فہرست میں ظاہر نہ ہو تو **Search** کا استعمال کریں۔​\n\n"
+            "value" : "اگر آواز فہرست میں ظاہر نہ ہو تو **Search** کا استعمال کریں۔"
           }
         },
         "zh-Hans" : {
@@ -319,7 +319,7 @@
         "ur-PK" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "**Import Model from Files** کا استعمال کرتے ہوئے ایک .onnxماڈل اور اس کی.json کنفیگریشن کو منتخب کر کے کسٹم آوازیں انسٹال کی جا سکتی ہیں۔"
+            "value" : "**Import Model from Files** کا استعمال کرتے ہوئے ایک **.onnx** ماڈل اور اس کی **.json** کنفیگریشن کو منتخب کر کے کسٹم آوازیں انسٹال کی جا سکتی ہیں۔"
           }
         },
         "zh-Hans" : {
@@ -443,7 +443,7 @@
         "ur-PK" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "\n\nآواز کی معلومات\n"
+            "value" : "آواز کی معلومات"
           }
         },
         "zh-Hans" : {
@@ -1351,7 +1351,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "语文"
+            "value" : "语言"
           }
         }
       }
@@ -1427,7 +1427,7 @@
         "ur-PK" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : ".آڈیو یونٹ ایکسٹینشن (GPLv3)"
+            "value" : "آڈیو یونٹ ایکسٹینشن (GPLv3)"
           }
         },
         "zh-Hans" : {
@@ -1556,7 +1556,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Pipper App是由 [Ihor Shevchuk](https://ihor-shevchuk.dev)开发的，是在 MIT下授权的。 这是一个单独的程序，仅通过 XPC 与音频设备扩展进行通信。"
+            "value" : "Piper App 是由 [Ihor Shevchuk](https://ihor-shevchuk.dev) 开发的，是在 MIT 下授权的。这是一个单独的程序，仅通过 XPC 与音频设备扩展进行通信。"
           }
         }
       }
@@ -1844,7 +1844,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "猪人"
+            "value" : "Piper"
           }
         }
       }
@@ -2044,7 +2044,7 @@
         "ur-PK" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : " نمونہ متن: %1$@"
+            "value" : "نمونہ متن: %1$@"
           }
         },
         "zh-Hans" : {
@@ -2489,7 +2489,7 @@
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "прогрес завантаження %@ %"
+            "value" : "прогрес завантаження %@%"
           }
         },
         "ur-PK" : {
