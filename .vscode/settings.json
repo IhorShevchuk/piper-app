@@ -1,5 +1,6 @@
 {
     "swiftlint.configPath": "PiperApp/BuildScripts/Linting/SwiftLint/swiftlint.yml",
     "files.trimTrailingWhitespace": true,
-    "files.insertFinalNewline": true
+    "files.insertFinalNewline": true,
+    "sweetpad.build.xcodeWorkspacePath": "Piper.xcworkspace"
 }
