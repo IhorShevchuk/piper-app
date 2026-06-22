@@ -13,6 +13,8 @@ struct VoicesListView: View {
         NavigationStack {
             if let voices = hostModel.languages[language]?.sorted(by: { voice1, voice2 in
                 voice1.name < voice2.name
+            }).filter({ voice in
+                return voice.isSupported
             }),
                !voices.isEmpty {
                 List {

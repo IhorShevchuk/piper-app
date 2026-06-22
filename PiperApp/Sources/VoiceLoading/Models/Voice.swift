@@ -43,3 +43,16 @@ extension Voice: Hashable {
         hasher.combine(files)
     }
 }
+
+extension Voice {
+    static var unsupportedVoices: Set<String> = {
+        return Set<String>([
+            // piper-objc doesn't support pinyin phoneme based voices:
+            "chaowen",
+            "xiao_ya"
+        ])
+    }()
+    var isSupported: Bool {
+        return !Voice.unsupportedVoices.contains(name)
+    }
+}
