@@ -225,27 +225,7 @@ public class PiperTTSAudioUnit: AVSpeechSynthesisProviderAudioUnit {
 extension PiperTTSAudioUnit: PiperDelegate {
     public func piperDidReceiveSamples(_ samples: UnsafePointer<Float>, withSize size: Int) {
         let buf = UnsafeBufferPointer(start: samples, count: size)
-
         if size == 0 { return }
-
-        while true {
-            // Back-pressure check: ensure the buffer doesn't grow indefinitely
-            os_unfair_lock_lock(&outputDataLock)
-            let count = outputData.count
-            let isRequestActive = request != nil
-            os_unfair_lock_unlock(&outputDataLock)
-
-            if !isRequestActive {
-                Log.debug("Ignoring data as request is cancelled")
-                return
-            }
-
-            if count < maxSamplesCount {
-                 break
-            }
-            Log.debug("We still have something to play. Waiting.")
-            Thread.sleep(forTimeInterval: 0.1)
-        }
 
         if let modelFormat = model?.audioFormat,
            modelFormat.sampleRate != format.sampleRate {
@@ -257,18 +237,16 @@ extension PiperTTSAudioUnit: PiperDelegate {
 
             var output = [Float](repeating: 0, count: outputCount)
 
-            // Create positions array for interpolation
             var rampStart: Float = 0
             var positions = [Float](repeating: 0, count: outputCount)
             var rampStep: Float = (inputCount > 1 && outputCount > 1) ? Float(inputCount - 1) / Float(outputCount - 1) : 0
             vDSP_vramp(&rampStart, &rampStep, &positions, 1, vDSP_Length(outputCount))
 
-            // Perform linear interpolation
             output.withUnsafeMutableBufferPointer { outPtr in
                 positions.withUnsafeBufferPointer { posPtr in
                     buf.baseAddress!.withMemoryRebound(to: Float.self, capacity: inputCount) { inPtr in
                         vDSP_vlint(
-                            inPtr,                    // input samples
+                            inPtr,                     // input samples
                             posPtr.baseAddress!,       // positions
                             1,                         // stride of positions
                             outPtr.baseAddress!,       // output buffer

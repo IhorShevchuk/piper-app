@@ -128,7 +128,7 @@ class PiperAudioUnit {
                 engine.stop()
             }
             self.engine.attach(audioUnit)
-            self.engine.isAutoShutdownEnabled = true
+            self.engine.isAutoShutdownEnabled = false
 
             self.messageChannel = audioUnit.auAudioUnit.messageChannel(for: "\(Self.Type.self)")
             self.audioUnit = audioUnit
@@ -210,6 +210,7 @@ class PiperAudioUnit {
                 continuation.resume()
             }
         }
+        engine.stop()
     }
 
     func save(text: String,
@@ -278,6 +279,7 @@ class PiperAudioUnit {
                 isRunning = false
             }
         }
+        engine.stop()
     }
 
     private func connect(to audioUnit: AVAudioUnit, output: AVAudioNode) {
