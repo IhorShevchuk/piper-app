@@ -2,7 +2,7 @@
 # Copyright (c) 2026 Ihor Shevchuk
 
 [tools]
-tuist = "4.195.17"
+tuist = "4.200.5"
 swiftlint = "latest"
 
 [tasks.install]

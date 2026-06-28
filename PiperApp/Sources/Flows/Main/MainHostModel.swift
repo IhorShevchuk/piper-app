@@ -20,7 +20,11 @@ class MainHostModel: @unchecked Sendable, ObservableObject {
     func connect() {
         Task {
 #if DEBUG
-            try await Task.sleep(for: .seconds(2))
+            do {
+                try await Task.sleep(for: .seconds(2))
+            } catch {
+                Log.error("Error happened during waiting: \(error)")
+            }
 #endif
             await self.piper.audioUnit.connect()
         }
