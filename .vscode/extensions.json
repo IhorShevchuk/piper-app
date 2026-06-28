@@ -3,6 +3,7 @@
         "tombi-toml.tombi",
         "hverlin.mise-vscode",
         "sweetpad.sweetpad",
-        "swiftlang.swift-vscode"
+        "swiftlang.swift-vscode",
+        "vknabel.vscode-swiftlint"
     ]
 }

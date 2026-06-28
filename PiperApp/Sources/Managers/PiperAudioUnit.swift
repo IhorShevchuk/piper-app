@@ -27,33 +27,6 @@ class PiperAudioUnit {
     private var healthCheckTimer: Timer?
     private let manager = AVAudioUnitComponentManager.shared()
 
-    private func setUpEngineObservers() {
-        NotificationCenter.default.publisher(for: .AVAudioEngineConfigurationChange, object: engine)
-            .sink { [weak self] _ in
-                self?.handleEngineConfigurationChange()
-            }
-            .store(in: &cancellables)
-#if !os(macOS)
-        NotificationCenter.default.publisher(for: AVAudioSession.interruptionNotification)
-            .sink { [weak self] note in
-                self?.handleInterruption(note)
-            }
-            .store(in: &cancellables)
-
-        NotificationCenter.default.publisher(for: AVAudioSession.routeChangeNotification)
-            .sink { [weak self] _ in
-                self?.handleRouteChange()
-            }
-            .store(in: &cancellables)
-
-        NotificationCenter.default.publisher(for: AVAudioSession.mediaServicesWereResetNotification)
-            .sink { [weak self] _ in
-                self?.handleMediaServicesReset()
-            }
-            .store(in: &cancellables)
-#endif
-    }
-
     private func startHealthCheckTimer() {
         healthCheckTimer?.invalidate()
         healthCheckTimer = Timer.scheduledTimer(withTimeInterval: 3.0, repeats: true) { [weak self] _ in
@@ -91,14 +64,6 @@ class PiperAudioUnit {
         }
     }
 #endif
-
-    private func handleRouteChange() {
-        Task { await reconnect() }
-    }
-
-    private func handleMediaServicesReset() {
-        Task { await reconnect() }
-    }
 
     func loadAudioUnit(with description: AudioComponentDescription) async throws -> AVAudioUnit {
         let components = manager.components(matching: description)
@@ -213,6 +178,25 @@ class PiperAudioUnit {
         engine.stop()
     }
 
+    private func createAudioBuffer(format: AVAudioFormat, maxFrames: AVAudioFrameCount) -> (UnsafeMutablePointer<AudioBufferList>, () -> Void) {
+        let sampleSize = MemoryLayout<Float32>.size
+        let bufferListPtr = UnsafeMutablePointer<AudioBufferList>.allocate(capacity: 1)
+        bufferListPtr.pointee.mNumberBuffers = format.channelCount
+
+        let rawBuffer = UnsafeMutableRawPointer.allocate(byteCount: Int(maxFrames) * sampleSize, alignment: sampleSize)
+        bufferListPtr.pointee.mBuffers = AudioBuffer(
+            mNumberChannels: 1,
+            mDataByteSize: UInt32(Int(maxFrames) * sampleSize),
+            mData: rawBuffer
+        )
+
+        let cleanup = {
+            rawBuffer.deallocate()
+            bufferListPtr.deallocate()
+        }
+        return (bufferListPtr, cleanup)
+    }
+
     func save(text: String,
               piperVoiceId: String,
               to file: String) async throws {
@@ -226,21 +210,9 @@ class PiperAudioUnit {
         let format = audioUnit.outputFormat(forBus: 0)
         let outputFile = try AVAudioFile(forWriting: URL(filePath: file), settings: format.settings)
 
-        let sampleSize = MemoryLayout<Float32>.size
-        let bufferListPtr = UnsafeMutablePointer<AudioBufferList>.allocate(capacity: 1)
-        bufferListPtr.pointee.mNumberBuffers = format.channelCount
-
         let maxFrames: AVAudioFrameCount = 512
-        let rawBuffer = UnsafeMutableRawPointer.allocate(byteCount: Int(maxFrames) * sampleSize, alignment: sampleSize)
-        bufferListPtr.pointee.mBuffers = AudioBuffer(
-            mNumberChannels: 1,
-            mDataByteSize: UInt32(Int(maxFrames) * sampleSize),
-            mData: rawBuffer
-        )
-        defer {
-            bufferListPtr.pointee.mBuffers.mData?.deallocate()
-            bufferListPtr.deallocate()
-        }
+        let (bufferListPtr, cleanup) = createAudioBuffer(format: format, maxFrames: maxFrames)
+        defer { cleanup() }
 
         try auAudioUnit.allocateRenderResourcesIfNeeded()
         try auAudioUnit.handleSpeechRequest(AVSpeechSynthesisProviderRequest(simpeText: text, piperId: piperVoiceId))
@@ -269,7 +241,7 @@ class PiperAudioUnit {
 
                 if let destChannel = pcmBuffer.floatChannelData?[0],
                    let sourceChannel = bufferListPtr.pointee.mBuffers.mData {
-                    memcpy(destChannel, sourceChannel, Int(maxFrames) * sampleSize)
+                    memcpy(destChannel, sourceChannel, Int(bufferListPtr.pointee.mBuffers.mDataByteSize))
                 }
 
                 try outputFile.write(from: pcmBuffer)
@@ -328,5 +300,43 @@ extension PiperAudioUnit {
         }
 
         return responseObject[MessageChannelKeys.kIsSyntehizerRunning] as? Bool ?? false
+    }
+}
+
+// MARK: - Notification Handling
+private extension PiperAudioUnit {
+    func setUpEngineObservers() {
+        NotificationCenter.default.publisher(for: .AVAudioEngineConfigurationChange, object: engine)
+            .sink { [weak self] _ in
+                self?.handleEngineConfigurationChange()
+            }
+            .store(in: &cancellables)
+#if !os(macOS)
+        NotificationCenter.default.publisher(for: AVAudioSession.interruptionNotification)
+            .sink { [weak self] note in
+                self?.handleInterruption(note)
+            }
+            .store(in: &cancellables)
+
+        NotificationCenter.default.publisher(for: AVAudioSession.routeChangeNotification)
+            .sink { [weak self] _ in
+                self?.handleRouteChange()
+            }
+            .store(in: &cancellables)
+
+        NotificationCenter.default.publisher(for: AVAudioSession.mediaServicesWereResetNotification)
+            .sink { [weak self] _ in
+                self?.handleMediaServicesReset()
+            }
+            .store(in: &cancellables)
+#endif
+    }
+
+    func handleRouteChange() {
+        Task { await reconnect() }
+    }
+
+    func handleMediaServicesReset() {
+        Task { await reconnect() }
     }
 }
