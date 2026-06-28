@@ -269,6 +269,34 @@ extension PiperTTSAudioUnit: PiperDelegate {
             os_unfair_lock_unlock(&outputDataLock)
         }
     }
+
+    public func piperDidGenerateMarkers(_ markers: [PiperSpeechMarker]) {
+        os_unfair_lock_lock(&outputDataLock)
+        defer { os_unfair_lock_unlock(&outputDataLock) }
+
+        guard let metadataBlock = self.speechSynthesisOutputMetadataBlock,
+        let request = self.request else {
+            return
+        }
+
+        for marker in markers {
+            guard let appleMarker = marker.avMarker else {
+                continue
+            }
+#if DEBUG
+            let requestText = request.ssmlRepresentation
+            let swiftRange = Range(appleMarker.textRange, in: requestText)
+            let text = if let swiftRange {
+                String(requestText[swiftRange])
+            } else {
+                "<no valid range>"
+            }
+
+            Log.debug("DidGenerateMarker [type:\(appleMarker.mark)] offset:\(appleMarker.byteSampleOffset), text:'\(text)'")
+#endif
+            metadataBlock([appleMarker], request)
+        }
+    }
 }
 
 extension PiperTTSAudioUnit: PiperMessageChannelDelegate {
@@ -277,5 +305,18 @@ extension PiperTTSAudioUnit: PiperMessageChannelDelegate {
         let result = request != nil
         os_unfair_lock_unlock(&outputDataLock)
         return result
+    }
+}
+
+extension PiperSpeechMarker {
+    var avMarker: AVSpeechSynthesisMarker? {
+        let avType =
+        switch type {
+        case .sentence:
+            AVSpeechSynthesisMarker.Mark.sentence
+        case .word:
+            AVSpeechSynthesisMarker.Mark.word
+        }
+        return AVSpeechSynthesisMarker(markerType: avType, forTextRange: range, atByteSampleOffset: byteOffset)
     }
 }
