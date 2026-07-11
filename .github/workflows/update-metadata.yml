@@ -32,8 +32,6 @@ jobs:
       - name: Install dependencies
         run: |
           mise install
-          bundle config set path vendor/bundle
-          bundle install
 
       - name: Update Release Notes
         run: |
