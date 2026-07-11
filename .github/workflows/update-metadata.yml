@@ -2,7 +2,6 @@ name: Update App Store Metadata
 
 on:
   workflow_dispatch:
-on:
   push:
     branches: ['main']
     paths:
