@@ -40,8 +40,6 @@ jobs:
           ruby -v
           gem env
           bundle env || true
-          ls -la
-          ls -la Gem*
           which ruby
           bundle -v
           env | sort
