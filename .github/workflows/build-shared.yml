@@ -34,7 +34,7 @@ jobs:
       BUILD_OUTPUT: "${{ github.workspace }}/BuildOutput"
       BUILD_TARGET: ${{ inputs.platform }}
       ARTIFACT_PATH: >-
-        ${{ inputs.platform == 'ios-device' && 'iOS/Piper.ipa' || 
+        ${{ inputs.platform == 'ios-device' && 'iOS/Piper.ipa' ||
         (inputs.platform == 'macos-device' && 'macOS/Piper.pkg' || '') }}
       SIGN_BUILD: ${{ (inputs.platform == 'ios-device' || inputs.platform == 'macos-device') && github.event_name == 'push' && github.ref == 'refs/heads/main' }}
 
@@ -78,7 +78,7 @@ jobs:
             # Split the secret from the filename
             DATA="${entry%%:*}"
             FILENAME="${entry#*:}"
-            
+
             echo "Installing $FILENAME..."
             echo -n "$DATA" | base64 --decode -o "$DEST_DIR/$FILENAME"
           done
