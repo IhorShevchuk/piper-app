@@ -59,11 +59,11 @@ jobs:
       - name: Set up mise
         uses: jdx/mise-action@v4
         with:
-          install: false
+          install: true
           cache: true
+          install_args: swiftlint
 
       - name: mise lint
         shell: bash
         run: |
-          mise install swiftlint
           mise run lint --reporter github-actions-logging
