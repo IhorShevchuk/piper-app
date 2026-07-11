@@ -4,11 +4,7 @@
 [tools]
 tuist = "4.200.5"
 swiftlint = "latest"
-fastlane = "2.236.1"
 ruby = "3.3.11"
-
-[plugins]
-fastlane = 'https://github.com/mollyIV/asdf-fastlane.git'
 
 [settings]
 ruby.compile = false
@@ -76,8 +72,16 @@ set -e
 source PiperApp/BuildScripts/Configs/version.xcconfig
 source PiperApp/BuildScripts/Configs/app_bundle_id.xcconfig
 
-fastlane updateReleaseNotes appVersion:"$MARKETING_VERSION" \
-                            appIdentifier:"$APP_BUNDLE_IDENTIFIER" \
-                            apiKeyPath:"${usage_api_key_path}" \
-                            skipPreview:${usage_skip_preview}
+bundle exec fastlane updateReleaseNotes appVersion:"$MARKETING_VERSION" \
+                                        appIdentifier:"$APP_BUNDLE_IDENTIFIER" \
+                                        apiKeyPath:"${usage_api_key_path}" \
+                                        skipPreview:${usage_skip_preview}
 '''
+
+[tasks.setup]
+description = "Install project dependencies"
+depends = ["install"]
+run = """
+bundle config set path vendor/bundle
+bundle install
+"""

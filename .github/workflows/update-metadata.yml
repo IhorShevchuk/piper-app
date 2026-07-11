@@ -31,22 +31,10 @@ jobs:
 
       - name: Install dependencies
         run: |
-          mise install
+          mise run setup
 
       - name: Update Release Notes
         run: |
-          which fastlane
-          head -30 "$(which fastlane)"
-          ruby -v
-          gem env
-          bundle env || true
-          which ruby
-          bundle -v
-          env | sort
-          fastlane --version
-          which bundle
-          bundle env || true
-          gem env
           CONFIG_PATH="$RUNNER_TEMP/fastlane.json"
           echo "FASTLANE_CONFIG_PATH=${CONFIG_PATH}" >> $GITHUB_ENV
           echo "${{ secrets.FASTLANE_CONFIG_JSON_BASE64 }}" | base64 --decode > "$CONFIG_PATH"

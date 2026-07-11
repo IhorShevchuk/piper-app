@@ -99,3 +99,4 @@ BuildOutput
 fastlane/swift
 fastlane/FastlaneRunner
 vendor
+.bundle/config
