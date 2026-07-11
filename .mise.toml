@@ -4,6 +4,14 @@
 [tools]
 tuist = "4.200.5"
 swiftlint = "latest"
+fastlane = "2.236.1"
+ruby = "3.3.11"
+
+[plugins]
+fastlane = 'git@github.com:mollyIV/asdf-fastlane.git'
+
+[settings]
+ruby.compile = false
 
 [tasks.install]
 description = "Resolve and fetch SPM dependencies (Package.swift)"
@@ -55,4 +63,21 @@ case "$usage_target" in
     ./PiperApp/BuildScripts/Scripts/BuildSimulator.sh "$usage_build_number"
     ;;
 esac
+'''
+
+[tasks.update-release-notes]
+description = "Updates 'What's New' in App Store Connect using the version from version.xcconfig"
+usage = '''
+flag "--api-key-path <path>" help="Path to the App Store Connect API Key JSON file" default="fastlane/apikey.json"
+flag "--skip-preview" help="Skip generating a preview before submission" default="false"
+'''
+run = '''
+set -e
+source PiperApp/BuildScripts/Configs/version.xcconfig
+source PiperApp/BuildScripts/Configs/app_bundle_id.xcconfig
+
+fastlane updateReleaseNotes appVersion:"$MARKETING_VERSION"\
+                            appIdentifier:"$APP_BUNDLE_IDENTIFIER"\
+                            apiKeyPath:"${usage_api_key_path}"\
+                            skipPreview:${usage_skip_preview}
 '''

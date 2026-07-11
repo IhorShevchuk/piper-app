@@ -1,0 +1,44 @@
+name: Update App Store Metadata
+
+on:
+  workflow_dispatch:
+on:
+  push:
+    branches: ['main']
+    paths:
+      - '.mise.toml'
+      - 'fastlane/**'
+      - '.github/workflows/update_metadata.yml'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  update_metadata:
+    name: Update App Store Connect Metadata
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v7
+
+      - name: Setup Mise
+        uses: jdx/mise-action@v4
+
+      - name: Install dependencies
+        run: mise install
+
+      - name: Update Release Notes
+        run: |
+          CONFIG_PATH="$RUNNER_TEMP/fastlane.json"
+          echo "FASTLANE_CONFIG_PATH=${CONFIG_PATH}" >> $GITHUB_ENV
+          echo "${{ secrets.FASTLANE_CONFIG_JSON_BASE64 }}" | base64 --decode > "$CONFIG_PATH"
+          mise run update-release-notes \
+            --api-key-path "$CONFIG_PATH" \
+            --skip-preview
+
+      - name: Clean up
+        if: ${{ always() }}
+        run: |
+          rm -f "$FASTLANE_CONFIG_PATH"

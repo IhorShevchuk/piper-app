@@ -96,3 +96,5 @@ Piper.xcodeproj
 Piper.xcworkspace
 BuildOutput
 .swiftpm
+fastlane/swift
+fastlane/FastlaneRunner

@@ -1,7 +1,6 @@
 #include "version.xcconfig"
 #include "config.xcconfig"
-
-APP_BUNDLE_IDENTIFIER=dev.ihor-shevchuk.piper
+#include "app_bundle_id.xcconfig"
 
 CODE_SIGN_ALLOW_ENTITLEMENTS_MODIFICATION[sdk=macosx*] = YES
 

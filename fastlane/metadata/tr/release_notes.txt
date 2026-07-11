@@ -1,0 +1,1 @@
+- Genel hata düzeltmeleri ve performans iyileştirmeleri.
