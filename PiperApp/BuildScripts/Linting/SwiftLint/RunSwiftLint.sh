@@ -22,7 +22,7 @@ fi
 
 
 if which mise >/dev/null; then
-  mise install
+  mise install swiftlint
   mise use swiftlint
   mise exec -- swiftlint "$@" --config $(dirname "$0")/swiftlint.yml
 else
