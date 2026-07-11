@@ -72,7 +72,9 @@ set -e
 source PiperApp/BuildScripts/Configs/version.xcconfig
 source PiperApp/BuildScripts/Configs/app_bundle_id.xcconfig
 
+bundle exec fastlane swift init
 bundle exec fastlane swift generate
+
 bundle exec fastlane updateReleaseNotes appVersion:"$MARKETING_VERSION" \
                                         appIdentifier:"$APP_BUNDLE_IDENTIFIER" \
                                         apiKeyPath:"${usage_api_key_path}" \
