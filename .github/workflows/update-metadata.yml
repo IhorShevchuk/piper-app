@@ -38,10 +38,10 @@ jobs:
           ruby -v
           which ruby
           bundle -v
-          bundle list
           CONFIG_PATH="$RUNNER_TEMP/fastlane.json"
           echo "FASTLANE_CONFIG_PATH=${CONFIG_PATH}" >> $GITHUB_ENV
           echo "${{ secrets.FASTLANE_CONFIG_JSON_BASE64 }}" | base64 --decode > "$CONFIG_PATH"
+          echo "Starting update-release-notes..."
           mise run update-release-notes \
             --api-key-path "$CONFIG_PATH" \
             --skip-preview
