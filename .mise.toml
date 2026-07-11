@@ -8,7 +8,7 @@ fastlane = "2.236.1"
 ruby = "3.3.11"
 
 [plugins]
-fastlane = 'git@github.com:mollyIV/asdf-fastlane.git'
+fastlane = 'https://github.com/mollyIV/asdf-fastlane.git'
 
 [settings]
 ruby.compile = false
