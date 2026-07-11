@@ -61,6 +61,6 @@ jobs:
         with:
           install: false
           cache: true
-        run: |
+      - run: |
           mise install swiftlint
           mise run lint --reporter github-actions-logging
