@@ -8,6 +8,7 @@ on:
       - '.mise.toml'
       - 'fastlane/**'
       - '.github/workflows/update_metadata.yml'
+      - 'PiperApp/BuildScripts/Configs/version.xcconfig'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -17,6 +18,9 @@ jobs:
   update_metadata:
     name: Update App Store Connect Metadata
     runs-on: macos-latest
+    env:
+      CI: true
+      FASTLANE_SKIP_UPDATE_CHECK: true
 
     steps:
       - name: Checkout Code
@@ -28,10 +32,15 @@ jobs:
       - name: Install dependencies
         run: |
           mise install
+          bundle config set path vendor/bundle
           bundle install
 
       - name: Update Release Notes
         run: |
+          ruby -v
+          which ruby
+          bundle -v
+          bundle list
           CONFIG_PATH="$RUNNER_TEMP/fastlane.json"
           echo "FASTLANE_CONFIG_PATH=${CONFIG_PATH}" >> $GITHUB_ENV
           echo "${{ secrets.FASTLANE_CONFIG_JSON_BASE64 }}" | base64 --decode > "$CONFIG_PATH"

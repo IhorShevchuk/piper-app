@@ -98,3 +98,4 @@ BuildOutput
 .swiftpm
 fastlane/swift
 fastlane/FastlaneRunner
+vendor

@@ -76,8 +76,11 @@ set -e
 source PiperApp/BuildScripts/Configs/version.xcconfig
 source PiperApp/BuildScripts/Configs/app_bundle_id.xcconfig
 
-fastlane updateReleaseNotes appVersion:"$MARKETING_VERSION"\
-                            appIdentifier:"$APP_BUNDLE_IDENTIFIER"\
-                            apiKeyPath:"${usage_api_key_path}"\
-                            skipPreview:${usage_skip_preview}
+bundle config set path vendor/bundle
+bundle install
+
+bundle exec fastlane updateReleaseNotes appVersion:"$MARKETING_VERSION" \
+                                        appIdentifier:"$APP_BUNDLE_IDENTIFIER" \
+                                        apiKeyPath:"${usage_api_key_path}" \
+                                        skipPreview:${usage_skip_preview}
 '''
