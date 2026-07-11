@@ -26,7 +26,9 @@ jobs:
         uses: jdx/mise-action@v4
 
       - name: Install dependencies
-        run: mise install
+        run: |
+          mise install
+          bundle install
 
       - name: Update Release Notes
         run: |
