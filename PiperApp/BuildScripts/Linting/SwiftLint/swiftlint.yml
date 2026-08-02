@@ -33,8 +33,8 @@ included: # paths to include during linting. `--path` is ignored if present.
 excluded: # paths to ignore during linting. Takes precedence over `included`.
   - ${SRCROOT}/Derived
   - ${SRCROOT}/.build
-  - Derived
-  - .build
+  - ${SRCROOT}/vendor
+  - ${SRCROOT}/fastlane/swift
 
 # configurable rules can be customized from this configuration file
 # binary rules can set their severity level
