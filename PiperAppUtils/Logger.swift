@@ -75,29 +75,29 @@ public class Log {
         }
     }
 
-    static public func debug(type: LogType = .other, _ message: String, file: String = #file, function: String = #function, line: UInt = #line) {
+    static public func debug(type: LogType = .other, _ message: @autoclosure @escaping () -> String, file: String = #file, function: String = #function, line: UInt = #line) {
         doPrint(logLevel: .debug, type: type, message, file: file, function: function, line: line)
     }
 
-    static public func info(type: LogType = .other, _ message: String, file: String = #file, function: String = #function, line: UInt = #line) {
+    static public func info(type: LogType = .other, _ message: @autoclosure @escaping () -> String, file: String = #file, function: String = #function, line: UInt = #line) {
         doPrint(logLevel: .info, type: type, message, file: file, function: function, line: line)
     }
 
-    static public func warning(type: LogType = .other, _ message: String, file: String = #file, function: String = #function, line: UInt = #line) {
+    static public func warning(type: LogType = .other, _ message: @autoclosure @escaping () -> String, file: String = #file, function: String = #function, line: UInt = #line) {
         doPrint(logLevel: .warning, type: type, message, file: file, function: function, line: line)
     }
 
-    static public func error(type: LogType = .other, _ message: String, file: String = #file, function: String = #function, line: UInt = #line) {
+    static public func error(type: LogType = .other, _ message: @autoclosure @escaping () -> String, file: String = #file, function: String = #function, line: UInt = #line) {
         doPrint(logLevel: .error, type: type, message, file: file, function: function, line: line)
     }
 }
 
 private extension Log {
     // swiftlint:disable:next function_parameter_count
-    static func doPrint(logLevel: Level, type: LogType, _ message: String, file: String, function: String, line: UInt) {
+    static func doPrint(logLevel: Level, type: LogType, _ message: @escaping () -> String, file: String, function: String, line: UInt) {
         if self.logLevel <= logLevel {
             let fileName = file.components(separatedBy: "/").last ?? file
-            let messageToPrint = "[\(logLevel)][\(type)][\(fileName)(\(line))] \(message)"
+            let messageToPrint = "[\(logLevel)][\(type)][\(fileName)(\(line))] \(message())"
             if shouldMask {
                 os_log("%{private}@", log: oslog, type: logLevel.os_logLevel, messageToPrint)
             } else {

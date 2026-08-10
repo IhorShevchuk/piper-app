@@ -114,7 +114,7 @@ public class PiperTTSAudioUnit: AVSpeechSynthesisProviderAudioUnit {
 
             outputRecurseCallNumber += 1
             if outputRecurseCallNumber < outputRecurseCallNumberMax && !completedRendering {
-                Log.error(type: .synthesizer, "Rendering in progress no data. Trying one more time: \(outputRecurseCallNumber)")
+                Log.error(type: .synthesizer, "Rendering in progress no data. Trying one more time: \(self.outputRecurseCallNumber)")
                 pauseUntil(maxDelayFactor: outputRecurseCallNumberMax) { [weak self] in
                     guard let self else { return true }
                     os_unfair_lock_lock(&self.outputDataLock)
@@ -125,7 +125,7 @@ public class PiperTTSAudioUnit: AVSpeechSynthesisProviderAudioUnit {
                 }
                 return doPerformRender(actionFlags: actionFlags, timestamp: timestamp, frameCount: frameCount, outputBusNumber: outputBusNumber, outputAudioBufferList: outputAudioBufferList, renderEvents: renderEvents, renderPull: renderPull)
             }
-            Log.error(type: .synthesizer, "Tried \(outputRecurseCallNumber), without luck. Returning what have currently")
+            Log.error(type: .synthesizer, "Tried \(self.outputRecurseCallNumber), without luck. Returning what have currently")
         }
 
         outputRecurseCallNumber = 0
@@ -171,7 +171,7 @@ public class PiperTTSAudioUnit: AVSpeechSynthesisProviderAudioUnit {
     }
 
     func cleanUp() {
-        Log.debug("cleanUp request:\(request?.ssmlRepresentation ?? "nil")")
+        Log.debug("cleanUp request:\(self.request?.ssmlRepresentation ?? "nil")")
         removeRequestAndCleanOutputData()
     }
 
