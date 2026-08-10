@@ -205,6 +205,13 @@ public class PiperTTSAudioUnit: AVSpeechSynthesisProviderAudioUnit {
         }
         piper = Piper(modelPath: paths.model.path(percentEncoded: false),
                       andConfigPath: paths.json.path(percentEncoded: false))
+        
+        Log.debug("Piper Created")
+        let availableMemory = Int64(Double(os_proc_available_memory()) * 0.9)
+        if availableMemory > 0 {
+            Log.debug("Setting memoryThresholdBytes:\(ByteCountFormatter.string(fromByteCount: availableMemory, countStyle: .binary))")
+            piper?.memoryThresholdBytes = UInt64(availableMemory)
+        }
         piper?.delegate = self
         self.model = model
     }
