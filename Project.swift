@@ -8,6 +8,7 @@ import ProjectDescription
 let projectName = "Piper"
 let appName = "\(projectName)App"
 let sharedUtilsName = "\(projectName)AppUtils"
+let screenshotTargetName = "Screenshots"
 let ttsExtensionName = "\(projectName)TTS"
 let buildScriptPath = "\(appName)/BuildScripts"
 let configsPath = "\(buildScriptPath)/Configs"
@@ -122,6 +123,18 @@ let project = Project(
                                     defaultSettings: .recommended(excluding: [
                                         "DEFINES_MODULE"
                                     ]))
-               )
+               ),
+        .target(name: "\(screenshotTargetName)",
+                destinations: destinations,
+                product: .uiTests,
+                bundleId: "$(PRODUCT_BUNDLE_IDENTIFIER)",
+                sources: [
+                    "\(screenshotTargetName)/**",
+                    "fastlane/SnapshotHelper.swift"
+                ],
+                dependencies: [
+                    .target(name: projectName)
+                ]
+        )
     ],
 )

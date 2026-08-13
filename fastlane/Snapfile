@@ -1,0 +1,12 @@
+devices([
+  "iPhone 17 Pro Max",
+  "iPad Pro 13-inch (M5)",
+])
+
+languages([
+  "en-US",
+])
+
+scheme("Screenshots")
+clear_previous_screenshots(true)
+override_status_bar(true)

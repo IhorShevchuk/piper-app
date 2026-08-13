@@ -31,6 +31,7 @@ struct VoicesListView: View {
                     Text("warning_big_voice_files")
                         .font(.title2)
                 }
+                .accessibilityIdentifier("download_languages_list")
             } else {
                 Text("no_voices")
             }

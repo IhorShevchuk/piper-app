@@ -46,6 +46,7 @@ struct MainView: View {
         } label: {
             Text("download_voice_model")
                 .font(.title2)
+                .accessibilityIdentifier("download_voice_model")
         }
     }
     
@@ -55,6 +56,7 @@ struct MainView: View {
         } label: {
             Text("update_model_in_app")
                 .font(.title2)
+                .accessibilityIdentifier("update_model_in_app")
         }
     }
     
