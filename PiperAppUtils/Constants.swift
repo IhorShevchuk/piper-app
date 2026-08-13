@@ -2,7 +2,9 @@
 // Copyright (c) 2026 Ihor Shevchuk
 
 import Foundation
+#if canImport(UniformTypeIdentifiers)
 import UniformTypeIdentifiers
+#endif
 
 public enum Constants {
     public static let speakerIdSeparator = "<+>"
@@ -21,6 +23,14 @@ public enum Constants {
         return "\(modelsFolderName).\(jsonModelExtension)"
     }
 
-    public static let jsonUTI: UTType = .json
-    public static let modelUTI: UTType = .init(filenameExtension: modelExtensiom) ?? .item
+#if canImport(UniformTypeIdentifiers)
+    @available(macOS 11.0, iOS 14.0, *)
+    public static var jsonUTI: UTType { .json }
+    @available(macOS 11.0, iOS 14.0, *)
+    public static var modelUTI: UTType { UTType(filenameExtension: modelExtensiom) ?? .item }
+#else
+    // Linux / non-Apple fallback – simple string identifiers
+    public static let jsonUTI: String = "public.json"
+    public static let modelUTI: String = "org.onnx.model"
+#endif
 }

@@ -44,24 +44,36 @@ public struct ModelInfo: Decodable {
     }
 
     public static var installed: ModelInfo? {
+#if os(Linux)
+        return nil
+#else
         if FileManager.default.isInstalled {
             let modelInfoJson = FileManager.Constants.jsonModelURL
             return try? create(from: modelInfoJson)
         }
         return nil
+#endif
     }
 
     public static var installedModels: [ModelInfo] {
+#if os(Linux)
+        return []
+#else
         FileManager.ModelPaths.installedModels.compactMap { path in
             path.info
         }
+#endif
     }
 
+#if os(Linux)
+    public var installedPath: URL? { nil }
+#else
     public var installedPath: FileManager.ModelPaths? {
         return FileManager.ModelPaths.installedModels.first { paths in
             (paths.info) == self
         }
     }
+#endif
 
     public static let separator = ">0<"
     public var voiceId: String {

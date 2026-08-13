@@ -124,6 +124,27 @@ let project = Project(
                                         "DEFINES_MODULE"
                                     ]))
                ),
+        .target(name: "\(sharedUtilsName)Tests",
+                destinations: destinations,
+                product: .unitTests,
+                bundleId: "$(PRODUCT_BUNDLE_IDENTIFIER)",
+                infoPlist: .default,
+                sources: ["\(sharedUtilsName)/Tests/**"],
+                dependencies: [
+                    .target(name: sharedUtilsName)
+                ]
+        ),
+        .target(name: "\(ttsExtensionName)Tests",
+                destinations: destinations,
+                product: .unitTests,
+                bundleId: "$(PRODUCT_BUNDLE_IDENTIFIER)",
+                infoPlist: .default,
+                sources: ["\(ttsExtensionName)/Tests/**"],
+                dependencies: [
+                    .target(name: sharedUtilsName),
+                    .target(name: ttsExtensionName)
+                ]
+        ),
         .target(name: "\(screenshotTargetName)",
                 destinations: destinations,
                 product: .uiTests,
