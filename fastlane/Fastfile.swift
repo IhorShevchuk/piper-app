@@ -16,27 +16,44 @@ class Fastfile: LaneFile {
     }
 
     func captureScreenshotsLane() {
-        desc("Generate iOS screenshots using UI Tests – languages from fastlane/metadata")
+        desc("Generate iOS screenshots using UI Tests – languages from fastlane/metadata (build once, test-without-building per lang)")
         sh(command: "rm -rf fastlane/test_output && mkdir -p fastlane/test_output")
         // Fix AX timeout on first language – snapshot warns 0s wait, we want 30s for AX to load
         setenv("SNAPSHOT_SIMULATOR_WAIT_FOR_BOOT_TIMEOUT", "30", 1)
-        // Also keep translators happy – avoid re-linting slowdown
-        setenv("FASTLANE_SKIP_PACKAGE_DEPENDENCIES_RESOLUTION", "1", 1)
+        // Skip package resolution speedup – we already resolved
+        setenv("FASTLANE_SNAPSHOT", "YES", 1)
         let languages = supportedLanguages()
+        let derivedDataPath = "/tmp/snapshot_derived_ios"
+        // Clean derived data once
+        sh(command: "rm -rf \(derivedDataPath) && mkdir -p \(derivedDataPath)")
+        // 1) Build once for testing – scan is wrapper around xcodebuild build-for-testing
+        // Uses same workspace/scheme/devices as snapshot to populate DerivedData
+        // Order for scan follows Scan::Options.available_options: workspace, scheme, device, derivedDataPath, buildForTesting etc
+        scan(
+            workspace: "./Piper.xcworkspace",
+            scheme: "Screenshots",
+            devices: ["iPhone 17 Pro Max", "iPad Pro 13-inch (M5)"],
+            derivedDataPath: derivedDataPath,
+            buildForTesting: true
+        )
+        // 2) Run snapshot with testWithoutBuilding – avoids 13 rebuilds (was rebuilding each lang)
         // Order must match Snapshot::Options.available_options order:
-        // languages -> output_directory -> clear_previous_screenshots -> headless -> override_status_bar -> number_of_retries -> concurrent_simulators -> xcodebuild_formatter
+        // languages -> outputDirectory -> clearPreviousScreenshots -> headless -> overrideStatusBar -> numberOfRetries -> concurrentSimulators -> xcodebuildFormatter -> derivedDataPath -> testWithoutBuilding
         captureScreenshots(
             languages: languages,
             outputDirectory: "fastlane/screenshots/ios",
             clearPreviousScreenshots: true,
             headless: true,
             overrideStatusBar: true,
+            testWithoutBuilding: true,
             numberOfRetries: 3,
+            derivedDataPath: derivedDataPath,
             concurrentSimulators: true,
             xcodebuildFormatter: "xcpretty"
         )
     }
 
+    
     func updateReleaseNotesLane(withOptions options: [String: String]?) {
         desc("Update the 'What's New' text in App Store Connect using the metadata files. Pass `appVersion` as a parameter.")
 
