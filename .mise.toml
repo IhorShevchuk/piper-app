@@ -61,6 +61,20 @@ case "$usage_target" in
 esac
 '''
 
+[tasks.test]
+description = "Run PiperTests including PiperTTSLogic on macOS"
+run = """
+xcodebuild test \
+  -workspace Piper.xcworkspace \
+  -scheme Piper \
+  -destination 'platform=macOS' \
+  -only-testing:PiperTests \
+  CODE_SIGNING_ALLOWED=NO \
+  CODE_SIGNING_REQUIRED=NO \
+  CODE_SIGN_IDENTITY="" \
+  AD_HOC_CODE_SIGNING_ALLOWED=YES
+"""
+
 [tasks.update-release-notes]
 description = "Updates 'What's New' in App Store Connect using the version from version.xcconfig"
 usage = '''

@@ -4,7 +4,6 @@ name: Build
 on:
   push:
     branches: ['main']
-    # Only run when app source, xcconfig, scripts, Tuist project, or .mise.toml change (ignores docs, licenses, etc.)
     paths:
       - 'PiperApp/**'
       - 'PiperAppUtils/**'
@@ -88,17 +87,9 @@ jobs:
           mise run install
           mise run generate
 
-      - name: Run PiperTests (including PiperTTSLogic)
+      - name: Test
         run: |
-          xcodebuild test \
-            -workspace Piper.xcworkspace \
-            -scheme Piper \
-            -destination 'platform=macOS' \
-            -only-testing:PiperTests \
-            CODE_SIGNING_ALLOWED=NO \
-            CODE_SIGNING_REQUIRED=NO \
-            CODE_SIGN_IDENTITY="" \
-            AD_HOC_CODE_SIGNING_ALLOWED=YES
+          mise run test
 
   Lint:
     runs-on: ubuntu-latest

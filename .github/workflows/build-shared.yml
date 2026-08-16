@@ -104,6 +104,10 @@ jobs:
           mise run install
           mise run generate
 
+      - name: Test
+        run: |
+          mise run test
+
       - name: Build
         run: |
           mise run build $BUILD_NUMBER $BUILD_TARGET
