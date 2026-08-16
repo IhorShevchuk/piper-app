@@ -116,7 +116,17 @@ bundle install
 """
 
 
-[tasks.screenshots]
+
+
+
+
+
+[tasks.upload-screenshots]
+description = "Upload screenshots to App Store Connect"
+run = "mise run screenshots-upload"
+
+
+[tasks.screenshots-ios]
 description = "Capture iOS screenshots"
 run = "bundle exec fastlane captureScreenshots"
 
@@ -124,13 +134,13 @@ run = "bundle exec fastlane captureScreenshots"
 description = "Capture macOS screenshots"
 run = "bash scripts/capture-macos-screenshots.sh"
 
-[tasks.screenshots-all]
+[tasks.screenshots]
 description = "Capture iOS + macOS screenshots"
-run = "mise run screenshots && mise run screenshots-macos"
+run = "mise run screenshots-ios && mise run screenshots-macos"
 
-[tasks.screenshots-generate]
-description = "Generate screenshots"
-run = "mise run screenshots-all"
+[tasks.screenshots-all]
+description = "Alias for screenshots (iOS + macOS)"
+run = "mise run screenshots"
 
 [tasks.screenshots-upload]
 description = "Upload screenshots to App Store Connect"
@@ -144,3 +154,4 @@ bundle exec fastlane updateReleaseNotes appVersion:"$MARKETING_VERSION" appIdent
 [tasks.upload-screenshots]
 description = "Upload screenshots to App Store Connect"
 run = "mise run screenshots-upload"
+
