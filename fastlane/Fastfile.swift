@@ -19,15 +19,17 @@ class Fastfile: LaneFile {
         desc("Generate iOS screenshots using UI Tests – languages from fastlane/metadata")
         sh(command: "rm -rf fastlane/test_output && mkdir -p fastlane/test_output")
         let languages = supportedLanguages()
+        // Order must match Snapshot::Options.available_options order:
+        // languages -> output_directory -> clear_previous_screenshots -> headless -> override_status_bar -> number_of_retries -> concurrent_simulators -> xcodebuild_formatter
         captureScreenshots(
             languages: languages,
             outputDirectory: "fastlane/screenshots/ios",
-            xcodebuildFormatter: "xcpretty",
+            clearPreviousScreenshots: true,
+            headless: true,
+            overrideStatusBar: true,
             numberOfRetries: 0,
             concurrentSimulators: true,
-            headless: true,
-            clearPreviousScreenshots: true,
-            overrideStatusBar: true
+            xcodebuildFormatter: "xcpretty"
         )
     }
 
