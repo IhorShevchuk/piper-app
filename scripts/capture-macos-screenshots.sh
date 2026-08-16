@@ -11,6 +11,7 @@ LANGUAGES=${LANGUAGES:-$DEFAULT_LANGS}
 CACHE_BASE="$HOME/Library/Caches/tools.fastlane"
 CACHE_SCREENSHOTS="$CACHE_BASE/screenshots"
 OUTPUT_BASE="fastlane/screenshots/macos"
+DERIVED_DATA="/tmp/snapshot_derived_macos"
 
 echo "→ Languages (from fastlane/metadata): $LANGUAGES"
 echo "→ Cleaning test_output + screenshots"
@@ -21,6 +22,17 @@ mkdir -p "$CACHE_SCREENSHOTS"
 rm -rf "$OUTPUT_BASE"
 mkdir -p "$OUTPUT_BASE"
 mkdir -p "$CACHE_BASE"
+
+# One-time build – avoids rebuilding Piper + SwiftLint for each language
+# FASTLANE_SNAPSHOT=YES makes Project.swift skip SwiftLint phases (speedup)
+export FASTLANE_SNAPSHOT=YES
+echo "→ Building Screenshots scheme once for macOS (no code signing)"
+xcodebuild build-for-testing \
+  -workspace Piper.xcworkspace \
+  -scheme Screenshots \
+  -destination "platform=macOS" \
+  -derivedDataPath "$DERIVED_DATA" \
+  CODE_SIGNING_ALLOWED=NO | xcpretty
 
 for LANG in $LANGUAGES; do
   echo ""
@@ -33,12 +45,13 @@ for LANG in $LANGUAGES; do
   rm -rf "fastlane/test_output/macos-screenshots-$LANG.xcresult" || true
   rm -f "$CACHE_SCREENSHOTS"/*.png || true
 
-  xcodebuild test \
+  xcodebuild test-without-building \
     -workspace Piper.xcworkspace \
     -scheme Screenshots \
     -destination "platform=macOS" \
+    -derivedDataPath "$DERIVED_DATA" \
     -resultBundlePath "fastlane/test_output/macos-screenshots-$LANG.xcresult" \
-    CODE_SIGNING_ALLOWED=NO
+    CODE_SIGNING_ALLOWED=NO | xcpretty
 
   if [ -d "$CACHE_SCREENSHOTS" ]; then
     count=0
