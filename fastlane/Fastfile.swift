@@ -21,7 +21,13 @@ class Fastfile: LaneFile {
         let languages = supportedLanguages()
         captureScreenshots(
             languages: languages,
-            outputDirectory: "fastlane/screenshots/ios"
+            outputDirectory: "fastlane/screenshots/ios",
+            xcodebuildFormatter: "xcpretty",
+            numberOfRetries: 0,
+            concurrentSimulators: true,
+            headless: true,
+            clearPreviousScreenshots: true,
+            overrideStatusBar: true
         )
     }
 
