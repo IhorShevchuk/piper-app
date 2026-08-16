@@ -2,10 +2,25 @@ import Foundation
 
 class Fastfile: LaneFile {
 
+    private func supportedLanguages() -> [String] {
+        let fm = FileManager.default
+        let metaPath = "fastlane/metadata"
+        if let items = try? fm.contentsOfDirectory(atPath: metaPath) {
+            return items.filter { name in
+                var isDir: ObjCBool = false
+                let full = (metaPath as NSString).appendingPathComponent(name)
+                return fm.fileExists(atPath: full, isDirectory: &isDir) && isDir.boolValue
+            }.sorted()
+        }
+        return ["en-US"]
+    }
+
     func captureScreenshotsLane() {
         desc("Generate iOS screenshots using UI Tests – languages from fastlane/metadata")
         sh(command: "rm -rf fastlane/test_output && mkdir -p fastlane/test_output")
+        let languages = supportedLanguages()
         captureScreenshots(
+            languages: languages,
             outputDirectory: "fastlane/screenshots/ios"
         )
     }
