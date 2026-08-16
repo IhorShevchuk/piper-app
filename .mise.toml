@@ -64,7 +64,7 @@ esac
 [tasks.test]
 description = "Run PiperTests on a specified platform"
 usage = '''
-arg "[target]" help="Test target" default="macos" { choices "ios-simulator" "macos" }
+arg "[target]" help="Test target" default="macos" { choices "ios-simulator" "macos" "macos-device" }
 '''
 run = '''
 DESTINATION=""
@@ -72,7 +72,10 @@ case "$usage_target" in
   "ios-simulator")
     DESTINATION="platform=iOS Simulator,name=iPhone 17"
     ;;
-  *) # macos
+  "macos-device" | "macos")
+    DESTINATION="platform=macOS"
+    ;;
+  *)
     DESTINATION="platform=macOS"
     ;;
 esac
@@ -81,7 +84,7 @@ xcodebuild test -workspace Piper.xcworkspace \
                 -scheme Piper \
                 -destination "$DESTINATION" \
                 -only-testing:PiperTests \
-                CODE_SIGN_ALLOWED=NO
+                CODE_SIGNING_ALLOWED=NO
 '''
 
 [tasks.update-release-notes]
