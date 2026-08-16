@@ -243,21 +243,13 @@ extension PiperTTSAudioUnit: PiperDelegate {
 
         if let modelFormat = model?.audioFormat,
            modelFormat.sampleRate != format.sampleRate {
-            // Resample using testable helper
             let resampled = AudioResampler.resampleBuffer(buf, inputRate: modelFormat.sampleRate, outputRate: format.sampleRate)
             os_unfair_lock_lock(&outputDataLock)
-            outputData.append(contentsOf: resampled)
-            if outputData.count > maxSamplesCount {
-                outputData.removeFirst(outputData.count - maxSamplesCount)
-            }
+            outputData.appendAndEnforceMax(contentsOf: resampled, maxCount: maxSamplesCount)
             os_unfair_lock_unlock(&outputDataLock)
         } else {
-            // No resampling needed
             os_unfair_lock_lock(&outputDataLock)
-            outputData.append(contentsOf: buf)
-            if outputData.count > maxSamplesCount {
-                outputData.removeFirst(outputData.count - maxSamplesCount)
-            }
+            outputData.appendAndEnforceMax(contentsOf: buf, maxCount: maxSamplesCount)
             os_unfair_lock_unlock(&outputDataLock)
         }
     }

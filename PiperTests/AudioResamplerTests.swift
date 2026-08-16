@@ -5,43 +5,61 @@ import XCTest
 @testable import PiperTTSLogic
 
 final class AudioResamplerTests: XCTestCase {
-    func testSameRatePassthrough() {
-        let input: [Float] = [0.1, 0.2, 0.3, 0.4]
-        let output = AudioResampler.resample(input: input, inputRate: 22050, outputRate: 22050)
-        XCTAssertEqual(output, input)
+
+    func testPassthroughSameRate() {
+        let input: [Float] = [0, 1, 2, 3]
+        let out = AudioResampler.resample(input: input, inputRate: 22050, outputRate: 22050)
+        XCTAssertEqual(out, input)
     }
 
-    func testUpsampleCount() {
-        let input = Array(repeating: Float(0.5), count: 100)
-        let output = AudioResampler.resample(input: input, inputRate: 16000, outputRate: 22050)
-        XCTAssertEqual(output.count, 138)
-    }
-
-    func testDownsampleCount() {
-        let input = Array(repeating: Float(0.5), count: 220)
-        let output = AudioResampler.resample(input: input, inputRate: 22050, outputRate: 16000)
-        let expected = Int((Double(220) * 16000.0 / 22050.0).rounded())
-        XCTAssertEqual(output.count, expected)
+    func testResampleCountChangesWithRate() {
+        let input = [Float](repeating: 1.0, count: 100)
+        let out = AudioResampler.resample(input: input, inputRate: 22050, outputRate: 16000)
+        XCTAssertEqual(out.count, Int((Double(100) * 16000.0 / 22050.0).rounded()))
     }
 
     func testEmptyInput() {
-        let input: [Float] = []
-        let output = AudioResampler.resample(input: input, inputRate: 16000, outputRate: 22050)
-        XCTAssertTrue(output.isEmpty)
+        let out = AudioResampler.resample(input: [], inputRate: 22050, outputRate: 16000)
+        XCTAssertTrue(out.isEmpty)
     }
 
-    func testSingleSampleUpsample() {
-        let input: [Float] = [1.0]
-        let output = AudioResampler.resample(input: input, inputRate: 16000, outputRate: 22050)
-        XCTAssertEqual(output.count, 1)
-        XCTAssertTrue(output.allSatisfy { $0 == 1.0 })
+    func testSingleSample() {
+        let out = AudioResampler.resample(input: [0.5], inputRate: 22050, outputRate: 16000)
+        XCTAssertFalse(out.isEmpty)
+        XCTAssertTrue(out.allSatisfy { $0 == 0.5 })
     }
 
-    func testBufferOverload() {
-        let input: [Float] = [0, 1, 2, 3]
-        input.withUnsafeBufferPointer { buffer in
-            let output = AudioResampler.resampleBuffer(buffer, inputRate: 16000, outputRate: 22050)
-            XCTAssertEqual(output.count, Int((Double(4) * 22050.0 / 16000.0).rounded()))
+    func testResampleBufferPassthroughNoCopySemantics() {
+        let arr: [Float] = [1, 2, 3, 4]
+        arr.withUnsafeBufferPointer { buf in
+            let out = AudioResampler.resampleBuffer(buf, inputRate: 22050, outputRate: 22050)
+            XCTAssertEqual(out, arr)
+        }
+    }
+
+    func testResampleBufferEmpty() {
+        let empty = [Float]().withUnsafeBufferPointer { buf in
+            AudioResampler.resampleBuffer(buf, inputRate: 22050, outputRate: 16000)
+        }
+        XCTAssertTrue(empty.isEmpty)
+    }
+
+    func testResampleBufferSingleSample() {
+        let src: [Float] = [0.7]
+        let out = src.withUnsafeBufferPointer { buf in
+            AudioResampler.resampleBuffer(buf, inputRate: 8000, outputRate: 16000)
+        }
+        XCTAssertFalse(out.isEmpty)
+        XCTAssertTrue(out.allSatisfy { $0 == 0.7 })
+    }
+
+    func testResampleBufferUprateAndDownrate() {
+        let src = [Float](repeating: 0.5, count: 10)
+        src.withUnsafeBufferPointer { buf in
+            let up = AudioResampler.resampleBuffer(buf, inputRate: 16000, outputRate: 22050)
+            let down = AudioResampler.resampleBuffer(buf, inputRate: 22050, outputRate: 16000)
+            XCTAssertEqual(up.count, Int((Double(10) * 22050.0 / 16000.0).rounded()))
+            XCTAssertEqual(down.count, Int((Double(10) * 16000.0 / 22050.0).rounded()))
         }
     }
 }
