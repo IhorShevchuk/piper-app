@@ -18,6 +18,10 @@ class Fastfile: LaneFile {
     func captureScreenshotsLane() {
         desc("Generate iOS screenshots using UI Tests – languages from fastlane/metadata")
         sh(command: "rm -rf fastlane/test_output && mkdir -p fastlane/test_output")
+        // Fix AX timeout on first language – snapshot warns 0s wait, we want 30s for AX to load
+        setenv("SNAPSHOT_SIMULATOR_WAIT_FOR_BOOT_TIMEOUT", "30", 1)
+        // Also keep translators happy – avoid re-linting slowdown
+        setenv("FASTLANE_SKIP_PACKAGE_DEPENDENCIES_RESOLUTION", "1", 1)
         let languages = supportedLanguages()
         // Order must match Snapshot::Options.available_options order:
         // languages -> output_directory -> clear_previous_screenshots -> headless -> override_status_bar -> number_of_retries -> concurrent_simulators -> xcodebuild_formatter

@@ -25,3 +25,6 @@ override_status_bar(true)
 xcodebuild_formatter("xcpretty")
 # Be less aggressive – default 1 retry already doubles time, keep 0 for speed
 number_of_retries(0)
+# Speed: don't let SwiftLint run inside snapshot builds (handled by Project.swift guard)
+# Simulator stability: wait longer for AX to load, avoids Exit 65 TIMED OUT waiting for AX loaded notification
+ENV['SNAPSHOT_SIMULATOR_WAIT_FOR_BOOT_TIMEOUT'] = '30'

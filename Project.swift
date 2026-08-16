@@ -69,10 +69,18 @@ let project = Project(
             entitlements: .dictionary(appEntitlements),
             scripts: [
                 .pre(script: """
+                             if [ "$FASTLANE_SNAPSHOT" = "YES" ]; then
+                               echo "Skipping SwiftLint for snapshot"
+                               exit 0
+                             fi
                              mise run lint --fix
                              """,
                      name: "Run SwiftLint Autocorrector"),
                 .post(script: """
+                              if [ "$FASTLANE_SNAPSHOT" = "YES" ]; then
+                                echo "Skipping SwiftLint Analyzer for snapshot"
+                                exit 0
+                              fi
                               mise run lint
                               """,
                       name: "Run SwiftLint Analyzer")
