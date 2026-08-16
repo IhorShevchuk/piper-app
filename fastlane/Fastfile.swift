@@ -4,7 +4,7 @@ class Fastfile: LaneFile {
 
     func captureScreenshotsLane() {
         desc("Generate iOS screenshots using UI Tests – languages from fastlane/metadata")
-        sh("rm -rf fastlane/test_output && mkdir -p fastlane/test_output")
+        sh(command: "rm -rf fastlane/test_output && mkdir -p fastlane/test_output")
         captureScreenshots(
             outputDirectory: "fastlane/screenshots/ios"
         )
