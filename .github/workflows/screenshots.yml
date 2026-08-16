@@ -107,12 +107,10 @@ jobs:
         run: |
           CONFIG_PATH="$RUNNER_TEMP/fastlane.json"
           echo "${{ secrets.FASTLANE_CONFIG_JSON_BASE64 }}" | base64 --decode > "$CONFIG_PATH"
-          mkdir -p fastlane
-          cp "$CONFIG_PATH" fastlane/apikey.json
-          echo "Starting upload..."
+          echo "Starting upload with api key $CONFIG_PATH..."
           source PiperApp/BuildScripts/Configs/version.xcconfig
           echo "Version $MARKETING_VERSION"
-          mise run screenshots-upload
+          mise run screenshots-upload --api-key-path "$CONFIG_PATH"
         env:
           FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD: ${{ secrets.APPLE_ID_APP_SPECIFIC_PASSWORD }}
 

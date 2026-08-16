@@ -129,9 +129,12 @@ run = "mise run screenshots-ios && mise run screenshots-macos"
 
 [tasks.screenshots-upload]
 description = "Upload screenshots to App Store Connect"
+usage = '''
+flag "--api-key-path <path>" help="Path to the App Store Connect API Key JSON file" default="fastlane/apikey.json"
+'''
 run = '''
 set -e
 source PiperApp/BuildScripts/Configs/version.xcconfig
 source PiperApp/BuildScripts/Configs/app_bundle_id.xcconfig
-bundle exec fastlane updateReleaseNotes appVersion:"$MARKETING_VERSION" appIdentifier:"$APP_BUNDLE_IDENTIFIER" apiKeyPath:"fastlane/apikey.json" uploadScreenshots:true skipPreview:true
+bundle exec fastlane updateReleaseNotes appVersion:"$MARKETING_VERSION" appIdentifier:"$APP_BUNDLE_IDENTIFIER" apiKeyPath:"${usage_api_key_path}" uploadScreenshots:true skipPreview:true
 '''
