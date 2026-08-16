@@ -33,7 +33,7 @@ class Fastfile: LaneFile {
             workspace: "./Piper.xcworkspace",
             scheme: "Screenshots",
             devices: .userDefined(["iPhone 17 Pro Max", "iPad Pro 13-inch (M5)"]),
-            xcodebuildFormatter: .userDefined("xcpretty"),
+            xcodebuildFormatter: "xcpretty",
             derivedDataPath: .userDefined(derivedDataPath),
             buildForTesting: .userDefined(true)
         )
