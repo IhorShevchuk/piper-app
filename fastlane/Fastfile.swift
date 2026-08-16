@@ -36,7 +36,17 @@ class Fastfile: LaneFile {
 
         let skipPreview = Bool(options?["skipPreview"] ?? "") ?? false
         let uploadScreenshots = Bool(options?["uploadScreenshots"] ?? "false") ?? false
-        let platforms = ["ios", "osx"]
+        let platformOption = options?["platform"]?.lowercased() ?? "all"
+
+        let platforms: [String]
+        switch platformOption {
+        case "ios":
+            platforms = ["ios"]
+        case "osx", "macos", "mac":
+            platforms = ["osx"]
+        default:
+            platforms = ["ios", "osx"]
+        }
 
         for platform in platforms {
             uploadToAppStore(

@@ -13,6 +13,15 @@ on:
         required: false
         default: ''
         type: string
+      platform:
+        description: 'Platform to upload (ios, osx, all)'
+        required: false
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - ios
+          - osx
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -110,7 +119,7 @@ jobs:
           echo "Starting upload with api key $CONFIG_PATH..."
           source PiperApp/BuildScripts/Configs/version.xcconfig
           echo "Version $MARKETING_VERSION"
-          mise run screenshots-upload --api-key-path "$CONFIG_PATH"
+          mise run screenshots-upload --api-key-path "$CONFIG_PATH" --platform "${{ inputs.platform || 'all' }}"
         env:
           FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD: ${{ secrets.APPLE_ID_APP_SPECIFIC_PASSWORD }}
 
