@@ -62,18 +62,27 @@ esac
 '''
 
 [tasks.test]
-description = "Run PiperTests including PiperTTSLogic on macOS"
-run = """
-xcodebuild test \
-  -workspace Piper.xcworkspace \
-  -scheme Piper \
-  -destination 'platform=macOS' \
-  -only-testing:PiperTests \
-  CODE_SIGNING_ALLOWED=NO \
-  CODE_SIGNING_REQUIRED=NO \
-  CODE_SIGN_IDENTITY="" \
-  AD_HOC_CODE_SIGNING_ALLOWED=YES
-"""
+description = "Run PiperTests on a specified platform"
+usage = '''
+arg "[target]" help="Test target" default="macos" { choices "ios-simulator" "macos" }
+'''
+run = '''
+DESTINATION=""
+case "$usage_target" in
+  "ios-simulator")
+    DESTINATION="platform=iOS Simulator,name=iPhone 17"
+    ;;
+  *) # macos
+    DESTINATION="platform=macOS"
+    ;;
+esac
+
+xcodebuild test -workspace Piper.xcworkspace \
+                -scheme Piper \
+                -destination "$DESTINATION" \
+                -only-testing:PiperTests \
+                CODE_SIGN_ALLOWED=NO
+'''
 
 [tasks.update-release-notes]
 description = "Updates 'What's New' in App Store Connect using the version from version.xcconfig"

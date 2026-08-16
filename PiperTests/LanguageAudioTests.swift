@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2026 Ihor Shevchuk
-// swiftlint:disable identifier_name non_optional_string_data_conversion
 
 import XCTest
 @testable import PiperAppUtils
@@ -8,6 +7,7 @@ import XCTest
 final class LanguageAudioTests: XCTestCase {
 
     func testLanguageDecoding() throws {
+        // swiftlint:disable:next non_optional_string_data_conversion
         let json = """
         {"code":"en_US","family":"en","region":"US"}
         """.data(using: .utf8)!
@@ -18,10 +18,13 @@ final class LanguageAudioTests: XCTestCase {
     }
 
     func testLanguageEquatableAndHashable() throws {
+        // swiftlint:disable:next non_optional_string_data_conversion
         let json = """
         {"code":"uk_UA","family":"uk","region":"UA"}
         """.data(using: .utf8)!
+        // swiftlint:disable:next identifier_name
         let l1 = try JSONDecoder().decode(Language.self, from: json)
+        // swiftlint:disable:next identifier_name
         let l2 = try JSONDecoder().decode(Language.self, from: json)
         XCTAssertEqual(l1, l2)
         XCTAssertEqual(l1.hashValue, l2.hashValue)
@@ -38,6 +41,7 @@ final class LanguageAudioTests: XCTestCase {
     }
 
     func testAudioDecoding() throws {
+        // swiftlint:disable:next non_optional_string_data_conversion
         let json = """
         {"sample_rate":22050,"quality":"high"}
         """.data(using: .utf8)!
@@ -47,8 +51,11 @@ final class LanguageAudioTests: XCTestCase {
     }
 
     func testAudioEquatableHashable() {
+        // swiftlint:disable:next identifier_name
         let a1 = Audio(sampleRate: 16000, quality: "medium")
+        // swiftlint:disable:next identifier_name
         let a2 = Audio(sampleRate: 16000, quality: "medium")
+        // swiftlint:disable:next identifier_name
         let a3 = Audio(sampleRate: 22050, quality: "high")
         XCTAssertEqual(a1, a2)
         XCTAssertNotEqual(a1, a3)

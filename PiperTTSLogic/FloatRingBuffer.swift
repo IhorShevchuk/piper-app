@@ -15,6 +15,7 @@ public struct FloatRingBuffer {
     }
 
     public var isEmpty: Bool {
+        // swiftlint:disable:next empty_count
         count == 0
     }
 
