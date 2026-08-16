@@ -2,23 +2,35 @@ import Foundation
 
 class Fastfile: LaneFile {
 
+    private func supportedLanguages() -> [String] {
+        let fm = FileManager.default
+        let metaPath = "fastlane/metadata"
+        if let items = try? fm.contentsOfDirectory(atPath: metaPath) {
+            return items.filter { name in
+                var isDir: ObjCBool = false
+                let full = (metaPath as NSString).appendingPathComponent(name)
+                return fm.fileExists(atPath: full, isDirectory: &isDir) && isDir.boolValue
+            }.sorted()
+        }
+        return ["en-US"]
+    }
+
     func captureScreenshotsLane() {
-        desc("Generate iOS screenshots using UI Tests")
+        desc("Generate iOS screenshots using UI Tests – languages from fastlane/metadata")
         captureScreenshots(
             outputDirectory: "fastlane/screenshots/ios"
         )
     }
 
     func captureMacScreenshotsLane() {
-        desc("Generate macOS screenshots for all configured languages – fastlane snapshot does not officially support macOS, so we run UITests directly")
+        desc("Generate macOS screenshots for all metadata languages")
 
-        let languages = ["en-US", "uk", "de-DE", "fr-FR", "es-ES", "ar-SA", "ur-PK", "zh-Hans", "hi", "pl", "nl-NL", "sv", "tr"]
+        let languages = supportedLanguages()
 
         sh("rm -rf ~/Library/Caches/tools.fastlane/screenshots")
         sh("rm -rf fastlane/screenshots/macos && mkdir -p fastlane/screenshots/macos")
 
         for lang in languages {
-            // Prepare fastlane cache so SnapshotHelper picks up language/locale
             sh("mkdir -p ~/Library/Caches/tools.fastlane/screenshots")
             sh("echo \"\(lang)\" > ~/Library/Caches/tools.fastlane/screenshots/language.txt")
             sh("echo \"\(lang)\" > ~/Library/Caches/tools.fastlane/screenshots/locale.txt")

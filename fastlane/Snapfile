@@ -1,11 +1,11 @@
+# A list of devices you want to take the screenshots from
 devices([
   "iPhone 17 Pro Max",
   "iPad Pro 13-inch (M5)",
 ])
 
-languages([
-  "en-US",
-])
+# Single source of truth for languages: folders under fastlane/metadata
+languages(Dir["./fastlane/metadata/*"].select { |f| File.directory?(f) }.map { |d| File.basename(d) })
 
 scheme("Screenshots")
 clear_previous_screenshots(true)

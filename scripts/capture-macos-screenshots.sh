@@ -1,12 +1,18 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Capture macOS screenshots per language
-LANGUAGES=${LANGUAGES:-"en-US uk de-DE fr-FR es-ES ar-SA ur-PK zh-Hans hi pl nl-NL sv tr"}
+# Single source of truth: fastlane/metadata directory names
+if [ -d fastlane/metadata ]; then
+  DEFAULT_LANGS=$(ls -1 fastlane/metadata | tr '\n' ' ')
+else
+  DEFAULT_LANGS="en-US"
+fi
+LANGUAGES=${LANGUAGES:-$DEFAULT_LANGS}
+
 CACHE_DIR="$HOME/Library/Caches/tools.fastlane/screenshots"
 OUTPUT_BASE="fastlane/screenshots/macos"
 
-echo "→ Languages: $LANGUAGES"
+echo "→ Languages (from fastlane/metadata): $LANGUAGES"
 rm -rf "$CACHE_DIR"
 rm -rf "$OUTPUT_BASE"
 mkdir -p "$OUTPUT_BASE"
@@ -42,5 +48,4 @@ for LANG in $LANGUAGES; do
 done
 
 echo ""
-echo "Done:"
 ls -R "$OUTPUT_BASE" || true
