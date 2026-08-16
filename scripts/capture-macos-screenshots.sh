@@ -13,11 +13,13 @@ CACHE_SCREENSHOTS="$CACHE_BASE/screenshots"
 OUTPUT_BASE="fastlane/screenshots/macos"
 
 echo "→ Languages (from fastlane/metadata): $LANGUAGES"
-echo "→ Cache base: $CACHE_BASE"
+echo "→ Cleaning test_output + screenshots"
+rm -rf fastlane/test_output
+mkdir -p fastlane/test_output
 rm -rf "$CACHE_SCREENSHOTS"
+mkdir -p "$CACHE_SCREENSHOTS"
 rm -rf "$OUTPUT_BASE"
 mkdir -p "$OUTPUT_BASE"
-mkdir -p fastlane/test_output
 mkdir -p "$CACHE_BASE"
 
 for LANG in $LANGUAGES; do
@@ -26,11 +28,10 @@ for LANG in $LANGUAGES; do
   mkdir -p "$CACHE_SCREENSHOTS"
   echo "$LANG" > "$CACHE_BASE/language.txt"
   echo "$LANG" > "$CACHE_BASE/locale.txt"
+  echo "  LANG=$LANG locale=$LANG (RTL if ar-SA / ur-PK – system mirrors SwiftUI automatically)"
   mkdir -p "$OUTPUT_BASE/$LANG"
+  rm -rf "fastlane/test_output/macos-screenshots-$LANG.xcresult" || true
   rm -f "$CACHE_SCREENSHOTS"/*.png || true
-
-  echo "  writing $CACHE_BASE/language.txt = $LANG"
-  cat "$CACHE_BASE/language.txt"
 
   xcodebuild test \
     -workspace Piper.xcworkspace \
@@ -47,11 +48,7 @@ for LANG in $LANGUAGES; do
       count=$((count+1))
     done
     echo "  → $count files → $OUTPUT_BASE/$LANG"
-    ls -1 "$OUTPUT_BASE/$LANG" 2>/dev/NULL | head
-  else
-    echo "  ✗ no $CACHE_SCREENSHOTS"
   fi
 done
 
-echo ""
 ls -R "$OUTPUT_BASE" || true

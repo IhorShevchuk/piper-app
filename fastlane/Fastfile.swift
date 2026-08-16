@@ -17,6 +17,7 @@ class Fastfile: LaneFile {
 
     func captureScreenshotsLane() {
         desc("Generate iOS screenshots using UI Tests – languages from fastlane/metadata")
+        sh("rm -rf fastlane/test_output && mkdir -p fastlane/test_output")
         captureScreenshots(
             outputDirectory: "fastlane/screenshots/ios"
         )
@@ -26,19 +27,19 @@ class Fastfile: LaneFile {
         desc("Generate macOS screenshots for all metadata languages")
 
         let languages = supportedLanguages()
-        let cacheBase = FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Library/Caches/tools.fastlane").path
 
         sh("rm -rf ~/Library/Caches/tools.fastlane/screenshots")
         sh("rm -rf fastlane/screenshots/macos && mkdir -p fastlane/screenshots/macos")
+        sh("rm -rf fastlane/test_output && mkdir -p fastlane/test_output")
 
         for lang in languages {
-            // SnapshotHelper on macOS expects language.txt at cacheBase, not screenshots subdir
-            sh("mkdir -p \(cacheBase)")
-            sh("mkdir -p \(cacheBase)/screenshots")
-            sh("echo \"\(lang)\" > \(cacheBase)/language.txt")
-            sh("echo \"\(lang)\" > \(cacheBase)/locale.txt")
+            sh("mkdir -p ~/Library/Caches/tools.fastlane")
+            sh("mkdir -p ~/Library/Caches/tools.fastlane/screenshots")
+            sh("echo \"\(lang)\" > ~/Library/Caches/tools.fastlane/language.txt")
+            sh("echo \"\(lang)\" > ~/Library/Caches/tools.fastlane/locale.txt")
             sh("mkdir -p fastlane/screenshots/macos/\(lang)")
-            sh("rm -f \(cacheBase)/screenshots/*.png || true")
+            sh("rm -f ~/Library/Caches/tools.fastlane/screenshots/*.png || true")
+            sh("rm -rf fastlane/test_output/macos-screenshots-\(lang).xcresult || true")
 
             otherAction.runTests(
                 workspace: "Piper.xcworkspace",
@@ -50,14 +51,15 @@ class Fastfile: LaneFile {
             )
 
             sh("""
-                if [ -d \(cacheBase)/screenshots ]; then
-                  find \(cacheBase)/screenshots -maxdepth 1 -type f -name "*.png" -exec cp {} fastlane/screenshots/macos/\(lang)/ \\; || true
+                if [ -d ~/Library/Caches/tools.fastlane/screenshots ]; then
+                  find ~/Library/Caches/tools.fastlane/screenshots -maxdepth 1 -type f -name "*.png" -exec cp {} fastlane/screenshots/macos/\(lang)/ \\; || true
                   echo "Lang \(lang): $(ls -1 fastlane/screenshots/macos/\(lang) 2>/dev/NULL | wc -l) files"
                 fi
                 """)
         }
 
         sh("ls -R fastlane/screenshots/macos || true")
+        sh("ls -R fastlane/test_output || true")
     }
 
     func captureAllScreenshotsLane() {

@@ -117,6 +117,7 @@ bundle install
 
 
 [tasks.screenshots-macos]
+# cleans fastlane/test_output
 description = "Capture macOS screenshots via UITests (My Mac)"
 run = "bash scripts/capture-macos-screenshots.sh"
 
