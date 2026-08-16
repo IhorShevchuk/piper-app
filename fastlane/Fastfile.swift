@@ -31,7 +31,7 @@ class Fastfile: LaneFile {
             clearPreviousScreenshots: true,
             headless: true,
             overrideStatusBar: true,
-            numberOfRetries: 0,
+            numberOfRetries: 3,
             concurrentSimulators: true,
             xcodebuildFormatter: "xcpretty"
         )

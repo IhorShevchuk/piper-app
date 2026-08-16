@@ -24,7 +24,7 @@ override_status_bar(true)
 # Fastlane 2.237+ defaults to xcbeautify which causes Exit 127 sh: xcbeautify: not found
 xcodebuild_formatter("xcpretty")
 # Be less aggressive – default 1 retry already doubles time, keep 0 for speed
-number_of_retries(0)
+number_of_retries(3)
 # Speed: don't let SwiftLint run inside snapshot builds (handled by Project.swift guard)
 # Simulator stability: wait longer for AX to load, avoids Exit 65 TIMED OUT waiting for AX loaded notification
 ENV['SNAPSHOT_SIMULATOR_WAIT_FOR_BOOT_TIMEOUT'] = '30'
