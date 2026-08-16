@@ -30,9 +30,9 @@ echo "→ Building Screenshots scheme once for macOS (no code signing)"
 xcodebuild build-for-testing \
   -workspace Piper.xcworkspace \
   -scheme Screenshots \
-  -destination "platform=macOS" \
+  -destination "platform=macOS,arch=arm64" \
   -derivedDataPath "$DERIVED_DATA" \
-  CODE_SIGNING_ALLOWED=NO | xcpretty
+  CODE_SIGNING_ALLOWED=NO
 
 for LANG in $LANGUAGES; do
   echo ""
@@ -48,10 +48,10 @@ for LANG in $LANGUAGES; do
   xcodebuild test-without-building \
     -workspace Piper.xcworkspace \
     -scheme Screenshots \
-    -destination "platform=macOS" \
+    -destination "platform=macOS,arch=arm64" \
     -derivedDataPath "$DERIVED_DATA" \
     -resultBundlePath "fastlane/test_output/macos-screenshots-$LANG.xcresult" \
-    CODE_SIGNING_ALLOWED=NO | xcpretty
+    CODE_SIGNING_ALLOWED=NO
 
   if [ -d "$CACHE_SCREENSHOTS" ]; then
     count=0
