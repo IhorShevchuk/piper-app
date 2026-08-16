@@ -114,3 +114,28 @@ run = """
 bundle config set path vendor/bundle
 bundle install
 """
+
+[tasks.screenshots-ios]
+description = "Capture iOS screenshots"
+run = "bundle exec fastlane captureScreenshots"
+
+[tasks.screenshots-macos]
+description = "Capture macOS screenshots"
+run = "bash PiperApp/BuildScripts/Scripts/CaptureMacosScreenshots.sh"
+
+[tasks.screenshots]
+description = "Capture iOS + macOS screenshots"
+run = "mise run screenshots-ios && mise run screenshots-macos"
+
+[tasks.screenshots-upload]
+description = "Upload screenshots to App Store Connect"
+usage = '''
+flag "--api-key-path <path>" help="Path to the App Store Connect API Key JSON file" default="fastlane/apikey.json"
+flag "--platform <platform>" help="Platform to upload: ios, osx, or all" default="all" { choices "ios" "osx" "all" }
+'''
+run = '''
+set -e
+source PiperApp/BuildScripts/Configs/version.xcconfig
+source PiperApp/BuildScripts/Configs/app_bundle_id.xcconfig
+bundle exec fastlane updateReleaseNotes appVersion:"$MARKETING_VERSION" appIdentifier:"$APP_BUNDLE_IDENTIFIER" apiKeyPath:"${usage_api_key_path}" platform:${usage_platform} uploadScreenshots:true skipPreview:true
+'''
