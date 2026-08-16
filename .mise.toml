@@ -135,7 +135,3 @@ source PiperApp/BuildScripts/Configs/version.xcconfig
 source PiperApp/BuildScripts/Configs/app_bundle_id.xcconfig
 bundle exec fastlane updateReleaseNotes appVersion:"$MARKETING_VERSION" appIdentifier:"$APP_BUNDLE_IDENTIFIER" apiKeyPath:"fastlane/apikey.json" uploadScreenshots:true skipPreview:true
 '''
-
-[tasks.upload-screenshots]
-description = "Upload screenshots to App Store Connect"
-run = "mise run screenshots-upload"
