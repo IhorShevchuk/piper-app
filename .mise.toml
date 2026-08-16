@@ -127,10 +127,6 @@ run = "bash scripts/capture-macos-screenshots.sh"
 description = "Capture iOS + macOS screenshots"
 run = "mise run screenshots-ios && mise run screenshots-macos"
 
-[tasks.screenshots-all]
-description = "Alias for screenshots (iOS + macOS)"
-run = "mise run screenshots"
-
 [tasks.screenshots-upload]
 description = "Upload screenshots to App Store Connect"
 run = '''
