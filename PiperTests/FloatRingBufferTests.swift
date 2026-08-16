@@ -5,66 +5,88 @@ import XCTest
 @testable import PiperTTSLogic
 
 final class FloatRingBufferTests: XCTestCase {
+
     func testAppendAndCount() {
-        var ringBuffer = FloatRingBuffer()
-        XCTAssertTrue(ringBuffer.isEmpty)
-        ringBuffer.append(contentsOf: [1, 2, 3])
-        XCTAssertEqual(ringBuffer.count, 3)
-        XCTAssertFalse(ringBuffer.isEmpty)
+        var ring = FloatRingBuffer()
+        XCTAssertTrue(ring.isEmpty)
+        ring.append(contentsOf: [1, 2, 3])
+        XCTAssertEqual(ring.count, 3)
+        XCTAssertEqual(ring.snapshot, [1, 2, 3])
     }
 
-    func testRemoveFirstAdvancesHead() {
-        var ringBuffer = FloatRingBuffer()
-        ringBuffer.append(contentsOf: [1, 2, 3, 4, 5])
-        ringBuffer.removeFirst(2)
-        XCTAssertEqual(ringBuffer.count, 3)
-        XCTAssertEqual(ringBuffer.snapshot, [3, 4, 5])
+    func testRemoveFirst() {
+        var ring = FloatRingBuffer()
+        ring.append(contentsOf: [1, 2, 3, 4, 5])
+        ring.removeFirst(2)
+        XCTAssertEqual(ring.count, 3)
+        XCTAssertEqual(ring.snapshot, [3, 4, 5])
     }
 
-    func testWithUnsafePointer() {
-        var ringBuffer = FloatRingBuffer()
-        ringBuffer.append(contentsOf: [10, 20, 30])
-        let sum = ringBuffer.withUnsafeBufferPointer { pointer in
-            pointer.reduce(Float(0), +)
+    func testClear() {
+        var ring = FloatRingBuffer()
+        ring.append(contentsOf: [1, 2, 3])
+        ring.clear()
+        XCTAssertTrue(ring.isEmpty)
+        XCTAssertEqual(ring.count, 0)
+    }
+
+    func testWithUnsafeBufferPointer() {
+        var ring = FloatRingBuffer()
+        ring.append(contentsOf: [10, 20, 30])
+        let sum = ring.withUnsafeBufferPointer { buf in
+            buf.reduce(0, +)
         }
         XCTAssertEqual(sum, 60)
     }
 
-    func testClear() {
-        var ringBuffer = FloatRingBuffer()
-        ringBuffer.append(contentsOf: [1, 2, 3])
-        ringBuffer.clear()
-        XCTAssertTrue(ringBuffer.isEmpty)
-        XCTAssertEqual(ringBuffer.count, 0)
-        XCTAssertEqual(ringBuffer.snapshot, [])
+    func testAppendAndEnforceMaxArray() {
+        var ring = FloatRingBuffer()
+        ring.appendAndEnforceMax(contentsOf: [1, 2, 3, 4, 5], maxCount: 3)
+        XCTAssertEqual(ring.count, 3)
+        XCTAssertEqual(ring.snapshot, [3, 4, 5])
+        ring.appendAndEnforceMax(contentsOf: [6, 7], maxCount: 3)
+        XCTAssertEqual(ring.snapshot, [5, 6, 7])
     }
 
-    func testMaxEnforceKeepsNewest() {
-        var ringBuffer = FloatRingBuffer()
-        ringBuffer.append(contentsOf: [1, 2, 3, 4, 5])
-        ringBuffer.appendAndEnforceMax(contentsOf: [6, 7, 8], maxCount: 5)
-        XCTAssertEqual(ringBuffer.count, 5)
-        XCTAssertEqual(ringBuffer.snapshot, [4, 5, 6, 7, 8])
-    }
-
-    func testLargeAppendRemoveEfficiency() {
-        var ringBuffer = FloatRingBuffer()
-        let large = Array(repeating: Float(0.5), count: 10000)
-        ringBuffer.append(contentsOf: large)
-        XCTAssertEqual(ringBuffer.count, 10000)
-        ringBuffer.removeFirst(9990)
-        XCTAssertEqual(ringBuffer.count, 10)
-        ringBuffer.append(contentsOf: [1, 2, 3])
-        XCTAssertEqual(ringBuffer.count, 13)
-        XCTAssertEqual(ringBuffer.snapshot.prefix(10).allSatisfy { $0 == 0.5 }, true)
-    }
-
-    func testAppendUnsafeBuffer() {
-        var ringBuffer = FloatRingBuffer()
-        let array: [Float] = [9, 8, 7]
-        array.withUnsafeBufferPointer { pointer in
-            ringBuffer.append(contentsOf: pointer)
+    func testAppendAndEnforceMaxBufferPointer() {
+        var ring = FloatRingBuffer()
+        let src: [Float] = [10, 20, 30, 40]
+        src.withUnsafeBufferPointer { buf in
+            ring.appendAndEnforceMax(contentsOf: buf, maxCount: 2)
         }
-        XCTAssertEqual(ringBuffer.snapshot, [9, 8, 7])
+        XCTAssertEqual(ring.count, 2)
+        XCTAssertEqual(ring.snapshot, [30, 40])
+    }
+
+    func testCopyFirstIntoDestination() {
+        var ring = FloatRingBuffer()
+        ring.append(contentsOf: [1, 2, 3, 4])
+        var dest = [Float](repeating: 0, count: 2)
+        dest.withUnsafeMutableBufferPointer { destBuf in
+            ring.copyFirst(into: destBuf.baseAddress!, count: 2)
+        }
+        XCTAssertEqual(dest, [1, 2])
+        XCTAssertEqual(ring.count, 4)
+    }
+
+    func testCompactDoesNotLoseData() {
+        var ring = FloatRingBuffer()
+        // Fill and drain to force head > 1024 threshold
+        for _ in 0..<5 {
+            ring.append(contentsOf: [Float](repeating: 1, count: 500))
+            ring.removeFirst(400)
+        }
+        XCTAssertTrue(ring.count > 0)
+        // snapshot should match withUnsafeBufferPointer
+        let snap = ring.snapshot
+        let bufSum = ring.withUnsafeBufferPointer { $0.reduce(0, +) }
+        XCTAssertEqual(Float(snap.count), bufSum)
+    }
+
+    func testAppendSlice() {
+        var ring = FloatRingBuffer()
+        let full = [1, 2, 3, 4, 5] as [Float]
+        ring.append(contentsOf: full[1...3])
+        XCTAssertEqual(ring.snapshot, [2, 3, 4])
     }
 }
