@@ -25,13 +25,14 @@ let project = Project(
     name: projectName,
     organizationName: "Ihor Shevchuk",
     targets: [
-        .target(name: projectName, destinations: destinations, product: .app, bundleId: "$(APP_BUNDLE_IDENTIFIER)", infoPlist: "\(appName)/Resources/Info.plist", sources: ["\(appName)/Sources/**"], resources: ["\(appName)/Resources/Localization/*","\(appName)/Resources/Assets.xcassets"], entitlements: .dictionary(appEntitlements), scripts: [.pre(script: """
+        .target(name: projectName, destinations: destinations, product: .app, bundleId: "$(APP_BUNDLE_IDENTIFIER)", infoPlist: "\(appName)/Resources/Info.plist", sources: ["\(appName)/Sources/**"], resources: ["\(appName)/Resources/Localization/*","\(appName)/Resources/Assets.xcassets"], entitlements: .dictionary(appEntitlements), scripts: [
+                .pre(script: """
                              mise run lint --fix
-                             """ ,
+                             """,
                      name: "Run SwiftLint Autocorrector"),
                 .post(script: """
                               mise run lint
-                              """ ,
+                              """,
                       name: "Run SwiftLint Analyzer")
             ], dependencies: [.target(name: sharedUtilsName, status: .required), .target(name: ttsExtensionName, status: .required)], settings: .settings(configurations: [.debug(name: "Debug", xcconfig: "\(configsPath)/app_debug.xcconfig"), .release(name: "Release", xcconfig: "\(configsPath)/app_release.xcconfig")], defaultSettings: defaultSettings), additionalFiles: ["\(buildScriptPath)/Linting/**"]),
         .target(name: ttsLogicName, destinations: destinations, product: .staticFramework, bundleId: "$(PRODUCT_BUNDLE_IDENTIFIER).logic", sources: ["PiperTTSLogic/**"], dependencies: [.sdk(name: "Accelerate", type: .framework, status: .required)], settings: .settings(configurations: [.debug(name: "Debug", xcconfig: "\(configsPath)/utils_debug.xcconfig"), .release(name: "Release", xcconfig: "\(configsPath)/utils_release.xcconfig")], defaultSettings: .recommended())),

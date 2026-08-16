@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2026 Ihor Shevchuk
+// swiftlint:disable identifier_name non_optional_string_data_conversion
 
 import XCTest
 @testable import PiperAppUtils
@@ -78,4 +79,3 @@ extension Audio {
         self = decoded
     }
 }
-
