@@ -115,17 +115,6 @@ bundle config set path vendor/bundle
 bundle install
 """
 
-
-
-
-
-
-
-[tasks.upload-screenshots]
-description = "Upload screenshots to App Store Connect"
-run = "mise run screenshots-upload"
-
-
 [tasks.screenshots-ios]
 description = "Capture iOS screenshots"
 run = "bundle exec fastlane captureScreenshots"
@@ -154,4 +143,3 @@ bundle exec fastlane updateReleaseNotes appVersion:"$MARKETING_VERSION" appIdent
 [tasks.upload-screenshots]
 description = "Upload screenshots to App Store Connect"
 run = "mise run screenshots-upload"
-
