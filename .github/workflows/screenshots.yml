@@ -64,6 +64,13 @@ jobs:
           # Ensure Simulator runtimes are available
           xcrun simctl list devices | head -n 30 || true
 
+      - name: Set Build Number
+        run: |
+          echo "BUILD_NUMBER=$GITHUB_RUN_NUMBER" >> $GITHUB_ENV
+          source PiperApp/BuildScripts/Configs/version.xcconfig
+          echo "Full Version: $MARKETING_VERSION($GITHUB_RUN_NUMBER)"
+        shell: bash
+
       - name: Prepare Project
         run: |
           rm -fr *.xcodeproj || true
