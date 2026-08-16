@@ -32,9 +32,9 @@ class Fastfile: LaneFile {
         scan(
             workspace: "./Piper.xcworkspace",
             scheme: "Screenshots",
-            devices: ["iPhone 17 Pro Max", "iPad Pro 13-inch (M5)"],
-            derivedDataPath: derivedDataPath,
-            buildForTesting: true
+            devices: .userDefined(["iPhone 17 Pro Max", "iPad Pro 13-inch (M5)"]),
+            derivedDataPath: .userDefined(derivedDataPath),
+            buildForTesting: .userDefined(true)
         )
         // 2) Run snapshot with testWithoutBuilding – avoids 13 rebuilds (was rebuilding each lang)
         // Order must match Snapshot::Options.available_options order:
@@ -45,9 +45,9 @@ class Fastfile: LaneFile {
             clearPreviousScreenshots: true,
             headless: true,
             overrideStatusBar: true,
-            testWithoutBuilding: true,
+            testWithoutBuilding: .userDefined(true),
             numberOfRetries: 3,
-            derivedDataPath: derivedDataPath,
+            derivedDataPath: .userDefined(derivedDataPath),
             concurrentSimulators: true,
             xcodebuildFormatter: "xcpretty"
         )
