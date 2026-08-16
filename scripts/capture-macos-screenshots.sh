@@ -1,49 +1,46 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Capture macOS screenshots for App Store Connect
-# Works around fastlane snapshot not officially supporting macOS:
-# - Runs the Screenshots UI test bundle for platform=macOS
-# - SnapshotHelper (macOS path) writes PNGs via NSBitmapImageRep into
-#   ~/Library/Caches/tools.fastlane/screenshots
-# - This script collects them into fastlane/screenshots/macos/en-US
-
-OUTPUT_DIR="fastlane/screenshots/macos/en-US"
+# Capture macOS screenshots per language
+LANGUAGES=${LANGUAGES:-"en-US uk de-DE fr-FR es-ES ar-SA ur-PK zh-Hans hi pl nl-NL sv tr"}
 CACHE_DIR="$HOME/Library/Caches/tools.fastlane/screenshots"
+OUTPUT_BASE="fastlane/screenshots/macos"
 
-echo "→ Cleaning previous macOS screenshots"
+echo "→ Languages: $LANGUAGES"
 rm -rf "$CACHE_DIR"
-rm -rf fastlane/screenshots/macos
-mkdir -p "$OUTPUT_DIR"
+rm -rf "$OUTPUT_BASE"
+mkdir -p "$OUTPUT_BASE"
 mkdir -p fastlane/test_output
 
-echo "→ Running Screenshots scheme for macOS"
-# Using xcodebuild directly so we don't depend on fastlane snapshot action
-xcodebuild test \
-  -workspace Piper.xcworkspace \
-  -scheme Screenshots \
-  -destination "platform=macOS" \
-  -resultBundlePath "fastlane/test_output/macos-screenshots.xcresult" \
-  CODE_SIGNING_ALLOWED=NO
+for LANG in $LANGUAGES; do
+  echo ""
+  echo "=== $LANG ==="
+  mkdir -p "$CACHE_DIR"
+  echo "$LANG" > "$CACHE_DIR/language.txt"
+  echo "$LANG" > "$CACHE_DIR/locale.txt"
+  mkdir -p "$OUTPUT_BASE/$LANG"
+  rm -f "$CACHE_DIR"/*.png || true
 
-echo "→ Collecting screenshots from $CACHE_DIR"
-if [ -d "$CACHE_DIR" ]; then
-  find "$CACHE_DIR" -type f -name "*.png" | while read -r f; do
-    echo "  copying $(basename "$f")"
-    cp "$f" "$OUTPUT_DIR"/
-  done
-  echo "→ Done: $(ls -1 "$OUTPUT_DIR" | wc -l) files in $OUTPUT_DIR"
-  ls -lh "$OUTPUT_DIR"
-else
-  echo "✗ No cache dir $CACHE_DIR found"
-  echo "  Check Xcode test log – Snapshot logs to NSLog"
-  exit 1
-fi
+  xcodebuild test \
+    -workspace Piper.xcworkspace \
+    -scheme Screenshots \
+    -destination "platform=macOS" \
+    -resultBundlePath "fastlane/test_output/macos-screenshots-$LANG.xcresult" \
+    CODE_SIGNING_ALLOWED=NO
 
-# App Store Connect expects 1280x800 minimum for Mac; we don't resize here but warn
-for img in "$OUTPUT_DIR"/*.png; do
-  dims=$(sips -g pxWidth -g pxHeight "$img" 2>/dev/NULL | awk '/px/ {printf "%sx%s ", $2, $1}'; echo)
-  echo "  $img $dims"
+  if [ -d "$CACHE_DIR" ]; then
+    count=0
+    for f in "$CACHE_DIR"/*.png; do
+      [ -e "$f" ] || continue
+      cp "$f" "$OUTPUT_BASE/$LANG"/
+      count=$((count+1))
+    done
+    echo "  → $count files → $OUTPUT_BASE/$LANG"
+  else
+    echo "  ✗ no $CACHE_DIR"
+  fi
 done
 
-echo "Ready for: fastlane mac appstore_upload or deliver --screenshots_path fastlane/screenshots/macos"
+echo ""
+echo "Done:"
+ls -R "$OUTPUT_BASE" || true
