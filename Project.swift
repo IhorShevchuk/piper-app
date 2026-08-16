@@ -10,6 +10,7 @@ let appName = "\(projectName)App"
 let sharedUtilsName = "\(projectName)AppUtils"
 let screenshotTargetName = "Screenshots"
 let ttsExtensionName = "\(projectName)TTS"
+let testsTargetName = "\(projectName)Tests"
 let buildScriptPath = "\(appName)/BuildScripts"
 let configsPath = "\(buildScriptPath)/Configs"
 
@@ -123,6 +124,26 @@ let project = Project(
                                     defaultSettings: .recommended(excluding: [
                                         "DEFINES_MODULE"
                                     ]))
+               ),
+        .target(name: testsTargetName,
+                destinations: destinations,
+                product: .unitTests,
+                bundleId: "dev.ihor-shevchuk.piper.tests",
+                sources: ["PiperTests/**"],
+                dependencies: [
+                    .target(name: sharedUtilsName)
+                ],
+                settings: .settings(base: [
+                    "PRODUCT_BUNDLE_IDENTIFIER": "dev.ihor-shevchuk.piper.tests",
+                    "CODE_SIGNING_ALLOWED": "NO",
+                    "CODE_SIGN_IDENTITY": "",
+                    "CODE_SIGNING_REQUIRED": "NO"
+                ], configurations: [
+                    .debug(name: "Debug",
+                           xcconfig: "\(configsPath)/utils_debug.xcconfig"),
+                    .release(name: "Release",
+                             xcconfig: "\(configsPath)/utils_release.xcconfig")
+                ], defaultSettings: .recommended())
                ),
         .target(name: "\(screenshotTargetName)",
                 destinations: destinations,
