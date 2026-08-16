@@ -121,7 +121,7 @@ run = "bundle exec fastlane captureScreenshots"
 
 [tasks.screenshots-macos]
 description = "Capture macOS screenshots"
-run = "bash scripts/capture-macos-screenshots.sh"
+run = "bash PiperApp/BuildScripts/capture-macos-screenshots.sh"
 
 [tasks.screenshots]
 description = "Capture iOS + macOS screenshots"
