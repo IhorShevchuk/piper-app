@@ -4,12 +4,13 @@ name: Build
 on:
   push:
     branches: ['main']
-    # Only run when app source, xcconfig, scripts, Tuist project, or .mise.toml change (ignores docs, licenses, etc.)
     paths:
       - 'PiperApp/**'
       - 'PiperAppUtils/**'
       - 'PiperappUtils/**'
       - 'PiperTTS/**'
+      - 'PiperTTSLogic/**'
+      - 'PiperTests/**'
       - 'Project.swift'
       - 'Package.swift'
       - 'Package.resolved'
@@ -23,6 +24,8 @@ on:
       - 'PiperAppUtils/**'
       - 'PiperappUtils/**'
       - 'PiperTTS/**'
+      - 'PiperTTSLogic/**'
+      - 'PiperTests/**'
       - 'Project.swift'
       - 'Package.swift'
       - 'Package.resolved'

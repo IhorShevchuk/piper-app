@@ -104,6 +104,11 @@ jobs:
           mise run install
           mise run generate
 
+      - name: Test
+        if: env.BUILD_TARGET != 'ios-device'
+        run: |
+          mise run test $BUILD_TARGET
+
       - name: Build
         run: |
           mise run build $BUILD_NUMBER $BUILD_TARGET

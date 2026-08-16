@@ -2,9 +2,9 @@
 // Copyright (c) 2026 Ihor Shevchuk
 
 import AVFoundation
-
 import piper_objc
 import PiperAppUtils
+import PiperTTSLogic
 import Accelerate
 
 public class PiperTTSAudioUnit: AVSpeechSynthesisProviderAudioUnit {
@@ -19,16 +19,15 @@ public class PiperTTSAudioUnit: AVSpeechSynthesisProviderAudioUnit {
     var model: ModelInfo?
 
     private var outputDataLock = os_unfair_lock_s()
-    private var outputData: ContiguousArray<Float> = []
+    internal var outputData = FloatRingBuffer()
     private var outputRecurseCallNumber = 0
 
     private let outputRecurseCallNumberMax: UInt32 = 200
     private let baseDelayMicroseconds: UInt32 = 500
-    private let maxBufferDurationSeconds: Double = 5.0
-    private let maxSamplesCount: Int
+    internal let maxBufferDurationSeconds: Double = 5.0
+    internal let maxSamplesCount: Int
 
     @objc override init(componentDescription: AudioComponentDescription, options: AudioComponentInstantiationOptions) throws {
-
         self.format = AVAudioFormat(commonFormat: .pcmFormatFloat32, sampleRate: 22050.0, channels: 1, interleaved: true)!
         self.maxSamplesCount = Int(self.format.sampleRate * maxBufferDurationSeconds)
 
@@ -52,11 +51,11 @@ public class PiperTTSAudioUnit: AVSpeechSynthesisProviderAudioUnit {
         model = nil
     }
 
-	// MARK: - Rendering
-	/*
-	 NOTE:- It is only safe to use Swift for audio rendering in this case, as Audio Unit Speech Extensions process offline.
-	 (Swift is not usually recommended for processing on the realtime audio thread)
-	 */
+    // MARK: - Rendering
+    /*
+     NOTE:- It is only safe to use Swift for audio rendering in this case, as Audio Unit Speech Extensions process offline.
+     (Swift is not usually recommended for processing on the realtime audio thread)
+     */
     public override var internalRenderBlock: AUInternalRenderBlock { self.performRender }
 
     // swiftlint:disable:next function_parameter_count
@@ -72,8 +71,9 @@ public class PiperTTSAudioUnit: AVSpeechSynthesisProviderAudioUnit {
         return doPerformRender(actionFlags: actionFlags, timestamp: timestamp, frameCount: frameCount, outputBusNumber: outputBusNumber, outputAudioBufferList: outputAudioBufferList, renderEvents: renderEvents, renderPull: renderPull)
     }
 
+    // Made internal for unit testing – previously private
     // swiftlint:disable:next function_parameter_count function_body_length
-    private func doPerformRender(
+    internal func doPerformRender(
       actionFlags: UnsafeMutablePointer<AudioUnitRenderActionFlags>,
       timestamp: UnsafePointer<AudioTimeStamp>,
       frameCount: AUAudioFrameCount,
@@ -134,14 +134,19 @@ public class PiperTTSAudioUnit: AVSpeechSynthesisProviderAudioUnit {
         outputAudioBufferList.pointee.mNumberBuffers = 1
         var unsafeBuffer = UnsafeMutableAudioBufferListPointer(outputAudioBufferList)[0]
         let frames = unsafeBuffer.mData!.assumingMemoryBound(to: Float32.self)
-        frames.update(repeating: 0, count: intFrameCount)
+        // Zero-fill only when we have less data than requested – otherwise we will overwrite entire buffer
+        if actualCopied < intFrameCount {
+            frames.update(repeating: 0, count: intFrameCount)
+        }
         unsafeBuffer.mNumberChannels = 1
         unsafeBuffer.mDataByteSize = UInt32(actualCopied * MemoryLayout<Float32>.size)
 
         os_unfair_lock_lock(&outputDataLock)
-        if actualCopied > 0 && outputData.count >= actualCopied {
-            outputData.withUnsafeBufferPointer { buf in
-                frames.update(from: buf.baseAddress!, count: actualCopied)
+        if actualCopied > 0 {
+            outputData.withUnsafeBufferPointer { src in
+                if let base = src.baseAddress {
+                    frames.update(from: base, count: actualCopied)
+                }
             }
             outputData.removeFirst(actualCopied)
         }
@@ -178,12 +183,12 @@ public class PiperTTSAudioUnit: AVSpeechSynthesisProviderAudioUnit {
     private func removeRequestAndCleanOutputData() {
         os_unfair_lock_lock(&outputDataLock)
         request = nil
-        outputData = []
+        outputData.clear()
         os_unfair_lock_unlock(&outputDataLock)
         piper?.cancel()
     }
 
-    private func pauseUntil(maxDelayFactor: UInt32, or condition: @escaping () -> Bool) {
+    internal func pauseUntil(maxDelayFactor: UInt32, or condition: @escaping () -> Bool) {
         let maxDelaySeconds = Double(baseDelayMicroseconds * maxDelayFactor) / 1_000_000
         let checkIntervalSeconds = maxDelaySeconds / 5.0
 
@@ -238,53 +243,34 @@ extension PiperTTSAudioUnit: PiperDelegate {
 
         if let modelFormat = model?.audioFormat,
            modelFormat.sampleRate != format.sampleRate {
-            let inputCount = size
-            let inputSampleRate = modelFormat.sampleRate
-            let outputSampleRate = format.sampleRate
-            let upsampleRatio = outputSampleRate / inputSampleRate
-            let outputCount = Int(round(Double(inputCount) * upsampleRatio))
-
-            var output = [Float](repeating: 0, count: outputCount)
-
-            var rampStart: Float = 0
-            var positions = [Float](repeating: 0, count: outputCount)
-            var rampStep: Float = (inputCount > 1 && outputCount > 1) ? Float(inputCount - 1) / Float(outputCount - 1) : 0
-            vDSP_vramp(&rampStart, &rampStep, &positions, 1, vDSP_Length(outputCount))
-
-            output.withUnsafeMutableBufferPointer { outPtr in
-                positions.withUnsafeBufferPointer { posPtr in
-                    buf.baseAddress!.withMemoryRebound(to: Float.self, capacity: inputCount) { inPtr in
-                        vDSP_vlint(
-                            inPtr,                     // input samples
-                            posPtr.baseAddress!,       // positions
-                            1,                         // stride of positions
-                            outPtr.baseAddress!,       // output buffer
-                            1,                         // stride of output
-                            vDSP_Length(outputCount),  // number of output samples
-                            vDSP_Length(inputCount)    // number of input samples
-                        )
-                    }
-                }
-            }
-
+            // Resample using testable helper
+            let resampled = AudioResampler.resampleBuffer(buf, inputRate: modelFormat.sampleRate, outputRate: format.sampleRate)
             os_unfair_lock_lock(&outputDataLock)
-            outputData.append(contentsOf: output)
+            outputData.append(contentsOf: resampled)
+            if outputData.count > maxSamplesCount {
+                outputData.removeFirst(outputData.count - maxSamplesCount)
+            }
             os_unfair_lock_unlock(&outputDataLock)
-
         } else {
             // No resampling needed
             os_unfair_lock_lock(&outputDataLock)
             outputData.append(contentsOf: buf)
+            if outputData.count > maxSamplesCount {
+                outputData.removeFirst(outputData.count - maxSamplesCount)
+            }
             os_unfair_lock_unlock(&outputDataLock)
         }
     }
 
     public func piperDidGenerateMarkers(_ markers: [PiperSpeechMarker]) {
+        // Copy metadata block and request out of lock to avoid holding lock during callback
         os_unfair_lock_lock(&outputDataLock)
-        defer { os_unfair_lock_unlock(&outputDataLock) }
+        let metadataBlock = self.speechSynthesisOutputMetadataBlock
+        let request = self.request
+        os_unfair_lock_unlock(&outputDataLock)
 
-        guard let metadataBlock = self.speechSynthesisOutputMetadataBlock,
-        let request = self.request else {
+        guard let metadataBlock = metadataBlock,
+              let request = request else {
             return
         }
 

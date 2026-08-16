@@ -75,7 +75,7 @@ mise run generate
 Open the generated `Piper.xcworkspace` in Xcode.
 
 ```bash
-open Piper.xcworkspace 
+open Piper.xcworkspace
 ```
 
 > **Note:** Run `mise run install` whenever `Package.swift` or dependencies change. Otherwise `mise run generate` alone is sufficient.
@@ -108,3 +108,17 @@ open Piper.xcworkspace
 3. Configure code signing for:
    * `Piper`
    * `PiperTTS`
+
+---
+
+# Project Structure
+
+* `PiperApp` – Main iOS/macOS app
+* `PiperTTS` – Audio Unit extension
+* `PiperAppUtils` – Shared utilities, model management, constants
+* `PiperTests` – Unit tests for `PiperAppUtils`
+* `Screenshots` – UI tests for App Store screenshots
+
+# License
+
+MIT – see `LICENSE-MIT`, GPL-3.0 for bundled resources

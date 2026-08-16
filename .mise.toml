@@ -61,6 +61,29 @@ case "$usage_target" in
 esac
 '''
 
+[tasks.test]
+description = "Run PiperTests on a specified platform"
+usage = '''
+arg "[target]" help="Test target" default="macos" { choices "ios-simulator" "macos" }
+'''
+run = '''
+DESTINATION=""
+case "$usage_target" in
+  "ios-simulator")
+    DESTINATION="platform=iOS Simulator,name=iPhone 17"
+    ;;
+  *) # macos
+    DESTINATION="platform=macOS"
+    ;;
+esac
+
+xcodebuild test -workspace Piper.xcworkspace \
+                -scheme Piper \
+                -destination "$DESTINATION" \
+                -only-testing:PiperTests \
+                CODE_SIGN_ALLOWED=NO
+'''
+
 [tasks.update-release-notes]
 description = "Updates 'What's New' in App Store Connect using the version from version.xcconfig"
 usage = '''
