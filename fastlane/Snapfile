@@ -20,3 +20,8 @@ end
 scheme("Screenshots")
 clear_previous_screenshots(true)
 override_status_bar(true)
+# Use xcpretty – xcbeautify not present on vanilla macOS GitHub runners / many Macs
+# Fastlane 2.237+ defaults to xcbeautify which causes Exit 127 sh: xcbeautify: not found
+xcodebuild_formatter("xcpretty")
+# Be less aggressive – default 1 retry already doubles time, keep 0 for speed
+number_of_retries(0)
