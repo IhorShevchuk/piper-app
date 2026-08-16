@@ -1,4 +1,3 @@
-// swiftlint:disable all
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2026 Ihor Shevchuk
 
@@ -60,17 +59,23 @@ final class LanguageAudioTests: XCTestCase {
 
 extension Language {
     init(code: String, family: String, region: String) {
-        // Construct via decoding trick to avoid needing public init
-        let dict: [String:String] = ["code":code,"family":family,"region":region]
-        let data = try! JSONSerialization.data(withJSONObject: dict)
-        self = try! JSONDecoder().decode(Language.self, from: data)
+        let dict: [String: String] = ["code": code, "family": family, "region": region]
+        guard let data = try? JSONSerialization.data(withJSONObject: dict),
+              let decoded = try? JSONDecoder().decode(Language.self, from: data) else {
+            fatalError("Failed to decode Language from \(dict)")
+        }
+        self = decoded
     }
 }
 
 extension Audio {
     init(sampleRate: Double, quality: String) {
-        let dict: [String:Any] = ["sample_rate":sampleRate,"quality":quality]
-        let data = try! JSONSerialization.data(withJSONObject: dict)
-        self = try! JSONDecoder().decode(Audio.self, from: data)
+        let dict: [String: Any] = ["sample_rate": sampleRate, "quality": quality]
+        guard let data = try? JSONSerialization.data(withJSONObject: dict),
+              let decoded = try? JSONDecoder().decode(Audio.self, from: data) else {
+            fatalError("Failed to decode Audio from \(dict)")
+        }
+        self = decoded
     }
 }
+

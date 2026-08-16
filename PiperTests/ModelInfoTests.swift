@@ -1,4 +1,3 @@
-// swiftlint:disable all
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2026 Ihor Shevchuk
 
