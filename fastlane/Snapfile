@@ -23,7 +23,7 @@ override_status_bar(true)
 # Use xcpretty – xcbeautify not present on vanilla macOS GitHub runners / many Macs
 # Fastlane 2.237+ defaults to xcbeautify which causes Exit 127 sh: xcbeautify: not found
 xcodebuild_formatter("xcpretty")
-# Be less aggressive – default 1 retry already doubles time, keep 0 for speed
+# Retry 3 times on Exit 65 AX timeout – more resilient after fixing wait_for_boot
 number_of_retries(3)
 # Speed: don't let SwiftLint run inside snapshot builds (handled by Project.swift guard)
 # Simulator stability: wait longer for AX to load, avoids Exit 65 TIMED OUT waiting for AX loaded notification
