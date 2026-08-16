@@ -26,16 +26,19 @@ class Fastfile: LaneFile {
         desc("Generate macOS screenshots for all metadata languages")
 
         let languages = supportedLanguages()
+        let cacheBase = FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Library/Caches/tools.fastlane").path
 
         sh("rm -rf ~/Library/Caches/tools.fastlane/screenshots")
         sh("rm -rf fastlane/screenshots/macos && mkdir -p fastlane/screenshots/macos")
 
         for lang in languages {
-            sh("mkdir -p ~/Library/Caches/tools.fastlane/screenshots")
-            sh("echo \"\(lang)\" > ~/Library/Caches/tools.fastlane/screenshots/language.txt")
-            sh("echo \"\(lang)\" > ~/Library/Caches/tools.fastlane/screenshots/locale.txt")
+            // SnapshotHelper on macOS expects language.txt at cacheBase, not screenshots subdir
+            sh("mkdir -p \(cacheBase)")
+            sh("mkdir -p \(cacheBase)/screenshots")
+            sh("echo \"\(lang)\" > \(cacheBase)/language.txt")
+            sh("echo \"\(lang)\" > \(cacheBase)/locale.txt")
             sh("mkdir -p fastlane/screenshots/macos/\(lang)")
-            sh("rm -rf ~/Library/Caches/tools.fastlane/screenshots/*.png || true")
+            sh("rm -f \(cacheBase)/screenshots/*.png || true")
 
             otherAction.runTests(
                 workspace: "Piper.xcworkspace",
@@ -47,8 +50,8 @@ class Fastfile: LaneFile {
             )
 
             sh("""
-                if [ -d ~/Library/Caches/tools.fastlane/screenshots ]; then
-                  find ~/Library/Caches/tools.fastlane/screenshots -maxdepth 1 -type f -name "*.png" -exec cp {} fastlane/screenshots/macos/\(lang)/ \\; || true
+                if [ -d \(cacheBase)/screenshots ]; then
+                  find \(cacheBase)/screenshots -maxdepth 1 -type f -name "*.png" -exec cp {} fastlane/screenshots/macos/\(lang)/ \\; || true
                   echo "Lang \(lang): $(ls -1 fastlane/screenshots/macos/\(lang) 2>/dev/NULL | wc -l) files"
                 fi
                 """)
