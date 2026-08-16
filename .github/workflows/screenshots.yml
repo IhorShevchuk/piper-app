@@ -98,18 +98,7 @@ jobs:
           path: |
             fastlane/screenshots/**
           if-no-files-found: warn
-          retention-days: 14
-
-      - name: Upload Test Output (for debugging)
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: screenshots-test-output-${{ github.run_number }}
-          path: |
-            fastlane/test_output/**
-            ~/Library/Caches/tools.fastlane/screenshots/**
-          if-no-files-found: ignore
-          retention-days: 7
+          retention-days: 3
 
       - name: Upload to App Store Connect
         if: ${{ inputs.upload == true }}
