@@ -10,6 +10,8 @@ on:
       - 'PiperAppUtils/**'
       - 'PiperappUtils/**'
       - 'PiperTTS/**'
+      - 'PiperTTSLogic/**'
+      - 'PiperTests/**'
       - 'Project.swift'
       - 'Package.swift'
       - 'Package.resolved'
@@ -23,6 +25,8 @@ on:
       - 'PiperAppUtils/**'
       - 'PiperappUtils/**'
       - 'PiperTTS/**'
+      - 'PiperTTSLogic/**'
+      - 'PiperTests/**'
       - 'Project.swift'
       - 'Package.swift'
       - 'Package.resolved'
@@ -49,6 +53,52 @@ jobs:
     with:
       platform: ${{ matrix.platform }}
     secrets: inherit
+
+  Test:
+    name: Unit Tests
+    runs-on: macos-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v7
+        with:
+          clean: true
+
+      - name: Setup Mise
+        uses: jdx/mise-action@v4.2.4
+        with:
+          install: true
+          cache: true
+
+      - name: Select Xcode
+        env:
+          XCODE_VERSION: "26.3"
+        run: |
+          APPLICATIONS_FOLDER="/Applications"
+          TARGET="${APPLICATIONS_FOLDER}/Xcode_${XCODE_VERSION}.app"
+          if [ -d "$TARGET" ]; then
+            sudo xcode-select -s "$TARGET"
+          fi
+          xcode-select -p
+          xcodebuild -version
+
+      - name: Prepare Project
+        run: |
+          rm -fr *.xcodeproj || true
+          rm -fr *.xcworkspace || true
+          mise run install
+          mise run generate
+
+      - name: Run PiperTests (including PiperTTSLogic)
+        run: |
+          xcodebuild test \
+            -workspace Piper.xcworkspace \
+            -scheme Piper \
+            -destination 'platform=macOS' \
+            -only-testing:PiperTests \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
+            AD_HOC_CODE_SIGNING_ALLOWED=YES
 
   Lint:
     runs-on: ubuntu-latest
