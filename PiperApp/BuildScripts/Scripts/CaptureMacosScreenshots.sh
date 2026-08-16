@@ -13,6 +13,15 @@ CACHE_SCREENSHOTS="$CACHE_BASE/screenshots"
 OUTPUT_BASE="fastlane/screenshots/macos"
 DERIVED_DATA="/tmp/snapshot_derived_macos"
 
+# Smart arch detection – M4 (arm64) vs old Intel mini (x86_64) vs Rosetta
+HOST_ARCH=$(uname -m)
+if [[ "$HOST_ARCH" == "arm64" ]]; then
+  MAC_ARCH=arm64
+else
+  MAC_ARCH=x86_64
+fi
+echo "→ Host arch: $HOST_ARCH → using destination arch=$MAC_ARCH"
+
 echo "→ Languages (from fastlane/metadata): $LANGUAGES"
 echo "→ Cleaning test_output + screenshots"
 rm -rf fastlane/test_output
@@ -30,7 +39,7 @@ echo "→ Building Screenshots scheme once for macOS (no code signing)"
 xcodebuild build-for-testing \
   -workspace Piper.xcworkspace \
   -scheme Screenshots \
-  -destination "platform=macOS,arch=arm64" \
+  -destination "platform=macOS,arch=$MAC_ARCH" \
   -derivedDataPath "$DERIVED_DATA" \
   CODE_SIGNING_ALLOWED=NO
 
@@ -48,7 +57,7 @@ for LANG in $LANGUAGES; do
   xcodebuild test-without-building \
     -workspace Piper.xcworkspace \
     -scheme Screenshots \
-    -destination "platform=macOS,arch=arm64" \
+    -destination "platform=macOS,arch=$MAC_ARCH" \
     -derivedDataPath "$DERIVED_DATA" \
     -resultBundlePath "fastlane/test_output/macos-screenshots-$LANG.xcresult" \
     CODE_SIGNING_ALLOWED=NO
