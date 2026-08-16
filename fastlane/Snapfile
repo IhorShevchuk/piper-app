@@ -5,7 +5,17 @@ devices([
 ])
 
 # Single source of truth for languages: folders under fastlane/metadata
-languages(Dir["./fastlane/metadata/*"].select { |f| File.directory?(f) }.map { |d| File.basename(d) })
+# Allows LANGUAGES env var to filter (e.g. "en-US uk")
+def all_languages
+  Dir["./fastlane/metadata/*"].select { |f| File.directory?(f) }.map { |d| File.basename(d) }
+end
+
+if ENV['LANGUAGES'] && !ENV['LANGUAGES'].strip.empty?
+  filter = ENV['LANGUAGES'].split
+  languages(filter)
+else
+  languages(all_languages)
+end
 
 scheme("Screenshots")
 clear_previous_screenshots(true)
