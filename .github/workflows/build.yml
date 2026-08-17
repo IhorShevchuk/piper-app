@@ -64,6 +64,10 @@ jobs:
         with:
           install: false
           cache: true
-      - run: |
-          mise install swiftlint
-          mise run lint --reporter github-actions-logging
+      - name: Install lint tool
+        run: mise install swiftlint
+      - name: Run SwiftLint
+        run: |
+          # Avoid `mise run lint` which auto-installs ruby/tuist and fails on Linux
+          mise exec -- swiftlint lint --reporter github-actions-logging --config PiperApp/BuildScripts/Linting/SwiftLint/swiftlint.yml || \
+          mise x swiftlint -- swiftlint lint --reporter github-actions-logging --config PiperApp/BuildScripts/Linting/SwiftLint/swiftlint.yml
