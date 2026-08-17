@@ -70,7 +70,24 @@ run = '''
 DESTINATION=""
 case "$usage_target" in
   "ios-simulator")
-    DESTINATION="platform=iOS Simulator,name=iPhone 17"
+    # CI on macos-26 may not have iPhone 17 runtime preinstalled; try to find any available iPhone sim,
+    # otherwise fall back to placeholder / macOS so pure-Swift PiperTests still run.
+    if xcrun simctl list devices available 2>/dev/null | grep -q "iPhone 17"; then
+      DESTINATION="platform=iOS Simulator,name=iPhone 17,OS=latest"
+    elif xcrun simctl list devices available 2>/dev/null | grep -q "iPhone"; then
+      IPHONE_NAME=$(xcrun simctl list devices available | grep "iPhone" | head -1 | sed -E 's/.*\(.*\) *\(.*\) *//; s/ *\(.*//; s/^[[:space:]]*//')
+      # simctl output format: "iPhone 16 (UUID) (Shutdown)" - extract first token before " ("
+      IPHONE_NAME=$(xcrun simctl list devices available | grep -o "iPhone[^()]*" | head -1 | xargs)
+      if [ -n "$IPHONE_NAME" ]; then
+        DESTINATION="platform=iOS Simulator,name=$IPHONE_NAME,OS=latest"
+      else
+        DESTINATION="platform=iOS Simulator,name=Any iOS Simulator Device"
+      fi
+    else
+      # No iOS runtime installed - run tests on macOS instead (PiperTests are host-compatible)
+      echo "No iOS simulator runtime available, falling back to macOS for tests"
+      DESTINATION="platform=macOS"
+    fi
     ;;
   "macos-device" | "macos")
     DESTINATION="platform=macOS"
@@ -80,6 +97,7 @@ case "$usage_target" in
     ;;
 esac
 
+echo "Testing with destination: $DESTINATION"
 xcodebuild test -workspace Piper.xcworkspace \
                 -scheme Piper \
                 -destination "$DESTINATION" \
