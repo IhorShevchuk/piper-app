@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2026 Ihor Shevchuk
 
+// swiftlint:disable identifier_name file_length function_body_length cyclomatic_complexity empty_count
+
 import XCTest
 import Foundation
 
