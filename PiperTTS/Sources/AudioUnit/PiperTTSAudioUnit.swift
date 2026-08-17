@@ -3,6 +3,9 @@
 
 import AVFoundation
 import piper_objc
+#if canImport(piper_utils)
+import piper_utils
+#endif
 import PiperAppUtils
 import PiperTTSLogic
 import Accelerate
@@ -21,6 +24,16 @@ public class PiperTTSAudioUnit: AVSpeechSynthesisProviderAudioUnit {
     private var outputDataLock = os_unfair_lock_s()
     internal var outputData = FloatRingBuffer()
     private var outputRecurseCallNumber = 0
+
+    // MARK: - Alignment (phoneme timing) – auxiliary storage
+    // Tiny vs 250 MB iOS limit: ~500 groups for 5 sec audio (< few KB, each group tens of bytes)
+    // vs 110k Float samples (~440 KB) and 250 MB guard. Bounded with sliding window to avoid
+    // unbounded growth across long SSML; cleared on cancel/dealloc.
+    // Reuses outputDataLock for protection – callback runs on OperationQueue maxConcurrent 1 (same as samples),
+    // render thread only reads outputData, so brief lock is safe. No AVFoundation block called inside lock.
+    private var lastAlignmentGroups: [PiperAlignmentParser.PhonemeGroup] = []
+    private let maxAlignmentGroups = 5000 // defensive cap; 5 sec ≈ 500 groups, never reached
+    private let alignmentSlidingWindowKeep = 500
 
     private let outputRecurseCallNumberMax: UInt32 = 200
     private let baseDelayMicroseconds: UInt32 = 500
@@ -47,6 +60,10 @@ public class PiperTTSAudioUnit: AVSpeechSynthesisProviderAudioUnit {
 
     public override func deallocateRenderResources() {
         super.deallocateRenderResources()
+        os_unfair_lock_lock(&outputDataLock)
+        outputData.clear()
+        lastAlignmentGroups.removeAll(keepingCapacity: false)
+        os_unfair_lock_unlock(&outputDataLock)
         piper = nil
         model = nil
     }
@@ -184,6 +201,7 @@ public class PiperTTSAudioUnit: AVSpeechSynthesisProviderAudioUnit {
         os_unfair_lock_lock(&outputDataLock)
         request = nil
         outputData.clear()
+        lastAlignmentGroups.removeAll(keepingCapacity: false)
         os_unfair_lock_unlock(&outputDataLock)
         piper?.cancel()
     }
@@ -254,7 +272,53 @@ extension PiperTTSAudioUnit: PiperDelegate {
         }
     }
 
+    // MARK: - Alignment delegate (optional Swift method)
+    // piper-objc now supplies precise phoneme alignment in PiperAlignmentParser.PhonemeGroup:
+    //   phoneme UInt32, codepoints [UInt32], ids [Int32], alignments [Int] (samples already scaled by hop_length),
+    //   sampleCount Int, cumulativeOffsetBefore Int, isSpecial Bool (ids 0…2 BOS/PAD/EOS), cumulativeOffsetAfter computed.
+    // Groups are delivered incrementally per chunk on OperationQueue maxConcurrent 1 (same queue as samples),
+    // so storing here is thread-safe with brief lock – render thread never reads alignment, only outputData.
+    // Markers are already alignment-derived in piper-objc (generateMarkersWithAlignment), so we don't retime here.
+    // This storage is auxiliary (< few KB, ~500 groups for 5 sec) vs 250 MB iOS limit, bounded with sliding window.
+    public func piperDidReceiveAlignment(groups: [PiperAlignmentParser.PhonemeGroup]) {
+        guard !groups.isEmpty else { return }
+
+        // Quick stats for DEBUG without holding lock during logging
+        let totalSamples = groups.reduce(0) { $0 + $1.sampleCount }
+        let specialCount = groups.reduce(0) { $0 + ($1.isSpecial ? 1 : 0) }
+
+        os_unfair_lock_lock(&outputDataLock)
+        // Append – we get per-chunk groups, not full sentence, so accumulation preserves sentence context.
+        // Reset on new synthesis via removeRequestAndCleanOutputData / deallocateRenderResources.
+        lastAlignmentGroups.append(contentsOf: groups)
+        if lastAlignmentGroups.count > maxAlignmentGroups {
+            // Hard cap impossible for 5 sec, but truncate defensively
+            lastAlignmentGroups.removeFirst(lastAlignmentGroups.count - alignmentSlidingWindowKeep)
+        } else if lastAlignmentGroups.count > 1000 {
+            // Soft sliding window to keep memory tiny while preserving recent context for long SSML
+            lastAlignmentGroups.removeFirst(lastAlignmentGroups.count - alignmentSlidingWindowKeep)
+        }
+        let storedCount = lastAlignmentGroups.count
+        os_unfair_lock_unlock(&outputDataLock)
+
+#if DEBUG
+        Log.debug(type: .synthesizer, "Alignment groups: \(groups.count) (specials: \(specialCount)), samples: \(totalSamples), stored total: \(storedCount)")
+#endif
+        // NOTE: groups unused beyond storage; marker timing already correct from piper-objc.
+        _ = specialCount
+        _ = totalSamples
+        _ = storedCount
+    }
+
     public func piperDidGenerateMarkers(_ markers: [PiperSpeechMarker]) {
+        // piper-objc now prefers generateMarkersWithAlignment when alignment groups non-empty:
+        //   totalSamples = sum alignments, realGroups = filter !isSpecial,
+        //   punctuationTrimSet = "‘’'\".,;:!?()[]{}—–" trimming for #31,
+        //   coreWords proportional distribution, byteOffset = start + cumulative*4 (Float size), monotonic.
+        // This AU just forwards those improved markers via AVFoundation metadata block.
+        // Example: hello=0, world=880 = 220*4 (220 samples * Float32 size). Legacy fallback still exists for file synthesis path.
+        // Thread-safe pattern: copy metadataBlock/request out of lock, then callback outside lock.
+
         // Copy metadata block and request out of lock to avoid holding lock during callback
         os_unfair_lock_lock(&outputDataLock)
         let metadataBlock = self.speechSynthesisOutputMetadataBlock
