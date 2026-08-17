@@ -47,6 +47,14 @@ jobs:
 
       - name: Setup Mise
         uses: jdx/mise-action@v4.2.4
+        with:
+          install: false
+          cache: true
+
+      - name: Install build tools (tuist+swiftlint only; ruby not needed for CI build/test)
+        run: |
+          mise install tuist swiftlint || mise install tuist
+          mise ls
 
       - name: Set Build Number
         run: |
