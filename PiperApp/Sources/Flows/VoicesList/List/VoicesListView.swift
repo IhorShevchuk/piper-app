@@ -10,7 +10,7 @@ struct VoicesListView: View {
 
     @ViewBuilder
     func voicesList(for language: String, title: String) -> some View {
-        NavigationStack {
+        Group {
             if let voices = hostModel.languages[language]?.sorted(by: { voice1, voice2 in
                 voice1.name < voice2.name
             }).filter({ voice in
@@ -20,6 +20,7 @@ struct VoicesListView: View {
                 List {
                     Text("warning_not_tested_voices")
                         .font(.title2)
+                        .accessibilityHidden(false)
                     Section {
                         ForEach(voices, id: \.key) { voice in
                             VoiceItemView(hostModel: VoiceItemHostModel(piper: hostModel.piper,
@@ -30,6 +31,7 @@ struct VoicesListView: View {
                     }
                     Text("warning_big_voice_files")
                         .font(.title2)
+                        .accessibilityHidden(false)
                 }
                 .accessibilityIdentifier("download_languages_list")
             } else {
@@ -54,6 +56,8 @@ struct VoicesListView: View {
                                 Text(title)
                                     .font(.title2)
                             }
+                            .accessibilityIdentifier("language_row_\(language)")
+                            .accessibilityHint("shows voices")
                         }
                     }
                 }

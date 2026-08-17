@@ -18,6 +18,7 @@ struct VoiceItemView: View {
             .imageScale(.large)
             .frame(width: buttonSize, height: buttonSize)
             .foregroundColor(.accentColor)
+            .accessibilityAddTraits(.isButton)
     }
 
     @ViewBuilder
@@ -29,21 +30,24 @@ struct VoiceItemView: View {
             } label: {
                 imageView(systemName: "stop")
                     .accessibilityLabel("stop_playing")
+                    .accessibilityHint("stops sample playback")
             }
-            .buttonStyle(PlainButtonStyle())
+            .buttonStyle(.borderless)
         } else if hostModel.viewModel.isSampleLoading {
             let size = 50.0
             ProgressView()
                 .progressViewStyle(.circular)
                 .frame(width: size, height: size)
+                .accessibilityLabel("loading sample")
         } else {
             Button {
                 hostModel.playSample(voice: hostModel.viewModel.voice)
             } label: {
                 imageView(systemName: "play")
                     .accessibilityLabel("play_sample")
+                    .accessibilityHint("plays a sample")
             }
-            .buttonStyle(PlainButtonStyle())
+            .buttonStyle(.borderless)
         }
     }
 
@@ -58,8 +62,9 @@ struct VoiceItemView: View {
                 } label: {
                     imageView(systemName: "trash")
                         .accessibilityLabel("uninstall_voice")
+                        .accessibilityHint("removes this voice")
                 }
-                .buttonStyle(PlainButtonStyle())
+                .buttonStyle(.borderless)
                 .alert("uninstall_voice", isPresented: $unstallConfirmationShown) {
                     Button("uninstall_button", role: .destructive) {
                         hostModel.remove(voice: voice)
@@ -73,15 +78,16 @@ struct VoiceItemView: View {
                     .frame(width: size, height: size)
                     .accessibilityElement()
                     .accessibilityLabel("downloading")
-                    .accessibilityValue(String(localized: "voice_loading_progress_\(hostModel.viewModel.downloadProgress * 100)"))
+                    .accessibilityValue("\(Int(hostModel.viewModel.downloadProgress * 100))%")
             } else {
                 Button {
                     hostModel.download(voice: voice)
                 } label: {
                     imageView(systemName: "square.and.arrow.down")
                         .accessibilityLabel("download_voice")
+                        .accessibilityHint("downloads this voice")
                 }
-                .buttonStyle(PlainButtonStyle())
+                .buttonStyle(.borderless)
             }
         }
 
@@ -105,9 +111,12 @@ struct VoiceItemView: View {
                 }
             }
             .accessibilityElement(children: .combine)
+            .accessibilityLabel(voiceTitle)
+            .accessibilityHint("double tap for details")
             Spacer()
             playDemo()
             download()
         }
+        .accessibilityElement(children: .contain)
     }
 }
