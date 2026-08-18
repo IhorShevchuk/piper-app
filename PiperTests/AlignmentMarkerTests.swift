@@ -470,4 +470,76 @@ final class AlignmentMarkerTests: XCTestCase {
         XCTAssertEqual(markers[0].type, .sentence)
         XCTAssertEqual(markers[0].range, nsRange)
     }
+
+    // MARK: - Extra safety nets added 2026-08-18
+
+    /// Multi-sentence paragraph – cumulative should not reset mid-paragraph
+    func testMultiSentenceMonotonicAcrossSentences() {
+        let sentence = "First sentence here. Second sentence here, with more words. Third one."
+        let nsRange = nsRange(for: sentence, location: 0)
+
+        // 12 groups, 100 samples each – enough for ~12 core tokens
+        let groups = MarkerGenerator.makeGroups(sampleCounts: Array(repeating: 100, count: 12))
+
+        let markers = MarkerGenerator.generateWithAlignment(for: sentence, sentenceNSRange: nsRange, startByteOffset: 0, groups: groups)
+
+        let wordMarkers = markers.filter { $0.type == .word }
+        XCTAssertGreaterThanOrEqual(wordMarkers.count, 9, "Should cover tokens across 3 sentences")
+
+        // Offsets strictly increasing and continuous
+        var last = -1
+        for markerItem in wordMarkers {
+            XCTAssertGreaterThan(markerItem.byteOffset, last, "Offsets must increase across sentence boundaries")
+            last = markerItem.byteOffset
+        }
+
+        // Last offset should be close to totalSamples*4 minus last word samples
+        let totalSamples = groups.reduce(0) { $0 + $1.sampleCount }
+        XCTAssertLessThanOrEqual(wordMarkers.last!.byteOffset, totalSamples * 4)
+
+        assertMonotonic(markers)
+    }
+
+    /// Specials-only groups (BOS/PAD/EOS) – must fallback to legacy, not crash
+    func testSpecialsOnlyFallback_ZeroRealGroups() {
+        let sentence = "Hello world"
+        let nsRange = nsRange(for: sentence)
+
+        // All specials – mirrors early decoder state where only BOS/PAD seen
+        let specials = [true, true, true]
+        let groups = MarkerGenerator.makeGroups(sampleCounts: [30, 10, 20], specials: specials, phonemes: [1, 0, 2])
+
+        let markers = MarkerGenerator.generateWithAlignment(for: sentence, sentenceNSRange: nsRange, startByteOffset: 200, groups: groups)
+
+        // Should not return empty, sentence marker always present
+        XCTAssertFalse(markers.isEmpty)
+        XCTAssertEqual(markers.first?.type, .sentence)
+        XCTAssertEqual(markers.first?.byteOffset, 200)
+
+        // Fallback via realGroups empty triggers legacy path – still monotonic
+        let wordMarkers = markers.filter { $0.type == .word }
+        XCTAssertGreaterThanOrEqual(wordMarkers.count, 1, "Fallback legacy should still produce word markers even if all groups special")
+        assertMonotonic(markers)
+    }
+
+    /// Zero totalSamples – totalSamples==0 guard must fallback safely
+    func testZeroTotalSamplesGuard() {
+        let sentence = "Hello world"
+        let nsRange = nsRange(for: sentence)
+
+        let groups = MarkerGenerator.makeGroups(sampleCounts: [0, 0, 0])
+
+        let markers = MarkerGenerator.generateWithAlignment(for: sentence, sentenceNSRange: nsRange, startByteOffset: 50, groups: groups)
+
+        XCTAssertFalse(markers.isEmpty, "Should fallback when totalSamples == 0")
+        XCTAssertEqual(markers.first?.type, .sentence)
+        XCTAssertEqual(markers.first?.byteOffset, 50)
+        XCTAssertEqual(markers.first?.range, nsRange)
+
+        // Legacy estimate path uses max(1, joined.count*200) so offsets monotonic
+        assertMonotonic(markers)
+
+        let wordMarkers = markers.filter { $0.type == .word }
+        XCTAssertGreaterThanOrEqual(wordMarkers.count, 1)
+    }
 }
