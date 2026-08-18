@@ -76,7 +76,7 @@ final class FloatRingBufferTests: XCTestCase {
             ring.append(contentsOf: [Float](repeating: 1, count: 500))
             ring.removeFirst(400)
         }
-        XCTAssertTrue(ring.count > 0)
+        XCTAssertFalse(ring.isEmpty)
         // snapshot should match withUnsafeBufferPointer
         let snap = ring.snapshot
         let bufSum = ring.withUnsafeBufferPointer { $0.reduce(0, +) }

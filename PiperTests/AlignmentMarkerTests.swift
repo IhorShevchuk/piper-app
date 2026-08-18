@@ -1,9 +1,8 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2026 Ihor Shevchuk
 
-// swiftlint:disable identifier_name file_length function_body_length cyclomatic_complexity empty_count
+// swiftlint:disable file_length
 
-import XCTest
 import Foundation
 
 // MARK: - Lightweight mirrors of production types (pure Swift, no piper-objc dependency)
@@ -127,7 +126,7 @@ private enum MarkerGenerator {
         var currentSearchStart = sentence.startIndex
         var cumulativeSamples = realGroups.first?.cumulativeOffsetBefore ?? 0
 
-        for (i, pair) in tokenRanges.enumerated() {
+        for (pairIndex, pair) in tokenRanges.enumerated() {
             let (_, core) = pair
             guard let coreRange = sentence.range(of: core, options: .literal, range: currentSearchStart..<sentence.endIndex) else {
                 continue
@@ -137,7 +136,7 @@ private enum MarkerGenerator {
             let wordNSRange = NSRange(location: sentenceNSRange.location + locInSentence, length: nsLen)
 
             let groupsForWord: Int
-            if i == tokenRanges.count - 1 {
+            if pairIndex == tokenRanges.count - 1 {
                 groupsForWord = realGroups.count - groupIdx
             } else {
                 let proportion = Double(core.count) / Double(totalCoreChars)
@@ -155,8 +154,8 @@ private enum MarkerGenerator {
             }
 
             var wordSampleCount = 0
-            for g in realGroups[groupIdx ..< groupIdx + clamped] {
-                wordSampleCount += g.sampleCount
+            for group in realGroups[groupIdx ..< groupIdx + clamped] {
+                wordSampleCount += group.sampleCount
             }
 
             let byteOffset = startByteOffset + cumulativeSamples * MemoryLayout<Float>.size
@@ -175,11 +174,11 @@ private enum MarkerGenerator {
     static func makeGroups(sampleCounts: [Int], specials: [Bool] = [], phonemes: [UInt32] = []) -> [MockPhonemeGroup] {
         var out: [MockPhonemeGroup] = []
         var cum = 0
-        for (idx, sc) in sampleCounts.enumerated() {
+        for (idx, sampleCount) in sampleCounts.enumerated() {
             let isSpec = idx < specials.count ? specials[idx] : false
-            let ph = idx < phonemes.count ? phonemes[idx] : UInt32(100 + idx)
-            out.append(MockPhonemeGroup(phoneme: ph, sampleCount: sc, cumulativeOffsetBefore: cum, isSpecial: isSpec))
-            cum += sc
+            let phonemeValue = idx < phonemes.count ? phonemes[idx] : UInt32(100 + idx)
+            out.append(MockPhonemeGroup(phoneme: phonemeValue, sampleCount: sampleCount, cumulativeOffsetBefore: cum, isSpecial: isSpec))
+            cum += sampleCount
         }
         return out
     }
@@ -197,9 +196,9 @@ final class AlignmentMarkerTests: XCTestCase {
 
     private func assertMonotonic(_ markers: [MockMarker], file: StaticString = #file, line: UInt = #line) {
         var last = -1
-        for m in markers {
-            XCTAssertGreaterThanOrEqual(m.byteOffset, last, "byte offsets must be monotonic", file: file, line: line)
-            last = m.byteOffset
+        for markerItem in markers {
+            XCTAssertGreaterThanOrEqual(markerItem.byteOffset, last, "byte offsets must be monotonic", file: file, line: line)
+            last = markerItem.byteOffset
         }
     }
 
@@ -226,10 +225,10 @@ final class AlignmentMarkerTests: XCTestCase {
         let wordMarkers = markers.filter { $0.type == .word }
         XCTAssertGreaterThanOrEqual(wordMarkers.count, 5, "Should have markers for each word even with curly quotes")
 
-        for wm in wordMarkers {
-            XCTAssertTrue(wm.range.location >= nsRange.location, "marker location inside sentence")
-            XCTAssertTrue(wm.range.location + wm.range.length <= nsRange.location + nsRange.length, "marker range inside sentence")
-            XCTAssertNotEqual(wm.range.location, NSNotFound)
+        for wordMarker in wordMarkers {
+            XCTAssertTrue(wordMarker.range.location >= nsRange.location, "marker location inside sentence")
+            XCTAssertTrue(wordMarker.range.location + wordMarker.range.length <= nsRange.location + nsRange.length, "marker range inside sentence")
+            XCTAssertNotEqual(wordMarker.range.location, NSNotFound)
         }
 
         // idealists exists despite surrounding curly quotes and period
@@ -349,8 +348,8 @@ final class AlignmentMarkerTests: XCTestCase {
         assertMonotonic(markers)
 
         // Ensure offsets monotonic and increasing (legacy)
-        for i in 1..<markers.count {
-            XCTAssertGreaterThanOrEqual(markers[i].byteOffset, markers[i-1].byteOffset)
+        for markerIndex in 1..<markers.count {
+            XCTAssertGreaterThanOrEqual(markers[markerIndex].byteOffset, markers[markerIndex-1].byteOffset)
         }
     }
 
@@ -395,9 +394,9 @@ final class AlignmentMarkerTests: XCTestCase {
 
         // Ensure monotonic even with punctuation heavy
         var lastOffset = -1
-        for m in markers {
-            XCTAssertGreaterThanOrEqual(m.byteOffset, lastOffset)
-            lastOffset = m.byteOffset
+        for markerItem in markers {
+            XCTAssertGreaterThanOrEqual(markerItem.byteOffset, lastOffset)
+            lastOffset = markerItem.byteOffset
         }
     }
 
@@ -429,7 +428,7 @@ final class AlignmentMarkerTests: XCTestCase {
             MockPhonemeGroup(phoneme: 1, sampleCount: 30, cumulativeOffsetBefore: 0, isSpecial: true),
             MockPhonemeGroup(phoneme: 10, sampleCount: 100, cumulativeOffsetBefore: 30, isSpecial: false),
             MockPhonemeGroup(phoneme: 11, sampleCount: 100, cumulativeOffsetBefore: 130, isSpecial: false),
-            MockPhonemeGroup(phoneme: 12, sampleCount: 100, cumulativeOffsetBefore: 230, isSpecial: false),
+            MockPhonemeGroup(phoneme: 12, sampleCount: 100, cumulativeOffsetBefore: 230, isSpecial: false)
         ]
 
         let markers = MarkerGenerator.generateWithAlignment(for: sentence, sentenceNSRange: nsRange, startByteOffset: 500, groups: groups)

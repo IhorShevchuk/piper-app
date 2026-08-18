@@ -56,9 +56,9 @@ final class AudioResamplerTests: XCTestCase {
     func testResampleBufferUprateAndDownrate() {
         let src = [Float](repeating: 0.5, count: 10)
         src.withUnsafeBufferPointer { buf in
-            let up = AudioResampler.resampleBuffer(buf, inputRate: 16000, outputRate: 22050)
+            let upsampled = AudioResampler.resampleBuffer(buf, inputRate: 16000, outputRate: 22050)
             let down = AudioResampler.resampleBuffer(buf, inputRate: 22050, outputRate: 16000)
-            XCTAssertEqual(up.count, Int((Double(10) * 22050.0 / 16000.0).rounded()))
+            XCTAssertEqual(upsampled.count, Int((Double(10) * 22050.0 / 16000.0).rounded()))
             XCTAssertEqual(down.count, Int((Double(10) * 16000.0 / 22050.0).rounded()))
         }
     }
