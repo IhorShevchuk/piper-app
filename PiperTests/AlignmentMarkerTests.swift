@@ -3,6 +3,7 @@
 
 // swiftlint:disable file_length
 
+import XCTest
 import Foundation
 
 // MARK: - Lightweight mirrors of production types (pure Swift, no piper-objc dependency)
