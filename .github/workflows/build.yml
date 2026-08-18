@@ -62,12 +62,7 @@ jobs:
       - name: Set up mise
         uses: jdx/mise-action@v4.2.4
         with:
-          install: false
+          install: true
           cache: true
-      - name: Install lint tool
-        run: mise install swiftlint
-      - name: Run SwiftLint
-        run: |
-          # Avoid `mise run lint` which auto-installs ruby/tuist and fails on Linux
-          mise exec -- swiftlint lint --reporter github-actions-logging --config PiperApp/BuildScripts/Linting/SwiftLint/swiftlint.yml || \
-          mise x swiftlint -- swiftlint lint --reporter github-actions-logging --config PiperApp/BuildScripts/Linting/SwiftLint/swiftlint.yml
+      - run: |
+          mise run lint --reporter github-actions-logging

@@ -47,14 +47,6 @@ jobs:
 
       - name: Setup Mise
         uses: jdx/mise-action@v4.2.4
-        with:
-          install: false
-          cache: true
-
-      - name: Install build tools (tuist+swiftlint only; ruby not needed for CI build/test)
-        run: |
-          mise install tuist swiftlint || mise install tuist
-          mise ls
 
       - name: Set Build Number
         run: |
@@ -106,67 +98,20 @@ jobs:
           xcodebuild -version
 
       - name: Prepare Project
-        env:
-          MISE_DISABLE_AUTO_INSTALL: "1"
         run: |
           rm -fr *.xcodeproj || true
           rm -fr *.xcworkspace || true
-          # Direct tuist calls avoid `mise run` which auto-installs ruby and fails on cache-miss
-          tuist install
-          tuist generate --no-open --verbose
+          mise run install
+          mise run generate
 
       - name: Test
         if: env.BUILD_TARGET != 'ios-device'
-        env:
-          MISE_DISABLE_AUTO_INSTALL: "1"
         run: |
-          # Reuse logic from .mise.toml tasks.test but call xcodebuild directly
-          DESTINATION=""
-          case "$BUILD_TARGET" in
-            "ios-simulator")
-              if xcrun simctl list devices available 2>/dev/null | grep -q "iPhone 17"; then
-                DESTINATION="platform=iOS Simulator,name=iPhone 17,OS=latest"
-              elif xcrun simctl list devices available 2>/dev/null | grep -q "iPhone"; then
-                IPHONE_NAME=$(xcrun simctl list devices available | grep -o "iPhone[^()]*" | head -1 | xargs)
-                if [ -n "$IPHONE_NAME" ]; then
-                  DESTINATION="platform=iOS Simulator,name=$IPHONE_NAME,OS=latest"
-                else
-                  DESTINATION="platform=iOS Simulator,name=Any iOS Simulator Device"
-                fi
-              else
-                echo "No iOS simulator runtime available, falling back to macOS for tests"
-                DESTINATION="platform=macOS"
-              fi
-              ;;
-            "macos-device" | "macos")
-              DESTINATION="platform=macOS"
-              ;;
-            *)
-              DESTINATION="platform=macOS"
-              ;;
-          esac
-          echo "Testing with destination: $DESTINATION"
-          xcodebuild test -workspace Piper.xcworkspace \
-                          -scheme Piper \
-                          -destination "$DESTINATION" \
-                          -only-testing:PiperTests \
-                          CODE_SIGNING_ALLOWED=NO
+          mise run test $BUILD_TARGET
 
       - name: Build
-        env:
-          MISE_DISABLE_AUTO_INSTALL: "1"
         run: |
-          case "$BUILD_TARGET" in
-            "ios-device")
-              ./PiperApp/BuildScripts/Scripts/BuildApp.sh "$BUILD_NUMBER" iOS
-              ;;
-            "macos-device")
-              ./PiperApp/BuildScripts/Scripts/BuildApp.sh "$BUILD_NUMBER" macOS
-              ;;
-            *)
-              ./PiperApp/BuildScripts/Scripts/BuildSimulator.sh "$BUILD_NUMBER"
-              ;;
-          esac
+          mise run build $BUILD_NUMBER $BUILD_TARGET
 
       - name: Store Artifact
         if: env.SIGN_BUILD == 'true'
