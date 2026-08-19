@@ -30,7 +30,7 @@ struct VoiceItemView: View {
             } label: {
                 imageView(systemName: "stop")
                     .accessibilityLabel("stop_playing")
-                    .accessibilityHint("stops sample playback")
+                    .accessibilityHint("stop_playing_hint")
             }
             .buttonStyle(.borderless)
         } else if hostModel.viewModel.isSampleLoading {
@@ -38,14 +38,14 @@ struct VoiceItemView: View {
             ProgressView()
                 .progressViewStyle(.circular)
                 .frame(width: size, height: size)
-                .accessibilityLabel("loading sample")
+                .accessibilityLabel("loading_sample")
         } else {
             Button {
                 hostModel.playSample(voice: hostModel.viewModel.voice)
             } label: {
                 imageView(systemName: "play")
                     .accessibilityLabel("play_sample")
-                    .accessibilityHint("plays a sample")
+                    .accessibilityHint("play_sample_hint")
             }
             .buttonStyle(.borderless)
         }
@@ -62,7 +62,7 @@ struct VoiceItemView: View {
                 } label: {
                     imageView(systemName: "trash")
                         .accessibilityLabel("uninstall_voice")
-                        .accessibilityHint("removes this voice")
+                        .accessibilityHint("uninstall_voice_hint")
                 }
                 .buttonStyle(.borderless)
                 .alert("uninstall_voice", isPresented: $unstallConfirmationShown) {
@@ -85,7 +85,7 @@ struct VoiceItemView: View {
                 } label: {
                     imageView(systemName: "square.and.arrow.down")
                         .accessibilityLabel("download_voice")
-                        .accessibilityHint("downloads this voice")
+                        .accessibilityHint("download_voice_hint")
                 }
                 .buttonStyle(.borderless)
             }
@@ -112,7 +112,7 @@ struct VoiceItemView: View {
             }
             .accessibilityElement(children: .combine)
             .accessibilityLabel(voiceTitle)
-            .accessibilityHint("double tap for details")
+            .accessibilityHint("voice_item_hint")
             Spacer()
             playDemo()
             download()

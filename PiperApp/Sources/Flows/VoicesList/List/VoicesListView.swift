@@ -57,7 +57,7 @@ struct VoicesListView: View {
                                     .font(.title2)
                             }
                             .accessibilityIdentifier("language_row_\(language)")
-                            .accessibilityHint("shows voices")
+                            .accessibilityHint("language_row_hint")
                         }
                     }
                 }
