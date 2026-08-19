@@ -47,6 +47,9 @@ public class PiperTTSAudioUnit: AVSpeechSynthesisProviderAudioUnit {
 
     public override func deallocateRenderResources() {
         super.deallocateRenderResources()
+        os_unfair_lock_lock(&outputDataLock)
+        outputData.clear()
+        os_unfair_lock_unlock(&outputDataLock)
         piper = nil
         model = nil
     }
@@ -134,7 +137,6 @@ public class PiperTTSAudioUnit: AVSpeechSynthesisProviderAudioUnit {
         outputAudioBufferList.pointee.mNumberBuffers = 1
         var unsafeBuffer = UnsafeMutableAudioBufferListPointer(outputAudioBufferList)[0]
         let frames = unsafeBuffer.mData!.assumingMemoryBound(to: Float32.self)
-        // Zero-fill only when we have less data than requested – otherwise we will overwrite entire buffer
         if actualCopied < intFrameCount {
             frames.update(repeating: 0, count: intFrameCount)
         }
@@ -191,9 +193,7 @@ public class PiperTTSAudioUnit: AVSpeechSynthesisProviderAudioUnit {
     internal func pauseUntil(maxDelayFactor: UInt32, or condition: @escaping () -> Bool) {
         let maxDelaySeconds = Double(baseDelayMicroseconds * maxDelayFactor) / 1_000_000
         let checkIntervalSeconds = maxDelaySeconds / 5.0
-
         let startTime = Date()
-
         while !condition() && Date().timeIntervalSince(startTime) < maxDelaySeconds {
             RunLoop.current.run(mode: .default, before: Date().addingTimeInterval(checkIntervalSeconds))
         }
@@ -204,13 +204,10 @@ public class PiperTTSAudioUnit: AVSpeechSynthesisProviderAudioUnit {
         let paths = model.installedPath else {
             return
         }
-
-        if model == self.model && piper != nil {
-            return
-        }
+        if model == self.model && piper != nil { return }
         piper = Piper(modelPath: paths.model.path(percentEncoded: false),
                       andConfigPath: paths.json.path(percentEncoded: false))
-        
+
         Log.debug("Piper Created")
 #if os(iOS)
         let availableMemory = Int64(Double(os_proc_available_memory()) * 0.9)
@@ -224,9 +221,7 @@ public class PiperTTSAudioUnit: AVSpeechSynthesisProviderAudioUnit {
     }
 
     public override var speechVoices: [AVSpeechSynthesisProviderVoice] {
-        get {
-            return AVSpeechSynthesisProviderVoice.supportedVoices
-        }
+        get { AVSpeechSynthesisProviderVoice.supportedVoices }
         set { }
     }
 
@@ -240,7 +235,6 @@ extension PiperTTSAudioUnit: PiperDelegate {
     public func piperDidReceiveSamples(_ samples: UnsafePointer<Float>, withSize size: Int) {
         let buf = UnsafeBufferPointer(start: samples, count: size)
         if size == 0 { return }
-
         if let modelFormat = model?.audioFormat,
            modelFormat.sampleRate != format.sampleRate {
             let resampled = AudioResampler.resampleBuffer(buf, inputRate: modelFormat.sampleRate, outputRate: format.sampleRate)
@@ -255,30 +249,19 @@ extension PiperTTSAudioUnit: PiperDelegate {
     }
 
     public func piperDidGenerateMarkers(_ markers: [PiperSpeechMarker]) {
-        // Copy metadata block and request out of lock to avoid holding lock during callback
+        // piper-objc 0.2.30 now prefers generateMarkersWithAlignment when alignment groups non-empty:
+        // monotonic timing, punctuationTrimSet fixes #31. AU just forwards those improved markers.
         os_unfair_lock_lock(&outputDataLock)
         let metadataBlock = self.speechSynthesisOutputMetadataBlock
         let request = self.request
         os_unfair_lock_unlock(&outputDataLock)
-
-        guard let metadataBlock = metadataBlock,
-              let request = request else {
-            return
-        }
-
+        guard let metadataBlock = metadataBlock, let request = request else { return }
         for marker in markers {
-            guard let appleMarker = marker.avMarker else {
-                continue
-            }
+            guard let appleMarker = marker.avMarker else { continue }
 #if DEBUG
             let requestText = request.ssmlRepresentation
             let swiftRange = Range(appleMarker.textRange, in: requestText)
-            let text = if let swiftRange {
-                String(requestText[swiftRange])
-            } else {
-                "<no valid range>"
-            }
-
+            let text = if let swiftRange { String(requestText[swiftRange]) } else { "<no valid range>" }
             Log.debug("DidGenerateMarker [type:\(appleMarker.mark)] offset:\(appleMarker.byteSampleOffset), text:'\(text)'")
 #endif
             metadataBlock([appleMarker], request)

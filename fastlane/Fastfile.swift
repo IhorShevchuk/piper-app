@@ -3,13 +3,13 @@ import Foundation
 class Fastfile: LaneFile {
 
     private func supportedLanguages() -> [String] {
-        let fm = FileManager.default
+        let fileManager = FileManager.default
         let metaPath = "fastlane/metadata"
-        if let items = try? fm.contentsOfDirectory(atPath: metaPath) {
+        if let items = try? fileManager.contentsOfDirectory(atPath: metaPath) {
             return items.filter { name in
                 var isDir: ObjCBool = false
                 let full = (metaPath as NSString).appendingPathComponent(name)
-                return fm.fileExists(atPath: full, isDirectory: &isDir) && isDir.boolValue
+                return fileManager.fileExists(atPath: full, isDirectory: &isDir) && isDir.boolValue
             }.sorted()
         }
         return ["en-US"]
@@ -54,7 +54,6 @@ class Fastfile: LaneFile {
         )
     }
 
-    
     func updateReleaseNotesLane(withOptions options: [String: String]?) {
         desc("Update the 'What's New' text in App Store Connect using the metadata files. Pass `appVersion` as a parameter.")
 
