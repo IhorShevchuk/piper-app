@@ -1,12 +1,30 @@
+# A list of devices you want to take the screenshots from
 devices([
   "iPhone 17 Pro Max",
   "iPad Pro 13-inch (M5)",
 ])
 
-languages([
-  "en-US",
-])
+# Single source of truth for languages: folders under fastlane/metadata
+# Allows LANGUAGES env var to filter (e.g. "en-US uk")
+def all_languages
+  Dir["./fastlane/metadata/*"].select { |f| File.directory?(f) }.map { |d| File.basename(d) }
+end
+
+if ENV['LANGUAGES'] && !ENV['LANGUAGES'].strip.empty?
+  filter = ENV['LANGUAGES'].split
+  languages(filter)
+else
+  languages(all_languages)
+end
 
 scheme("Screenshots")
 clear_previous_screenshots(true)
 override_status_bar(true)
+# Use xcpretty – xcbeautify not present on vanilla macOS GitHub runners / many Macs
+# Fastlane 2.237+ defaults to xcbeautify which causes Exit 127 sh: xcbeautify: not found
+xcodebuild_formatter("xcpretty")
+# Retry 3 times on Exit 65 AX timeout – more resilient after fixing wait_for_boot
+number_of_retries(3)
+# Speed: don't let SwiftLint run inside snapshot builds (handled by Project.swift guard)
+# Simulator stability: wait longer for AX to load, avoids Exit 65 TIMED OUT waiting for AX loaded notification
+ENV['SNAPSHOT_SIMULATOR_WAIT_FOR_BOOT_TIMEOUT'] = '30'

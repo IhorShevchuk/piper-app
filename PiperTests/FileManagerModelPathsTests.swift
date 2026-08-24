@@ -1,4 +1,3 @@
-// swiftlint:disable all
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2026 Ihor Shevchuk
 
@@ -62,7 +61,9 @@ final class FileManagerModelPathsTests: XCTestCase {
         let json1 = URL(fileURLWithPath: "\(base)/a/model.onnx.json")
         let model2 = URL(fileURLWithPath: "\(base)/a/model.onnx")
         let json2 = URL(fileURLWithPath: "\(base)/a/model.onnx.json")
+        // swiftlint:disable:next identifier_name
         let p1 = FileManager.ModelPaths(model: model1, json: json1)!
+        // swiftlint:disable:next identifier_name
         let p2 = FileManager.ModelPaths(model: model2, json: json2)!
         // Equality uses standardizedFileURL, so a/../a should equal a
         XCTAssertEqual(p1, p2)
@@ -71,7 +72,9 @@ final class FileManagerModelPathsTests: XCTestCase {
     func testHashConsistency() {
         let model = URL(fileURLWithPath: "/tmp/model.onnx")
         let json = URL(fileURLWithPath: "/tmp/model.onnx.json")
+        // swiftlint:disable:next identifier_name
         let p1 = FileManager.ModelPaths(model: model, json: json)!
+        // swiftlint:disable:next identifier_name
         let p2 = FileManager.ModelPaths(model: model, json: json)!
         XCTAssertEqual(p1.hashValue, p2.hashValue)
     }

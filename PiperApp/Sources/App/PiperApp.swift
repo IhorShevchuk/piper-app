@@ -22,10 +22,12 @@ struct PiperApp: App {
         #if os(macOS)
         Window("piper_app_name".localized, id: "main") {
             mainContent
-                .frame(minWidth: 400, minHeight: 300)
-                .frame(idealWidth: 400, idealHeight: 300)
-                .frame(maxWidth: 800, maxHeight: 800)
+                .frame(minWidth: 650, minHeight: 600)
+                .frame(idealWidth: 650, idealHeight: 600)
+                .frame(maxWidth: 1000, maxHeight: 800)
         }
+        .defaultSize(width: 650, height: 600)
+        .defaultPosition(.center)
         .windowResizability(.contentSize)
         #elseif os(iOS)
         WindowGroup {

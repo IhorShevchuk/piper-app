@@ -1,0 +1,173 @@
+name: Screenshots
+
+on:
+  workflow_dispatch:
+    inputs:
+      upload:
+        description: 'Upload to App Store Connect after generation'
+        required: false
+        default: false
+        type: boolean
+      languages:
+        description: 'Languages filter (space-separated, e.g. "en-US uk"). Empty = all from fastlane/metadata'
+        required: false
+        default: ''
+        type: string
+      platform:
+        description: 'Platform to upload (ios, osx, all)'
+        required: false
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - ios
+          - osx
+      marketing_version:
+        description: 'Marketing version (e.g. 1.0.10). Empty = from version.xcconfig'
+        required: false
+        default: ''
+        type: string
+      build_number:
+        description: 'Build number (e.g. 123). Empty = GITHUB_RUN_NUMBER'
+        required: false
+        default: ''
+        type: string
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  generate:
+    name: Generate Screenshots (iOS + macOS)
+    runs-on: macos-latest
+    timeout-minutes: 180
+    env:
+      CI: true
+      FASTLANE_SKIP_UPDATE_CHECK: true
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v7
+
+      - name: Setup Mise
+        uses: jdx/mise-action@v4.2.5
+        with:
+          install: true
+          cache: true
+
+      - name: Install dependencies
+        run: |
+          mise run setup
+
+      - name: Select Xcode
+        env:
+          XCODE_VERSION: "26.3"
+        run: |
+          APPLICATIONS_FOLDER="/Applications"
+          TARGET="${APPLICATIONS_FOLDER}/Xcode_${XCODE_VERSION}.app"
+          if [ -d "$TARGET" ]; then
+            sudo xcode-select -s "$TARGET"
+          fi
+          xcode-select -p
+          xcodebuild -version
+          # Ensure Simulator runtimes are available
+          xcrun simctl list devices | head -n 30 || true
+
+      - name: Set Build Number and Marketing Version
+        run: |
+          # Build number – prefer input, fallback to GITHUB_RUN_NUMBER
+          INPUT_BUILD_NUMBER="${{ inputs.build_number }}"
+          if [ -n "$INPUT_BUILD_NUMBER" ]; then
+            BUILD_NUM="$INPUT_BUILD_NUMBER"
+          else
+            BUILD_NUM="$GITHUB_RUN_NUMBER"
+          fi
+          echo "BUILD_NUMBER=$BUILD_NUM" >> $GITHUB_ENV
+          echo "Resolved BUILD_NUMBER=$BUILD_NUM"
+
+          # Marketing version – prefer input, fallback to version.xcconfig
+          source PiperApp/BuildScripts/Configs/version.xcconfig
+          INPUT_MARKETING_VERSION="${{ inputs.marketing_version }}"
+          if [ -n "$INPUT_MARKETING_VERSION" ]; then
+            MARKETING_VERSION="$INPUT_MARKETING_VERSION"
+            echo "Overriding MARKETING_VERSION in xcconfig to $MARKETING_VERSION"
+            # macOS BSD sed needs '' arg, GNU needs no arg – try both
+            sed -i '' "s/^MARKETING_VERSION=.*/MARKETING_VERSION=$MARKETING_VERSION/" PiperApp/BuildScripts/Configs/version.xcconfig 2>/dev/null || \
+            sed -i "s/^MARKETING_VERSION=.*/MARKETING_VERSION=$MARKETING_VERSION/" PiperApp/BuildScripts/Configs/version.xcconfig
+          fi
+          echo "MARKETING_VERSION=$MARKETING_VERSION" >> $GITHUB_ENV
+          echo "Full Version: $MARKETING_VERSION($BUILD_NUM)"
+          cat PiperApp/BuildScripts/Configs/version.xcconfig
+        shell: bash
+
+      - name: Prepare Project
+        run: |
+          rm -fr *.xcodeproj || true
+          rm -fr *.xcworkspace || true
+          mise run install
+          mise run generate
+          # fastlane/swift is gitignored – on fresh runner it doesn't exist and first
+          # `bundle exec fastlane captureScreenshots` fails with:
+          # `[Xcodeproj] Unable to open FastlaneSwiftRunner.xcodeproj because it doesn't exist`
+          # Ensure Swift runner exists before screenshots lane.
+          echo "Ensuring Fastlane Swift runner exists..."
+          bundle exec fastlane --help 2>&1 | head -n 20 || true
+          if [ ! -d "fastlane/swift/FastlaneSwiftRunner" ]; then
+            echo "fastlane/swift missing – generating via fastlane swift..."
+            bundle exec fastlane swift init 2>&1 | head -n 20 || true
+            bundle exec fastlane swift generate 2>&1 | head -n 20 || true
+          fi
+          ls -R fastlane/swift 2>/dev/null | head -n 20 || echo "fastlane/swift still missing – will be auto-generated on first lane"
+
+      - name: Generate Screenshots
+        env:
+          LANGUAGES: ${{ inputs.languages }}
+          BUILD_NUMBER: ${{ env.BUILD_NUMBER }}
+          MARKETING_VERSION: ${{ env.MARKETING_VERSION }}
+        run: |
+          echo "Building with BUILD_NUMBER=$BUILD_NUMBER MARKETING_VERSION=$MARKETING_VERSION"
+          if [ -n "$LANGUAGES" ]; then
+            echo "Using languages filter: $LANGUAGES"
+            export LANGUAGES
+          else
+            echo "Using all languages from fastlane/metadata"
+          fi
+          # mise task screenshots = iOS + macOS
+          mise run screenshots
+
+      - name: List Screenshots
+        if: always()
+        run: |
+          du -sh fastlane/screenshots || true
+          find fastlane/screenshots -type f | head -n 100 || true
+
+      - name: Upload Screenshots Artifact
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: screenshots-${{ github.run_number }}
+          path: |
+            fastlane/screenshots/**
+          if-no-files-found: warn
+          retention-days: 3
+
+      - name: Upload to App Store Connect
+        if: ${{ inputs.upload == true }}
+        run: |
+          CONFIG_PATH="$RUNNER_TEMP/fastlane.json"
+          echo "${{ secrets.FASTLANE_CONFIG_JSON_BASE64 }}" | base64 --decode > "$CONFIG_PATH"
+          echo "Starting upload with api key $CONFIG_PATH..."
+          echo "Uploading version $MARKETING_VERSION build $BUILD_NUMBER platform ${{ inputs.platform || 'all' }}"
+          mise run screenshots-upload --api-key-path "$CONFIG_PATH" --platform "${{ inputs.platform || 'all' }}"
+        env:
+          FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD: ${{ secrets.APPLE_ID_APP_SPECIFIC_PASSWORD }}
+          BUILD_NUMBER: ${{ env.BUILD_NUMBER }}
+          MARKETING_VERSION: ${{ env.MARKETING_VERSION }}
+
+      - name: Clean up keys
+        if: always()
+        run: |
+          rm -f "$RUNNER_TEMP/fastlane.json" fastlane/apikey.json || true
+          # Restore version.xcconfig if we overrode it, to keep workspace clean
+          git checkout -- PiperApp/BuildScripts/Configs/version.xcconfig || true

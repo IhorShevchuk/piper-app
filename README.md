@@ -75,7 +75,7 @@ mise run generate
 Open the generated `Piper.xcworkspace` in Xcode.
 
 ```bash
-open Piper.xcworkspace 
+open Piper.xcworkspace
 ```
 
 > **Note:** Run `mise run install` whenever `Package.swift` or dependencies change. Otherwise `mise run generate` alone is sufficient.
@@ -111,52 +111,7 @@ open Piper.xcworkspace
 
 ---
 
-# 🧪 Testing
-
-Piper now includes unit tests in `PiperTests` targeting `PiperAppUtils` core logic.
-
-## Run Tests in Xcode
-
-1. Generate project: `mise run generate`
-2. Open `Piper.xcworkspace`
-3. Product → Test (⌘U) or select the `PiperTests` scheme
-
-## Run Tests from CLI
-
-macOS (works over SSH / CI without keychain):
-
-```bash
-mise run generate
-xcodebuild test -workspace Piper.xcworkspace -scheme Piper -destination 'platform=macOS' -only-testing:PiperTests CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY=""
-```
-
-iOS Simulator (requires simulator runtime):
-
-```bash
-xcodebuild test -workspace Piper.xcworkspace -scheme Piper -destination 'platform=iOS Simulator,name=iPhone 17' -only-testing:PiperTests
-```
-
-Or with Tuist:
-
-```bash
-tuist test --test-targets PiperTests
-```
-
-39 tests currently – 6 Constants, 12 ModelPaths, 5 Language/Audio, 7 Logger, 9 ModelInfo – all passing as of 2026-08-15 on Xcode 26.6.
-
-## What’s Tested
-
-- `Constants` – file naming, UTI correctness, extension composition
-- `FileManager.ModelPaths` – equality & hash (standardized URLs), folder derivation, existence checks, `Equatable`/`Codable`, installNew nil handling, installed checks
-- `ModelInfo` – decoding with / without speakers, voiceId generation, equality, `nil` file handling, malformed voiceId handling
-- `Language` / `Audio` – decoding, Equatable/Hashable, country/language fallback
-- `Logger` – level ordering, allCases, logLevel getter/setter, masked logging logic
-
-The `PiperTests` target is defined in `Project.swift` as `.unitTests` with `bundleId: dev.ihor-shevchuk.piper.tests` and `CODE_SIGNING_ALLOWED=NO`, depends only on `PiperAppUtils`, so it runs fast without needing the TTS engine or model files.
-
----
-
-## Project Structure
+# Project Structure
 
 * `PiperApp` – Main iOS/macOS app
 * `PiperTTS` – Audio Unit extension
@@ -164,6 +119,6 @@ The `PiperTests` target is defined in `Project.swift` as `.unitTests` with `bund
 * `PiperTests` – Unit tests for `PiperAppUtils`
 * `Screenshots` – UI tests for App Store screenshots
 
-## License
+# License
 
 MIT – see `LICENSE-MIT`, GPL-3.0 for bundled resources

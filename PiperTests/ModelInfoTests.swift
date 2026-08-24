@@ -1,4 +1,3 @@
-// swiftlint:disable all
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2026 Ihor Shevchuk
 
@@ -9,6 +8,7 @@ import Foundation
 final class ModelInfoTests: XCTestCase {
 
     private var sampleJSON: Data {
+        // swiftlint:disable:next non_optional_string_data_conversion
         """
         {
           "dataset":"en_US-lessac-high",
@@ -22,6 +22,7 @@ final class ModelInfoTests: XCTestCase {
     }
 
     private var sampleJSONNoSpeakers: Data {
+        // swiftlint:disable:next non_optional_string_data_conversion
         """
         {
           "dataset":"uk_UA-ukrainian-high",
