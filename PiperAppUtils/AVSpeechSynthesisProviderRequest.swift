@@ -15,7 +15,7 @@ extension AVSpeechSynthesisProviderRequest {
         }
 
         self.init(
-          ssmlRepresentation: "<speak>\(simpeText)</speak>",
+          ssmlRepresentation: "<speak><prosody rate=\"50%\">\(simpeText)</prosody></speak>",
           voice: voice
         )
     }
