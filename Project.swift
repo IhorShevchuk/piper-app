@@ -64,7 +64,8 @@ let project = Project(
             sources: ["\(appName)/Sources/**"],
             resources: [
                 "\(appName)/Resources/Localization/*",
-                "\(appName)/Resources/Assets.xcassets"
+                "\(appName)/Resources/Assets.xcassets",
+                "\(appName)/Resources/g2pw/*"
             ],
             entitlements: .dictionary(appEntitlements),
             scripts: [
@@ -146,6 +147,7 @@ let project = Project(
             product: .staticFramework,
             bundleId: "$(PRODUCT_BUNDLE_IDENTIFIER)",
             sources: ["\(sharedUtilsName)/**"],
+            resources: ["\(sharedUtilsName)/Resources/**"],
             settings: .settings(configurations: [
                 .debug(name: "Debug",
                        xcconfig: "\(configsPath)/utils_debug.xcconfig"),

@@ -206,20 +206,44 @@ public class PiperTTSAudioUnit: AVSpeechSynthesisProviderAudioUnit {
         }
         if model == self.model && piper != nil { return }
         // Use modern options API to support Chinese pinyin voices (chaowen, xiao_ya)
-        // which require dataDir / g2pwModelDir. Passing model folder as dataDir
-        // allows piper to discover MONOPHONIC_CHARS.txt etc. if present.
+        // which require dataDir / g2pwModelDir. For pinyin voices we prefer the
+        // shared on-demand g2pw folder (2MB Phase 1) to keep RAM/IPA lean.
         let modelFolder = paths.model.deletingLastPathComponent()
+        var g2pwDir: String? = nil
+        var dataDir: String? = modelFolder.path(percentEncoded: false)
+
+        if model.isPinyin {
+            // Try to ensure g2pw is present via fast bundle copy (sync, 2MB, no network)
+            // If not in bundle, async download will have been triggered on voice install
+            if !FileManager.Constants.g2pwFileExists() {
+                _ = G2PWDataManager.copyFromBundleIfAvailable()
+            }
+            // Ensure shared g2pw folder is used if available (on-demand download on first zh voice)
+            if let sharedG2PW = FileManager.Constants.g2pwFolderURL,
+               FileManager.Constants.g2pwFileExists() {
+                g2pwDir = sharedG2PW.path(percentEncoded: false)
+                // dataDir can stay as modelFolder – piper will also probe dataDir/g2pw and dataDir itself
+                // but we set g2pwModelDir explicitly to shared folder for reliability
+            } else {
+                // Fallback: try model folder (if voice archive bundled dicts) – Phase 1 works without onnx
+                g2pwDir = modelFolder.path(percentEncoded: false)
+            }
+        } else {
+            // Non-pinyin voices: no g2pw needed
+            g2pwDir = nil
+        }
+
         let options = PiperCreateOptions(
             modelPath: paths.model.path(percentEncoded: false),
             configPath: paths.json.path(percentEncoded: false),
             espeakDataPath: nil,
-            dataDir: modelFolder.path(percentEncoded: false),
-            g2pwModelDir: modelFolder.path(percentEncoded: false)
+            dataDir: dataDir,
+            g2pwModelDir: g2pwDir
         )
         piper = Piper(options: options) ?? Piper(modelPath: paths.model.path(percentEncoded: false),
                                                  andConfigPath: paths.json.path(percentEncoded: false))
 
-        Log.debug("Piper Created")
+        Log.debug("Piper Created isPinyin:\(model.isPinyin) g2pwDir:\(g2pwDir ?? "nil")")
 #if os(iOS)
         let availableMemory = Int64(Double(os_proc_available_memory()) * 0.9)
         if availableMemory > 0 {

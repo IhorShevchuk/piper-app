@@ -11,6 +11,8 @@ public struct ModelInfo: Decodable {
         case audio
         case speakersInternal = "speaker_id_map"
         case numberOfSpeakersInternal = "num_speakers"
+        case phonemeType = "phoneme_type"
+        case espeakVoice = "espeak_voice"
     }
 
     public let dataset: String?
@@ -25,9 +27,15 @@ public struct ModelInfo: Decodable {
     public var numberOfSpeakers: Int {
         numberOfSpeakersInternal ?? 1
     }
+    public let phonemeType: String?
+    public let espeakVoice: String?
 
     public var name: String {
         return dataset ?? "Unknown"
+    }
+
+    public var isPinyin: Bool {
+        phonemeType?.lowercased() == "pinyin"
     }
 
     public enum Error: Swift.Error {

@@ -90,6 +90,18 @@ class VoiceLoader: NSObject {
                         throw Error.wrongModelInfo
                     }
 
+                    // If voice is pinyin (Chinese), ensure 2MB g2pw Phase 1 dicts are present
+                    // On-demand download keeps IPA/RAM lean, all zh voices share one cache
+                    if let info = try? ModelInfo.create(from: jsonLocalURL), info.isPinyin {
+                        // 0.5% weight for g2pw if needed (tiny)
+                        do {
+                            try await G2PWDataManager.ensureInstalled()
+                        } catch {
+                            Log.error("Failed to ensure g2pw data: \(error) – will try bundle fallback at synthesis time")
+                            // Don't fail voice download; piper will fallback to bundle copy if present
+                        }
+                    }
+
                     // Model is large → weight 95%
                     let modelLocalURL = try await self.downloadFile(
                         from: modelURL,
