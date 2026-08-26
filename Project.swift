@@ -64,8 +64,7 @@ let project = Project(
             sources: ["\(appName)/Sources/**"],
             resources: [
                 "\(appName)/Resources/Localization/*",
-                "\(appName)/Resources/Assets.xcassets",
-                "\(appName)/Resources/g2pw/*"
+                "\(appName)/Resources/Assets.xcassets"
             ],
             entitlements: .dictionary(appEntitlements),
             scripts: [

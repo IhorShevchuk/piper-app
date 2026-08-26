@@ -205,41 +205,51 @@ public class PiperTTSAudioUnit: AVSpeechSynthesisProviderAudioUnit {
             return
         }
         if model == self.model && piper != nil { return }
-        // Use modern options API to support Chinese pinyin voices (chaowen, xiao_ya)
-        // which require dataDir / g2pwModelDir. For pinyin voices we prefer the
-        // shared on-demand g2pw folder (2MB Phase 1) to keep RAM/IPA lean.
+        // Modern options API to support Chinese pinyin voices (chaowen, xiao_ya)
+        // Pure on-demand: 2MB Phase 1 dicts are downloaded on first zh voice install
+        // (voice install already needs network, so no extra failure mode)
+        // Once cached in group.pipertts.data/g2pw, synthesis works offline
         let modelFolder = paths.model.deletingLastPathComponent()
         var g2pwDir: String? = nil
         var dataDir: String? = modelFolder.path(percentEncoded: false)
 
-        if model.isPinyin {
-            // Pure on-demand: shared g2pw folder downloaded on first zh voice install
-            // Voice install already requires network, so no extra failure mode.
-            // Synthesis stays offline once cached.
+        // Detect Chinese voices by language code (zh_CN) – all zh voices are pinyin in current piper1-gpl
+        if model.language.code.lowercased().hasPrefix("zh") {
+            // Prefer shared g2pw folder (on-demand download) to keep RAM/IPA lean
             if let sharedG2PW = FileManager.Constants.g2pwFolderURL,
-               FileManager.Constants.g2pwFileExists() {
-                g2pwDir = sharedG2PW.path(percentEncoded: false)
+               FileManager.default.fileExists(atPath: sharedG2PW.path) {
+                // Check if required files are present in shared folder
+                let fm = FileManager.default
+                let hasFiles = ["MONOPHONIC_CHARS.txt", "char_bopomofo_dict.json", "bopomofo_to_pinyin_wo_tune_dict.json"]
+                    .allSatisfy { fm.fileExists(atPath: sharedG2PW.appendingPathComponent($0).path) }
+                if hasFiles {
+                    g2pwDir = sharedG2PW.path(percentEncoded: false)
+                } else {
+                    // Fallback: model folder may contain g2pw files (copied during install)
+                    g2pwDir = modelFolder.path(percentEncoded: false)
+                }
             } else {
-                // Fallback: try model folder (if voice archive ever bundles dicts)
-                // Phase 1 works without onnx, so this still covers 95% chars
+                // Fallback: try model folder (voice folder may contain g2pw files if copied during install)
                 g2pwDir = modelFolder.path(percentEncoded: false)
             }
-        } else {
-            // Non-pinyin voices: no g2pw needed
-            g2pwDir = nil
         }
 
-        let options = PiperCreateOptions(
-            modelPath: paths.model.path(percentEncoded: false),
-            configPath: paths.json.path(percentEncoded: false),
-            espeakDataPath: nil,
-            dataDir: dataDir,
-            g2pwModelDir: g2pwDir
-        )
-        piper = Piper(options: options) ?? Piper(modelPath: paths.model.path(percentEncoded: false),
-                                                 andConfigPath: paths.json.path(percentEncoded: false))
-
-        Log.debug("Piper Created isPinyin:\(model.isPinyin) g2pwDir:\(g2pwDir ?? "nil")")
+        if let g2pwDir = g2pwDir {
+            let options = PiperCreateOptions(
+                modelPath: paths.model.path(percentEncoded: false),
+                configPath: paths.json.path(percentEncoded: false),
+                espeakDataPath: nil,
+                dataDir: dataDir,
+                g2pwModelDir: g2pwDir
+            )
+            piper = Piper(options: options) ?? Piper(modelPath: paths.model.path(percentEncoded: false),
+                                                     andConfigPath: paths.json.path(percentEncoded: false))
+            Log.debug("Piper Created with g2pwDir:\(g2pwDir) for zh voice")
+        } else {
+            piper = Piper(modelPath: paths.model.path(percentEncoded: false),
+                          andConfigPath: paths.json.path(percentEncoded: false))
+            Log.debug("Piper Created")
+        }
 #if os(iOS)
         let availableMemory = Int64(Double(os_proc_available_memory()) * 0.9)
         if availableMemory > 0 {
@@ -250,6 +260,7 @@ public class PiperTTSAudioUnit: AVSpeechSynthesisProviderAudioUnit {
         piper?.delegate = self
         self.model = model
     }
+
 
     public override var speechVoices: [AVSpeechSynthesisProviderVoice] {
         get { AVSpeechSynthesisProviderVoice.supportedVoices }

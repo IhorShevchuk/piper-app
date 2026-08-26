@@ -28,17 +28,12 @@ extension FileManager {
             return sharedFolder?.appendingPathComponent(PiperAppUtils.Constants.modelJSONFileNameWithExtension)
         }
 
-        // MARK: - g2pw (Chinese pinyin Phase 1)
+        // MARK: - g2pw (Chinese pinyin Phase 1) – pure on-demand, 0 IPA
 
         public static var g2pwFolderName: String { "g2pw" }
 
         public static var g2pwFolderURL: URL? {
             return sharedFolder?.appendingPathComponent(g2pwFolderName)
-        }
-
-        public static var g2pwMiniTarURL: URL? {
-            // 301K compressed, ~1.9M uncompressed – Phase 1 minimal dictionaries
-            URL(string: "https://github.com/IhorShevchuk/piper-app/releases/download/g2pw-mini-v1/g2pw-mini.tar.gz")
         }
 
         public static var g2pwRequiredFiles: [String] {

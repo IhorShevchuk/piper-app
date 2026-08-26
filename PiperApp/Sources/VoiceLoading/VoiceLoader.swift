@@ -90,15 +90,24 @@ class VoiceLoader: NSObject {
                         throw Error.wrongModelInfo
                     }
 
-                    // If voice is pinyin (Chinese), ensure 2MB g2pw Phase 1 dicts are present
-                    // On-demand download keeps IPA/RAM lean, all zh voices share one cache
-                    if let info = try? ModelInfo.create(from: jsonLocalURL), info.isPinyin {
-                        // 0.5% weight for g2pw if needed (tiny)
+                    // Detect pinyin (Chinese) voices – phoneme_type == "pinyin" in config JSON
+                    // Pure on-demand: download 2MB dicts on first zh voice install (voice install already needs network)
+                    let isPinyinVoice: Bool = {
+                        // Fast path: language code from voice metadata
+                        if voice.language.code.lowercased().hasPrefix("zh") { return true }
+                        // Robust: parse downloaded JSON for phoneme_type
+                        guard let data = try? Data(contentsOf: jsonLocalURL),
+                              let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+                              let phonemeType = json["phoneme_type"] as? String else { return false }
+                        return phonemeType.lowercased() == "pinyin"
+                    }()
+
+                    if isPinyinVoice {
                         do {
                             try await G2PWDataManager.ensureInstalled()
                         } catch {
-                            Log.error("Failed to ensure g2pw data: \(error) – will try bundle fallback at synthesis time")
-                            // Don't fail voice download; piper will fallback to bundle copy if present
+                            Log.error("Failed to ensure g2pw data: \(error) – synthesis may fail until next install")
+                            // Don't fail voice download; user can retry, and synthesis will fallback to model folder if present
                         }
                     }
 
