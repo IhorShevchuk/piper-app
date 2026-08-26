@@ -147,7 +147,6 @@ let project = Project(
             product: .staticFramework,
             bundleId: "$(PRODUCT_BUNDLE_IDENTIFIER)",
             sources: ["\(sharedUtilsName)/**"],
-            resources: ["\(sharedUtilsName)/Resources/**"],
             settings: .settings(configurations: [
                 .debug(name: "Debug",
                        xcconfig: "\(configsPath)/utils_debug.xcconfig"),

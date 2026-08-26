@@ -213,19 +213,15 @@ public class PiperTTSAudioUnit: AVSpeechSynthesisProviderAudioUnit {
         var dataDir: String? = modelFolder.path(percentEncoded: false)
 
         if model.isPinyin {
-            // Try to ensure g2pw is present via fast bundle copy (sync, 2MB, no network)
-            // If not in bundle, async download will have been triggered on voice install
-            if !FileManager.Constants.g2pwFileExists() {
-                _ = G2PWDataManager.copyFromBundleIfAvailable()
-            }
-            // Ensure shared g2pw folder is used if available (on-demand download on first zh voice)
+            // Pure on-demand: shared g2pw folder downloaded on first zh voice install
+            // Voice install already requires network, so no extra failure mode.
+            // Synthesis stays offline once cached.
             if let sharedG2PW = FileManager.Constants.g2pwFolderURL,
                FileManager.Constants.g2pwFileExists() {
                 g2pwDir = sharedG2PW.path(percentEncoded: false)
-                // dataDir can stay as modelFolder – piper will also probe dataDir/g2pw and dataDir itself
-                // but we set g2pwModelDir explicitly to shared folder for reliability
             } else {
-                // Fallback: try model folder (if voice archive bundled dicts) – Phase 1 works without onnx
+                // Fallback: try model folder (if voice archive ever bundles dicts)
+                // Phase 1 works without onnx, so this still covers 95% chars
                 g2pwDir = modelFolder.path(percentEncoded: false)
             }
         } else {
