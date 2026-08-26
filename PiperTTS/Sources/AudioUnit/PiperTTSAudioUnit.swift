@@ -205,8 +205,19 @@ public class PiperTTSAudioUnit: AVSpeechSynthesisProviderAudioUnit {
             return
         }
         if model == self.model && piper != nil { return }
-        piper = Piper(modelPath: paths.model.path(percentEncoded: false),
-                      andConfigPath: paths.json.path(percentEncoded: false))
+        // Use modern options API to support Chinese pinyin voices (chaowen, xiao_ya)
+        // which require dataDir / g2pwModelDir. Passing model folder as dataDir
+        // allows piper to discover MONOPHONIC_CHARS.txt etc. if present.
+        let modelFolder = paths.model.deletingLastPathComponent()
+        let options = PiperCreateOptions(
+            modelPath: paths.model.path(percentEncoded: false),
+            configPath: paths.json.path(percentEncoded: false),
+            espeakDataPath: nil,
+            dataDir: modelFolder.path(percentEncoded: false),
+            g2pwModelDir: modelFolder.path(percentEncoded: false)
+        )
+        piper = Piper(options: options) ?? Piper(modelPath: paths.model.path(percentEncoded: false),
+                                                 andConfigPath: paths.json.path(percentEncoded: false))
 
         Log.debug("Piper Created")
 #if os(iOS)

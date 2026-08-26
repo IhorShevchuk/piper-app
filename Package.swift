@@ -1,19 +1,5 @@
-// swift-tools-version: 5.9
-// SPDX-License-Identifier: MIT
-// Copyright (c) 2026 Ihor Shevchuk
-//
-// Tuist XcodeProj-based SPM integration: declare dependencies here, then reference in
-// Project.swift via .external(name: "ProductName"). Run `mise run install` then `mise run generate` to resolve.
-
+// swift-tools-version:5.9
 import PackageDescription
-
-#if TUIST
-    import ProjectDescription
-
-    let packageSettings = PackageSettings(
-        productTypes: [:]
-    )
-#endif
 
 let package = Package(
     name: "Piper",
