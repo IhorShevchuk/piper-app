@@ -1,0 +1,12 @@
+{
+  "data" : [
+    {
+      "filename" : "bopomofo_to_pinyin_wo_tune_dict.json",
+      "universal" : true
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}
