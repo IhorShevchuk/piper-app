@@ -206,16 +206,15 @@ public class PiperTTSAudioUnit: AVSpeechSynthesisProviderAudioUnit {
         }
         if model == self.model && piper != nil { return }
         // Modern options API to support Chinese pinyin voices (chaowen, xiao_ya)
-        // Pure on-demand: 2MB Phase 1 dicts are downloaded on first zh voice install
-        // (voice install already needs network, so no extra failure mode)
-        // Once cached in group.pipertts.data/g2pw, synthesis works offline
+        // Option 5: xcassets compressed (300K IPA, lazy-loaded via NSDataAsset, offline)
+        // Once copied to group.pipertts.data/g2pw, all zh voices share one cache and synthesis works offline
         let modelFolder = paths.model.deletingLastPathComponent()
         var g2pwDir: String? = nil
         var dataDir: String? = modelFolder.path(percentEncoded: false)
 
         // Detect Chinese voices by language code (zh_CN) – all zh voices are pinyin in current piper1-gpl
         if model.language.code.lowercased().hasPrefix("zh") {
-            // Prefer shared g2pw folder (on-demand download) to keep RAM/IPA lean
+            // Prefer shared g2pw folder (xcassets copy) to keep RAM/IPA lean
             if let sharedG2PW = FileManager.Constants.g2pwFolderURL,
                FileManager.default.fileExists(atPath: sharedG2PW.path) {
                 // Check if required files are present in shared folder

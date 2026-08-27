@@ -91,7 +91,7 @@ class VoiceLoader: NSObject {
                     }
 
                     // Detect pinyin (Chinese) voices – phoneme_type == "pinyin" in config JSON
-                    // Pure on-demand: download 2MB dicts on first zh voice install (voice install already needs network)
+                    // Option 5: xcassets compressed (300K IPA, offline, lazy-loaded)
                     let isPinyinVoice: Bool = {
                         // Fast path: language code from voice metadata
                         if voice.language.code.lowercased().hasPrefix("zh") { return true }

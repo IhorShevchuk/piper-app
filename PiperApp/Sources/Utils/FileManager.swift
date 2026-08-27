@@ -36,8 +36,7 @@ extension FileManager {
         try fileManager.markFileAsUnprotected(at: destination.model)
 
         // For Chinese pinyin voices, also copy shared g2pw Phase 1 dicts into voice folder
-        // so legacy Piper init (modelPath only) can still find them via dataDir = modelFolder
-        // This keeps all changes isolated to PiperApp folder – PiperTTS can stay unchanged
+        // so Piper can find them via dataDir/g2pwModelDir (offline synthesis)
         if let info = paths.info, info.language.code.lowercased().hasPrefix("zh") {
             if let g2pwFolder = FileManager.Constants.g2pwFolderURL,
                FileManager.Constants.g2pwFileExists(),
