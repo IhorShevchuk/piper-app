@@ -28,8 +28,6 @@ extension FileManager {
             return sharedFolder?.appendingPathComponent(PiperAppUtils.Constants.modelJSONFileNameWithExtension)
         }
 
-        // MARK: - g2pw (Chinese pinyin Phase 1) – xcassets compressed, 300K IPA, offline
-
         public static var g2pwFolderName: String { "g2pw" }
 
         public static var g2pwFolderURL: URL? {

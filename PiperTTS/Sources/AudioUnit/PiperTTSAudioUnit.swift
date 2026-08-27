@@ -205,30 +205,22 @@ public class PiperTTSAudioUnit: AVSpeechSynthesisProviderAudioUnit {
             return
         }
         if model == self.model && piper != nil { return }
-        // Modern options API to support Chinese pinyin voices (chaowen, xiao_ya)
-        // Option 5: xcassets compressed (300K IPA, lazy-loaded via NSDataAsset, offline)
-        // Once copied to group.pipertts.data/g2pw, all zh voices share one cache and synthesis works offline
         let modelFolder = paths.model.deletingLastPathComponent()
         var g2pwDir: String? = nil
         var dataDir: String? = modelFolder.path(percentEncoded: false)
 
-        // Detect Chinese voices by language code (zh_CN) – all zh voices are pinyin in current piper1-gpl
         if model.language.code.lowercased().hasPrefix("zh") {
-            // Prefer shared g2pw folder (xcassets copy) to keep RAM/IPA lean
             if let sharedG2PW = FileManager.Constants.g2pwFolderURL,
                FileManager.default.fileExists(atPath: sharedG2PW.path) {
-                // Check if required files are present in shared folder
                 let fm = FileManager.default
                 let hasFiles = ["MONOPHONIC_CHARS.txt", "char_bopomofo_dict.json", "bopomofo_to_pinyin_wo_tune_dict.json"]
                     .allSatisfy { fm.fileExists(atPath: sharedG2PW.appendingPathComponent($0).path) }
                 if hasFiles {
                     g2pwDir = sharedG2PW.path(percentEncoded: false)
                 } else {
-                    // Fallback: model folder may contain g2pw files (copied during install)
                     g2pwDir = modelFolder.path(percentEncoded: false)
                 }
             } else {
-                // Fallback: try model folder (voice folder may contain g2pw files if copied during install)
                 g2pwDir = modelFolder.path(percentEncoded: false)
             }
         }

@@ -90,12 +90,8 @@ class VoiceLoader: NSObject {
                         throw Error.wrongModelInfo
                     }
 
-                    // Detect pinyin (Chinese) voices – phoneme_type == "pinyin" in config JSON
-                    // Option 5: xcassets compressed (300K IPA, offline, lazy-loaded)
                     let isPinyinVoice: Bool = {
-                        // Fast path: language code from voice metadata
                         if voice.language.code.lowercased().hasPrefix("zh") { return true }
-                        // Robust: parse downloaded JSON for phoneme_type
                         guard let data = try? Data(contentsOf: jsonLocalURL),
                               let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
                               let phonemeType = json["phoneme_type"] as? String else { return false }
@@ -106,8 +102,7 @@ class VoiceLoader: NSObject {
                         do {
                             try G2PWDataManager.ensureInstalled()
                         } catch {
-                            Log.error("Failed to ensure g2pw data: \(error) – synthesis may fail until next install")
-                            // Don't fail voice download; user can retry, and synthesis will fallback to model folder if present
+                            Log.error("Failed to ensure g2pw data: \(error)")
                         }
                     }
 
