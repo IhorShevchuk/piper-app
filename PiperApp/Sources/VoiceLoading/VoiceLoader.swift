@@ -104,7 +104,7 @@ class VoiceLoader: NSObject {
 
                     if isPinyinVoice {
                         do {
-                            try await G2PWDataManager.ensureInstalled()
+                            try G2PWDataManager.ensureInstalled()
                         } catch {
                             Log.error("Failed to ensure g2pw data: \(error) – synthesis may fail until next install")
                             // Don't fail voice download; user can retry, and synthesis will fallback to model folder if present

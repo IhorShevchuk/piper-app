@@ -11,7 +11,7 @@ import UIKit
 /// - Files are stored as NSDataAsset in PiperApp/Resources/G2PW.xcassets
 /// - IPA hit is ~300K compressed (vs 1.9M raw), RAM stays lean (loaded only on first zh voice)
 /// - Once copied to App Group `g2pw/`, all zh voices share one cache and synthesis works offline
-/// - No network, no download failures, no GitHub dependency
+/// - No network, no download, no GitHub dependency – pure offline
 public enum G2PWDataManager {
     public enum Error: Swift.Error {
         case noG2PWFolder
@@ -28,12 +28,11 @@ public enum G2PWDataManager {
     }
 
     /// Ensure Phase 1 dictionaries are present, copying from xcassets if needed.
-    public static func ensureInstalled() async throws {
+    public static func ensureInstalled() throws {
         if isInstalled { return }
-        // Primary: copy from xcassets (offline, 300K compressed, no network)
-        if copyFromAssetCatalog() { return }
-        // Fallback: try GitHub download (should rarely happen, kept for safety)
-        try await downloadIndividualFiles()
+        guard copyFromAssetCatalog() else {
+            throw Error.copyFailed
+        }
     }
 
     /// Copy from xcassets NSDataAsset to shared App Group folder
@@ -55,7 +54,7 @@ public enum G2PWDataManager {
 
             // NSDataAsset loads compressed data from xcassets, decompresses lazily on first access
             guard let dataAsset = NSDataAsset(name: assetName, bundle: Bundle.main) else {
-                // Try without bundle (main bundle fallback for tests)
+                // Fallback for tests where main bundle may not contain assets
                 if let fallback = NSDataAsset(name: assetName) {
                     do {
                         try fallback.data.write(to: dest, options: .atomic)
@@ -81,32 +80,7 @@ public enum G2PWDataManager {
         return allCopied && isInstalled
     }
 
-    public static func downloadIndividualFiles() async throws {
-        guard let folder = folderURL else { throw Error.noG2PWFolder }
-        let fm = FileManager.default
-        try fm.createDirectory(at: folder, withIntermediateDirectories: true, attributes: [.protectionKey: FileProtectionType.none])
-
-        // Fallback to GitHub release if xcassets not available (e.g., tests)
-        let base = "https://github.com/IhorShevchuk/piper-app/releases/download/g2pw-mini-v1"
-        for file in FileManager.Constants.g2pwRequiredFiles {
-            let dest = folder.appendingPathComponent(file)
-            if fm.fileExists(atPath: dest.path) { continue }
-            guard let url = URL(string: "\(base)/\(file)") else { continue }
-            do {
-                let (tmp, _) = try await URLSession.shared.download(from: url)
-                if fm.fileExists(atPath: dest.path) {
-                    try? fm.removeItem(at: dest)
-                }
-                try fm.moveItem(at: tmp, to: dest)
-                try FileManager.default.setAttributes([.protectionKey: FileProtectionType.none], ofItemAtPath: dest.path)
-            } catch {
-                throw Error.copyFailed
-            }
-        }
-        guard isInstalled else { throw Error.copyFailed }
-    }
-
-    /// Copy shared g2pw files into a voice's model folder so legacy Piper init can find them
+    /// Copy shared g2pw files into a voice's model folder for offline synthesis
     public static func copyToModelFolder(_ modelFolder: URL) throws {
         guard let g2pwFolder = folderURL, isInstalled else { return }
         let fm = FileManager.default
