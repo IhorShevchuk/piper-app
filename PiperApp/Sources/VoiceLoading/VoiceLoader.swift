@@ -63,6 +63,11 @@ class VoiceLoader: NSObject {
         return URL(string: "\(Constants.sampesBaseURL)/\(path)")
     }
 
+
+    private func isPinyinVoice(_ voice: Voice) -> Bool {
+        voice.language.code.lowercased().hasPrefix("zh")
+    }
+
     func download(voice: Voice) -> AsyncThrowingStream<DownloadEvent, Swift.Error> {
         AsyncThrowingStream { continuation in
             Task {
@@ -90,15 +95,7 @@ class VoiceLoader: NSObject {
                         throw Error.wrongModelInfo
                     }
 
-                    let isPinyinVoice: Bool = {
-                        if voice.language.code.lowercased().hasPrefix("zh") { return true }
-                        guard let data = try? Data(contentsOf: jsonLocalURL),
-                              let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-                              let phonemeType = json["phoneme_type"] as? String else { return false }
-                        return phonemeType.lowercased() == "pinyin"
-                    }()
-
-                    if isPinyinVoice {
+                    if isPinyinVoice(voice) {
                         do {
                             try G2PWDataManager.ensureInstalled()
                         } catch {

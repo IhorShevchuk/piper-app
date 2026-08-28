@@ -2,7 +2,7 @@
   "data" : [
     {
       "filename" : "MONOPHONIC_CHARS.txt",
-      "universal" : true
+      "idiom" : "universal"
     }
   ],
   "info" : {

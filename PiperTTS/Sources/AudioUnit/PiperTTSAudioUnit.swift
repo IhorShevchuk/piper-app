@@ -206,15 +206,15 @@ public class PiperTTSAudioUnit: AVSpeechSynthesisProviderAudioUnit {
         }
         if model == self.model && piper != nil { return }
         let modelFolder = paths.model.deletingLastPathComponent()
-        var g2pwDir: String? = nil
+        var g2pwDir: String?
         var dataDir: String? = modelFolder.path(percentEncoded: false)
 
         if model.language.code.lowercased().hasPrefix("zh") {
             if let sharedG2PW = FileManager.Constants.g2pwFolderURL,
                FileManager.default.fileExists(atPath: sharedG2PW.path) {
-                let fm = FileManager.default
+                let fileManager = FileManager.default
                 let hasFiles = ["MONOPHONIC_CHARS.txt", "char_bopomofo_dict.json", "bopomofo_to_pinyin_wo_tune_dict.json"]
-                    .allSatisfy { fm.fileExists(atPath: sharedG2PW.appendingPathComponent($0).path) }
+                    .allSatisfy { fileManager.fileExists(atPath: sharedG2PW.appendingPathComponent($0).path) }
                 if hasFiles {
                     g2pwDir = sharedG2PW.path(percentEncoded: false)
                 } else {
@@ -251,7 +251,6 @@ public class PiperTTSAudioUnit: AVSpeechSynthesisProviderAudioUnit {
         piper?.delegate = self
         self.model = model
     }
-
 
     public override var speechVoices: [AVSpeechSynthesisProviderVoice] {
         get { AVSpeechSynthesisProviderVoice.supportedVoices }

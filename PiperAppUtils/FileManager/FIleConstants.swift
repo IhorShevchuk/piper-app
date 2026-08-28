@@ -44,8 +44,8 @@ extension FileManager {
 
         public static func g2pwFileExists() -> Bool {
             guard let folder = g2pwFolderURL else { return false }
-            let fm = FileManager.default
-            return g2pwRequiredFiles.allSatisfy { fm.fileExists(atPath: folder.appendingPathComponent($0).path) }
+            let fileManager = FileManager.default
+            return g2pwRequiredFiles.allSatisfy { fileManager.fileExists(atPath: folder.appendingPathComponent($0).path) }
         }
     }
 }

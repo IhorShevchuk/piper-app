@@ -32,9 +32,9 @@ public enum G2PWDataManager {
     @discardableResult
     public static func copyFromAssetCatalog() -> Bool {
         guard let folder = folderURL else { return false }
-        let fm = FileManager.default
+        let fileManager = FileManager.default
         do {
-            try fm.createDirectory(at: folder, withIntermediateDirectories: true, attributes: [.protectionKey: FileProtectionType.none])
+            try fileManager.createDirectory(at: folder, withIntermediateDirectories: true, attributes: [.protectionKey: FileProtectionType.none])
         } catch {
             return false
         }
@@ -43,13 +43,13 @@ public enum G2PWDataManager {
         for file in FileManager.Constants.g2pwRequiredFiles {
             let assetName = (file as NSString).deletingPathExtension
             let dest = folder.appendingPathComponent(file)
-            if fm.fileExists(atPath: dest.path) { continue }
+            if fileManager.fileExists(atPath: dest.path) { continue }
 
             guard let dataAsset = NSDataAsset(name: assetName, bundle: Bundle.main) else {
                 if let fallback = NSDataAsset(name: assetName) {
                     do {
                         try fallback.data.write(to: dest, options: .atomic)
-                        try fm.setAttributes([.protectionKey: FileProtectionType.none], ofItemAtPath: dest.path)
+                        try fileManager.setAttributes([.protectionKey: FileProtectionType.none], ofItemAtPath: dest.path)
                         continue
                     } catch {
                         allCopied = false
@@ -62,7 +62,7 @@ public enum G2PWDataManager {
 
             do {
                 try dataAsset.data.write(to: dest, options: .atomic)
-                try fm.setAttributes([.protectionKey: FileProtectionType.none], ofItemAtPath: dest.path)
+                try fileManager.setAttributes([.protectionKey: FileProtectionType.none], ofItemAtPath: dest.path)
             } catch {
                 allCopied = false
             }
@@ -77,9 +77,9 @@ public enum G2PWDataManager {
         for file in FileManager.Constants.g2pwRequiredFiles {
             let src = g2pwFolder.appendingPathComponent(file)
             let dest = modelFolder.appendingPathComponent(file)
-            if fm.fileExists(atPath: dest.path) { continue }
-            try? fm.copyItem(at: src, to: dest)
-            try? fm.setAttributes([.protectionKey: FileProtectionType.none], ofItemAtPath: dest.path)
+            if fileManager.fileExists(atPath: dest.path) { continue }
+            try? fileManager.copyItem(at: src, to: dest)
+            try? fileManager.setAttributes([.protectionKey: FileProtectionType.none], ofItemAtPath: dest.path)
         }
     }
 }
