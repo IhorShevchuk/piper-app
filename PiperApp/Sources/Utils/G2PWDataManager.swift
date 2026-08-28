@@ -73,7 +73,7 @@ public enum G2PWDataManager {
 
     public static func copyToModelFolder(_ modelFolder: URL) throws {
         guard let g2pwFolder = folderURL, isInstalled else { return }
-        let fm = FileManager.default
+        let fileManager = FileManager.default
         for file in FileManager.Constants.g2pwRequiredFiles {
             let src = g2pwFolder.appendingPathComponent(file)
             let dest = modelFolder.appendingPathComponent(file)
