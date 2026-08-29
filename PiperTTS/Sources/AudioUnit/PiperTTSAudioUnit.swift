@@ -24,7 +24,7 @@ public class PiperTTSAudioUnit: AVSpeechSynthesisProviderAudioUnit {
 
     private let outputRecurseCallNumberMax: UInt32 = 200
     private let baseDelayMicroseconds: UInt32 = 500
-    internal let maxBufferDurationSeconds: Double = 5.0
+    internal let maxBufferDurationSeconds: Double = 120.0
     internal let maxSamplesCount: Int
 
     @objc override init(componentDescription: AudioComponentDescription, options: AudioComponentInstantiationOptions) throws {
