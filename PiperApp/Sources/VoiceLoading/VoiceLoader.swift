@@ -63,7 +63,6 @@ class VoiceLoader: NSObject {
         return URL(string: "\(Constants.sampesBaseURL)/\(path)")
     }
 
-
     private func isPinyinVoice(_ voice: Voice, configURL: URL) -> Bool {
         if voice.language.code.lowercased().hasPrefix("zh") { return true }
         guard let data = try? Data(contentsOf: configURL) else { return false }

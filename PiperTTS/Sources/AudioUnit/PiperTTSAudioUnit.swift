@@ -207,7 +207,7 @@ public class PiperTTSAudioUnit: AVSpeechSynthesisProviderAudioUnit {
         if model == self.model && piper != nil { return }
         let modelFolder = paths.model.deletingLastPathComponent()
         var g2pwDir: String?
-        var dataDir: String? = modelFolder.path(percentEncoded: false)
+        let dataDir: String? = modelFolder.path(percentEncoded: false)
 
         if model.language.code.lowercased().hasPrefix("zh") {
             if let sharedG2PW = FileManager.Constants.g2pwFolderURL,

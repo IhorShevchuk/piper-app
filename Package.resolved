@@ -1,32 +1,32 @@
 {
-  "pins": [
+  "pins" : [
     {
-      "identity": "espeak-ng-spm",
-      "kind": "remoteSourceControl",
-      "location": "https://github.com/IhorShevchuk/espeak-ng-spm.git",
-      "state": {
-        "revision": "8ffabfe9998f6d7f5fb768f5489ea4b7873e2829",
-        "version": "2026.4.7"
+      "identity" : "espeak-ng-spm",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/IhorShevchuk/espeak-ng-spm.git",
+      "state" : {
+        "revision" : "8ffabfe9998f6d7f5fb768f5489ea4b7873e2829",
+        "version" : "2026.4.7"
       }
     },
     {
-      "identity": "piper-objc",
-      "kind": "remoteSourceControl",
-      "location": "https://github.com/IhorShevchuk/piper-objc",
-      "state": {
-        "revision": "2d5289ac3065e052191c489fca8345af8d83b2c7",
-        "version": "0.2.36"
+      "identity" : "piper-objc",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/IhorShevchuk/piper-objc",
+      "state" : {
+        "revision" : "2d5289ac3065e052191c489fca8345af8d83b2c7",
+        "version" : "0.2.36"
       }
     },
     {
-      "identity": "piper1-gpl-spm",
-      "kind": "remoteSourceControl",
-      "location": "https://github.com/IhorShevchuk/piper1-gpl-spm.git",
-      "state": {
-        "revision": "042036eb0a1059f4d5daeb39036719f28cf6a578",
-        "version": "0.1.12"
+      "identity" : "piper1-gpl-spm",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/IhorShevchuk/piper1-gpl-spm.git",
+      "state" : {
+        "revision" : "3d6ef9e281671fc553850fbc5c49cd540c559987",
+        "version" : "0.1.15"
       }
     }
   ],
-  "version": 2
+  "version" : 2
 }

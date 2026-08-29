@@ -6,6 +6,9 @@ import PiperAppUtils
 #if canImport(UIKit)
 import UIKit
 #endif
+#if canImport(AppKit)
+import AppKit
+#endif
 
 public enum G2PWDataManager {
     public enum Error: Swift.Error {
