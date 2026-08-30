@@ -35,16 +35,20 @@ final class AudioUnitIntegrationTests: XCTestCase {
         XCTAssertEqual(result.action, "render", "Long paragraph should render, not complete early")
         XCTAssertEqual(result.copied, frameCount)
 
-        // Simulate draining 10 frames
+        // Simulate draining all frames
         var remaining = longParagraphSamples
         var renders = 0
         while remaining > 0 && renders < 3000 {
             let renderResult = simulateRender(availableCount: remaining, frameCount: frameCount, completed: false)
-            XCTAssertEqual(renderResult.action, "render")
+            XCTAssertEqual(renderResult.action, "render", "Should keep rendering while data remains")
+            XCTAssertGreaterThan(renderResult.copied, 0)
+            XCTAssertLessThanOrEqual(renderResult.copied, frameCount)
             remaining -= renderResult.copied
             renders += 1
         }
-        XCTAssertEqual(remaining, longParagraphSamples % frameCount == 0 ? 0 : longParagraphSamples - renders * frameCount)
+        XCTAssertEqual(remaining, 0, "All samples should be consumed after draining")
+        // ceil(2_646_000 / 1024) = 2584 renders (last partial 1008 samples)
+        XCTAssertEqual(renders, 2584, "Expected ceil division renders for 120s buffer")
 
         // After draining but not completed, should retry, not complete
         let afterDrainNotCompleted = simulateRender(availableCount: 0, frameCount: frameCount, completed: false)
