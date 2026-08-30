@@ -24,7 +24,7 @@ public class PiperTTSAudioUnit: AVSpeechSynthesisProviderAudioUnit {
 
     private let outputRecurseCallNumberMax: UInt32 = 200
     private let baseDelayMicroseconds: UInt32 = 500
-    internal let maxBufferDurationSeconds: Double = 5.0
+    internal let maxBufferDurationSeconds: Double = 120.0
     internal let maxSamplesCount: Int
 
     @objc override init(componentDescription: AudioComponentDescription, options: AudioComponentInstantiationOptions) throws {
@@ -205,10 +205,42 @@ public class PiperTTSAudioUnit: AVSpeechSynthesisProviderAudioUnit {
             return
         }
         if model == self.model && piper != nil { return }
-        piper = Piper(modelPath: paths.model.path(percentEncoded: false),
-                      andConfigPath: paths.json.path(percentEncoded: false))
+        let modelFolder = paths.model.deletingLastPathComponent()
+        var g2pwDir: String?
+        let dataDir: String? = modelFolder.path(percentEncoded: false)
 
-        Log.debug("Piper Created")
+        if model.language.code.lowercased().hasPrefix("zh") {
+            if let sharedG2PW = FileManager.Constants.g2pwFolderURL,
+               FileManager.default.fileExists(atPath: sharedG2PW.path) {
+                let fileManager = FileManager.default
+                let hasFiles = ["MONOPHONIC_CHARS.txt", "char_bopomofo_dict.json", "bopomofo_to_pinyin_wo_tune_dict.json"]
+                    .allSatisfy { fileManager.fileExists(atPath: sharedG2PW.appendingPathComponent($0).path) }
+                if hasFiles {
+                    g2pwDir = sharedG2PW.path(percentEncoded: false)
+                } else {
+                    g2pwDir = modelFolder.path(percentEncoded: false)
+                }
+            } else {
+                g2pwDir = modelFolder.path(percentEncoded: false)
+            }
+        }
+
+        if let g2pwDir = g2pwDir {
+            let options = PiperCreateOptions(
+                modelPath: paths.model.path(percentEncoded: false),
+                configPath: paths.json.path(percentEncoded: false),
+                espeakDataPath: nil,
+                dataDir: dataDir,
+                g2pwModelDir: g2pwDir
+            )
+            piper = Piper(options: options) ?? Piper(modelPath: paths.model.path(percentEncoded: false),
+                                                     andConfigPath: paths.json.path(percentEncoded: false))
+            Log.debug("Piper Created with g2pwDir:\(g2pwDir) for zh voice")
+        } else {
+            piper = Piper(modelPath: paths.model.path(percentEncoded: false),
+                          andConfigPath: paths.json.path(percentEncoded: false))
+            Log.debug("Piper Created")
+        }
 #if os(iOS)
         let availableMemory = Int64(Double(os_proc_available_memory()) * 0.9)
         if availableMemory > 0 {

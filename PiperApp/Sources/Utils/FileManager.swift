@@ -34,6 +34,20 @@ extension FileManager {
         try fileManager.markFileAsUnprotected(at: destination.json)
         try fileManager.copyItem(at: paths.model, to: destination.model)
         try fileManager.markFileAsUnprotected(at: destination.model)
+
+        if let info = paths.info, info.language.code.lowercased().hasPrefix("zh") {
+            if let g2pwFolder = FileManager.Constants.g2pwFolderURL,
+               FileManager.Constants.g2pwFileExists(),
+               let modelFolder = destination.modelFolder {
+                for file in FileManager.Constants.g2pwRequiredFiles {
+                    let src = g2pwFolder.appendingPathComponent(file)
+                    let dest = modelFolder.appendingPathComponent(file)
+                    if fileManager.fileExists(atPath: dest.path) { continue }
+                    try? fileManager.copyItem(at: src, to: dest)
+                    try? fileManager.markFileAsUnprotected(at: dest)
+                }
+            }
+        }
         var installedModels = FileManager.ModelPaths.installedModels
         installedModels.append(destination)
         FileManager.ModelPaths.installedModels = installedModels

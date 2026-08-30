@@ -63,6 +63,13 @@ class VoiceLoader: NSObject {
         return URL(string: "\(Constants.sampesBaseURL)/\(path)")
     }
 
+    private func isPinyinVoice(_ voice: Voice, configURL: URL) -> Bool {
+        if voice.language.code.lowercased().hasPrefix("zh") { return true }
+        guard let data = try? Data(contentsOf: configURL) else { return false }
+        guard let config = try? JSONDecoder().decode(VoiceConfig.self, from: data) else { return false }
+        return config.phonemeType?.lowercased() == "pinyin"
+    }
+
     func download(voice: Voice) -> AsyncThrowingStream<DownloadEvent, Swift.Error> {
         AsyncThrowingStream { continuation in
             Task {
@@ -88,6 +95,14 @@ class VoiceLoader: NSObject {
                     if (try? ModelInfo.create(from: jsonLocalURL)) == nil {
                         try? FileManager.default.removeItem(at: jsonLocalURL)
                         throw Error.wrongModelInfo
+                    }
+
+                    if isPinyinVoice(voice, configURL: jsonLocalURL) {
+                        do {
+                            try G2PWDataManager.ensureInstalled()
+                        } catch {
+                            Log.error("Failed to ensure g2pw data: \(error)")
+                        }
                     }
 
                     // Model is large → weight 95%

@@ -27,5 +27,25 @@ extension FileManager {
         public static var jsonModelURL: URL? {
             return sharedFolder?.appendingPathComponent(PiperAppUtils.Constants.modelJSONFileNameWithExtension)
         }
+
+        public static var g2pwFolderName: String { "g2pw" }
+
+        public static var g2pwFolderURL: URL? {
+            return sharedFolder?.appendingPathComponent(g2pwFolderName)
+        }
+
+        public static var g2pwRequiredFiles: [String] {
+            [
+                "MONOPHONIC_CHARS.txt",
+                "char_bopomofo_dict.json",
+                "bopomofo_to_pinyin_wo_tune_dict.json"
+            ]
+        }
+
+        public static func g2pwFileExists() -> Bool {
+            guard let folder = g2pwFolderURL else { return false }
+            let fileManager = FileManager.default
+            return g2pwRequiredFiles.allSatisfy { fileManager.fileExists(atPath: folder.appendingPathComponent($0).path) }
+        }
     }
 }

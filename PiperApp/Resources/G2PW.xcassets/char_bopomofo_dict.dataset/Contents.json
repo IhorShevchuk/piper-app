@@ -1,0 +1,12 @@
+{
+  "data" : [
+    {
+      "filename" : "char_bopomofo_dict.json",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}
