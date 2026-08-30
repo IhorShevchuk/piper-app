@@ -13,15 +13,10 @@ final class AudioUnitIntegrationTests: XCTestCase {
 
     private func simulateRender(availableCount: Int, frameCount: Int, completed: Bool) -> (action: String, copied: Int) {
         let intFrameCount = frameCount
-        let countToCopy = min(availableCount, intFrameCount)
-
-        if countToCopy < intFrameCount {
-            let completedRendering = completed
-            if completedRendering && availableCount == 0 {
+        if availableCount == 0 {
+            if completed {
                 return ("complete", 0)
-            }
-            // Would recurse up to 200 times in real AU, here we simulate one retry
-            if !completedRendering {
+            } else {
                 return ("retry", 0)
             }
         }
