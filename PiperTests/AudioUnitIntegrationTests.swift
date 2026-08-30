@@ -17,7 +17,7 @@ final class AudioUnitIntegrationTests: XCTestCase {
 
         if countToCopy < intFrameCount {
             let completedRendering = completed
-            if (completedRendering && availableCount == 0) {
+            if completedRendering && availableCount == 0 {
                 return ("complete", 0)
             }
             // Would recurse up to 200 times in real AU, here we simulate one retry
@@ -44,9 +44,9 @@ final class AudioUnitIntegrationTests: XCTestCase {
         var remaining = longParagraphSamples
         var renders = 0
         while remaining > 0 && renders < 3000 {
-            let r = simulateRender(availableCount: remaining, frameCount: frameCount, completed: false)
-            XCTAssertEqual(r.action, "render")
-            remaining -= r.copied
+            let renderResult = simulateRender(availableCount: remaining, frameCount: frameCount, completed: false)
+            XCTAssertEqual(renderResult.action, "render")
+            remaining -= renderResult.copied
             renders += 1
         }
         XCTAssertEqual(remaining, longParagraphSamples % frameCount == 0 ? 0 : longParagraphSamples - renders * frameCount)
