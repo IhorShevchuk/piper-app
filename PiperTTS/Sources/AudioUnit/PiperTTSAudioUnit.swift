@@ -22,8 +22,8 @@ public class PiperTTSAudioUnit: AVSpeechSynthesisProviderAudioUnit {
     internal var outputData = FloatRingBuffer()
     private var outputRecurseCallNumber = 0
 
-    private let outputRecurseCallNumberMax: UInt32 = 200
-    private let baseDelayMicroseconds: UInt32 = 500
+    private let outputRecurseCallNumberMax: UInt32 = 400
+    private let baseDelayMicroseconds: UInt32 = 5000
     internal let maxBufferDurationSeconds: Double = 120.0
     internal let maxSamplesCount: Int
 
