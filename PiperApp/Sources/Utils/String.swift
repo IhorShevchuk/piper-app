@@ -41,6 +41,11 @@ extension String {
     }
 
     var localizedLanguageFromCode: String {
-        Locale.current.localizedString(forIdentifier: self) ?? self
+        if let name = Locale.current.localizedString(forIdentifier: self) {
+            return name
+        }
+        // Fall back to the language part for invalid identifiers like ja_JA.
+        let languageCode = components(separatedBy: CharacterSet(charactersIn: "_-")).first ?? self
+        return Locale.current.localizedString(forLanguageCode: languageCode) ?? self
     }
 }
