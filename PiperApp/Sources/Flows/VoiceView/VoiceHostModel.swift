@@ -40,15 +40,17 @@ class VoiceHostModel: @unchecked Sendable, ObservableObject {
     }
 
     func updateSample() {
-        guard let sampleJSONData = NSDataAsset(name: "Samples")?.data else {
+        guard let sampleJSONData = NSDataAsset(name: "Samples")?.data,
+              let language = viewModel.paths.info?.language else {
             return
         }
 
         do {
             let decoder = JSONDecoder()
             let samples = try decoder.decode([String: String].self, from: sampleJSONData)
-            if  let code = viewModel.paths.info?.language.code,
-                let sample = samples[code] {
+            // Fall back to the language family so renamed codes (e.g. ja_JA
+            // becoming ja_JP upstream) still resolve to the right text.
+            if let sample = samples[language.code] ?? samples[language.family] {
                 viewModel.demoText = sample
             }
         } catch {
