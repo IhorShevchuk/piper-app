@@ -49,7 +49,7 @@ struct VoicesListView: View {
                 List {
                     Section {
                         ForEach(hostModel.viewModel.languages, id: \.self) { language in
-                            let title = Locale.current.localizedString(forIdentifier: language) ?? language
+                            let title = language.localizedLanguageFromCode
                             NavigationLink {
                                 voicesList(for: language, title: title)
                             } label: {
