@@ -105,16 +105,20 @@ class VoiceItemHostModel: @unchecked Sendable, ObservableObject {
             return
         }
 
-        setAudioSession(active: true)
-        viewModel.isSampleLoading = true
-
-        let item = AVPlayerItem(url: sampleURL)
         NotificationCenter.default.addObserver(self, selector: #selector(self.playerItemDidPlayToEndTime(notification:)),
                                                name: AVPlayerItem.didPlayToEndTimeNotification,
                                                object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(self.playerItemDidPlayToEndTime(notification:)),
                                                name: AVPlayerItem.failedToPlayToEndTimeNotification,
                                                object: nil)
+        playSample(voice: voice, url: sampleURL, fallbackAttempted: false)
+    }
+
+    private func playSample(voice: Voice, url: URL, fallbackAttempted: Bool) {
+        setAudioSession(active: true)
+        viewModel.isSampleLoading = true
+
+        let item = AVPlayerItem(url: url)
         audioPlayer = AVPlayer(playerItem: item)
         self.avPlayerRateObserver = audioPlayer?.observe(\.rate, options: [.new]) { [weak self] player, _ in
             self?.viewModel.isPlaying = player.rate == 1.0
@@ -123,11 +127,24 @@ class VoiceItemHostModel: @unchecked Sendable, ObservableObject {
         self.avItemStateObserver = item.observe(\.status, options: [.new]) { [weak self] item, _ in
             self?.viewModel.isSampleLoading = item.status != .readyToPlay && item.status != .failed
             if item.status == .failed {
-                self?.stopPlaying()
+                self?.handleSampleFailure(voice: voice, fallbackAttempted: fallbackAttempted)
             }
         }
         audioPlayer?.volume = 1.0
         audioPlayer?.play()
+    }
+
+    private func handleSampleFailure(voice: Voice, fallbackAttempted: Bool) {
+        // Our hosted sample may be missing; retry once with the community sample.
+        if !fallbackAttempted, let fallbackURL = loader.fallbackSampleURL(for: voice) {
+            audioPlayer?.pause()
+            audioPlayer = nil
+            avPlayerRateObserver = nil
+            avItemStateObserver = nil
+            playSample(voice: voice, url: fallbackURL, fallbackAttempted: true)
+        } else {
+            stopPlaying()
+        }
     }
 
     @objc func playerItemDidPlayToEndTime(notification: NSNotification) {
