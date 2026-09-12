@@ -21,7 +21,7 @@ class VoiceLoader: NSObject {
     }
     private enum Constants {
         static let baseURL = "https://huggingface.co/IhorShevchuk/piper1-voices-fp16-quantized/resolve/main"
-        static let sampesBaseURL = "https://rhasspy.github.io/piper-samples/samples"
+        static let communitySamplesBaseURL = "https://rhasspy.github.io/piper-samples/samples"
 
         static var voicesURL: URL? {
             return URL(string: "\(Constants.baseURL)/voices.json")
@@ -56,11 +56,18 @@ class VoiceLoader: NSObject {
         return Array(allVoices.values)
     }
 
-    func sampleURL(for voice: Voice, speaker: String = "0") -> URL? {
+    func sampleURL(for voice: Voice) -> URL? {
+        guard let modelPath = voice.modelPath else { return nil }
+        let directory = (modelPath as NSString).deletingLastPathComponent
+        return URL(string: "\(Constants.baseURL)/\(directory)/sample.mp3")
+    }
+
+    /// Community sample, used when our hosted sample is missing.
+    func fallbackSampleURL(for voice: Voice) -> URL? {
         let languageCode = voice.language.code
         let languageFamily = languageCode.split(separator: "_").first.map(String.init) ?? languageCode
-        let path = "\(languageFamily)/\(languageCode)/\(voice.name)/\(voice.quality)/speaker_\(speaker).mp3"
-        return URL(string: "\(Constants.sampesBaseURL)/\(path)")
+        let path = "\(languageFamily)/\(languageCode)/\(voice.name)/\(voice.quality)/speaker_0.mp3"
+        return URL(string: "\(Constants.communitySamplesBaseURL)/\(path)")
     }
 
     private func isPinyinVoice(_ voice: Voice, configURL: URL) -> Bool {
