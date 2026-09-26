@@ -22,6 +22,10 @@ public class PiperTTSAudioUnit: AVSpeechSynthesisProviderAudioUnit {
     internal var outputData = FloatRingBuffer()
     private var outputRecurseCallNumber = 0
 
+    private let requestGate = RequestGenerationGate()
+    /// Generation of the request currently being synthesized. Guarded by outputDataLock.
+    private var activeGeneration: UInt64 = 0
+
     private let outputRecurseCallNumberMax: UInt32 = 400
     private let baseDelayMicroseconds: UInt32 = 5000
     internal let maxBufferDurationSeconds: Double = 120.0
@@ -85,6 +89,7 @@ public class PiperTTSAudioUnit: AVSpeechSynthesisProviderAudioUnit {
       renderEvents: UnsafePointer<AURenderEvent>?,
       renderPull: AURenderPullInputBlock?
     ) -> AUAudioUnitStatus {
+        let renderGeneration = requestGate.currentGeneration
 
         guard let piper = self.piper else {
             Log.error("Piper is nil while request for rendering came.")
@@ -122,7 +127,7 @@ public class PiperTTSAudioUnit: AVSpeechSynthesisProviderAudioUnit {
                     guard let self else { return true }
                     os_unfair_lock_lock(&self.outputDataLock)
                     let hasEnoughData = self.outputData.count >= intFrameCount
-                    let isCancelled = self.request == nil
+                    let isCancelled = self.request == nil || !self.requestGate.isCurrent(renderGeneration)
                     os_unfair_lock_unlock(&self.outputDataLock)
                     return piper.completed() || hasEnoughData || isCancelled
                 }
@@ -168,8 +173,10 @@ public class PiperTTSAudioUnit: AVSpeechSynthesisProviderAudioUnit {
             return
         }
         removeRequestAndCleanOutputData()
+        let generation = requestGate.begin()
         os_unfair_lock_lock(&outputDataLock)
         self.request = speechRequest
+        self.activeGeneration = generation
         os_unfair_lock_unlock(&outputDataLock)
         createPiperIfNeeded(voiceIdentifier: speechRequest.voice.identifier)
         piper?.synthesizeSSML(speechRequest.ssmlRepresentation,
@@ -187,6 +194,7 @@ public class PiperTTSAudioUnit: AVSpeechSynthesisProviderAudioUnit {
     }
 
     private func removeRequestAndCleanOutputData() {
+        requestGate.cancel()
         os_unfair_lock_lock(&outputDataLock)
         request = nil
         outputData.clear()
@@ -275,11 +283,15 @@ extension PiperTTSAudioUnit: PiperDelegate {
            modelFormat.sampleRate != format.sampleRate {
             let resampled = AudioResampler.resampleBuffer(buf, inputRate: modelFormat.sampleRate, outputRate: format.sampleRate)
             os_unfair_lock_lock(&outputDataLock)
-            outputData.appendAndEnforceMax(contentsOf: resampled, maxCount: maxSamplesCount)
+            if requestGate.isCurrent(activeGeneration) {
+                outputData.appendAndEnforceMax(contentsOf: resampled, maxCount: maxSamplesCount)
+            }
             os_unfair_lock_unlock(&outputDataLock)
         } else {
             os_unfair_lock_lock(&outputDataLock)
-            outputData.appendAndEnforceMax(contentsOf: buf, maxCount: maxSamplesCount)
+            if requestGate.isCurrent(activeGeneration) {
+                outputData.appendAndEnforceMax(contentsOf: buf, maxCount: maxSamplesCount)
+            }
             os_unfair_lock_unlock(&outputDataLock)
         }
     }
@@ -290,8 +302,9 @@ extension PiperTTSAudioUnit: PiperDelegate {
         os_unfair_lock_lock(&outputDataLock)
         let metadataBlock = self.speechSynthesisOutputMetadataBlock
         let request = self.request
+        let isCurrentGeneration = requestGate.isCurrent(self.activeGeneration)
         os_unfair_lock_unlock(&outputDataLock)
-        guard let metadataBlock = metadataBlock, let request = request else { return }
+        guard let metadataBlock = metadataBlock, let request = request, isCurrentGeneration else { return }
         for marker in markers {
             guard let appleMarker = marker.avMarker else { continue }
 #if DEBUG
