@@ -3216,6 +3216,17 @@
         }
       }
     },
+    "json_error_invalid_speaker_id" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Invalid speaker ID in voice identifier."
+          }
+        }
+      }
+    },
     "json_error_invalid_model_file_path" : {
       "extractionState" : "manual",
       "localizations" : {

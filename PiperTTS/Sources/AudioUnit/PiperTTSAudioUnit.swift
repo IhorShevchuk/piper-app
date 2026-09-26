@@ -163,13 +163,17 @@ public class PiperTTSAudioUnit: AVSpeechSynthesisProviderAudioUnit {
 
     public override func synthesizeSpeechRequest(_ speechRequest: AVSpeechSynthesisProviderRequest) {
         Log.debug("synthesizeSpeechRequest \(speechRequest.ssmlRepresentation)")
+        guard let speakerId = speechRequest.voice.identifier.speakerId else {
+            Log.error(type: .synthesizer, "Cannot parse speaker id from identifier: \(speechRequest.voice.identifier).")
+            return
+        }
         removeRequestAndCleanOutputData()
         os_unfair_lock_lock(&outputDataLock)
         self.request = speechRequest
         os_unfair_lock_unlock(&outputDataLock)
         createPiperIfNeeded(voiceIdentifier: speechRequest.voice.identifier)
         piper?.synthesizeSSML(speechRequest.ssmlRepresentation,
-                              speakerId: speechRequest.voice.identifier.speakerId)
+                              speakerId: speakerId)
     }
 
     public override func cancelSpeechRequest() {
