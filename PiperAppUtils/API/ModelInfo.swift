@@ -32,6 +32,7 @@ public struct ModelInfo: Decodable {
 
     public enum Error: Swift.Error {
         case nilFileURL
+        case invalidSpeakerId(String)
     }
 
     public static func create(from fileURL: URL?) throws -> ModelInfo {
@@ -41,6 +42,19 @@ public struct ModelInfo: Decodable {
         let data = try Data(contentsOf: fileURL, options: .mappedIfSafe)
         let jsonDecoder = JSONDecoder()
         return try jsonDecoder.decode(ModelInfo.self, from: data)
+    }
+
+    /// Parses the speaker ID from a full voice identifier
+    /// (`voiceId` + `Constants.speakerIdSeparator` + id).
+    /// Throws `Error.invalidSpeakerId` instead of silently falling back to 0,
+    /// so a malformed identifier can never speak with the wrong voice.
+    public static func speakerId(from voiceIdentifier: String) throws -> Int32 {
+        guard let voiceId = voiceIdentifier.components(separatedBy: Self.separator).last,
+              let speakerIdString = voiceId.components(separatedBy: Constants.speakerIdSeparator).last,
+              let speakerId = Int32(speakerIdString) else {
+            throw Error.invalidSpeakerId(voiceIdentifier)
+        }
+        return speakerId
     }
 
     public static var installed: ModelInfo? {
