@@ -237,12 +237,12 @@ public class PiperTTSAudioUnit: AVSpeechSynthesisProviderAudioUnit {
                 dataDir: dataDir,
                 g2pwModelDir: g2pwDir
             )
-            piper = Piper(options: options) ?? Piper(modelPath: paths.model.path(percentEncoded: false),
-                                                     andConfigPath: paths.json.path(percentEncoded: false))
+            piper = (try? Piper(options: options)) ?? (try? Piper(modelPath: paths.model.path(percentEncoded: false),
+                                                                     andConfigPath: paths.json.path(percentEncoded: false)))
             Log.debug("Piper Created with g2pwDir:\(g2pwDir) for zh voice")
         } else {
-            piper = Piper(modelPath: paths.model.path(percentEncoded: false),
-                          andConfigPath: paths.json.path(percentEncoded: false))
+            piper = try? Piper(modelPath: paths.model.path(percentEncoded: false),
+                               andConfigPath: paths.json.path(percentEncoded: false))
             Log.debug("Piper Created")
         }
 #if os(iOS)
