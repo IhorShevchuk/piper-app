@@ -163,13 +163,17 @@ public class PiperTTSAudioUnit: AVSpeechSynthesisProviderAudioUnit {
 
     public override func synthesizeSpeechRequest(_ speechRequest: AVSpeechSynthesisProviderRequest) {
         Log.debug("synthesizeSpeechRequest \(speechRequest.ssmlRepresentation)")
+        guard let speakerId = speechRequest.voice.identifier.speakerId else {
+            Log.error(type: .synthesizer, "Cannot parse speaker id from identifier: \(speechRequest.voice.identifier).")
+            return
+        }
         removeRequestAndCleanOutputData()
         os_unfair_lock_lock(&outputDataLock)
         self.request = speechRequest
         os_unfair_lock_unlock(&outputDataLock)
         createPiperIfNeeded(voiceIdentifier: speechRequest.voice.identifier)
         piper?.synthesizeSSML(speechRequest.ssmlRepresentation,
-                              speakerId: speechRequest.voice.identifier.speakerId)
+                              speakerId: speakerId)
     }
 
     public override func cancelSpeechRequest() {
@@ -233,12 +237,12 @@ public class PiperTTSAudioUnit: AVSpeechSynthesisProviderAudioUnit {
                 dataDir: dataDir,
                 g2pwModelDir: g2pwDir
             )
-            piper = Piper(options: options) ?? Piper(modelPath: paths.model.path(percentEncoded: false),
-                                                     andConfigPath: paths.json.path(percentEncoded: false))
+            piper = (try? Piper(options: options)) ?? (try? Piper(modelPath: paths.model.path(percentEncoded: false),
+                                                                     andConfigPath: paths.json.path(percentEncoded: false)))
             Log.debug("Piper Created with g2pwDir:\(g2pwDir) for zh voice")
         } else {
-            piper = Piper(modelPath: paths.model.path(percentEncoded: false),
-                          andConfigPath: paths.json.path(percentEncoded: false))
+            piper = try? Piper(modelPath: paths.model.path(percentEncoded: false),
+                               andConfigPath: paths.json.path(percentEncoded: false))
             Log.debug("Piper Created")
         }
 #if os(iOS)

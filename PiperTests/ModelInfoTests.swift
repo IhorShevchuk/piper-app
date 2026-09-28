@@ -105,4 +105,66 @@ final class ModelInfoTests: XCTestCase {
         let models = ModelInfo.installedModels
         XCTAssertNotNil(models)
     }
+
+    private var strippedLanguageJSON: Data {
+        // Matches community-trained configs such as en_GB-dii-high.onnx.json,
+        // whose language block has no family/region.
+        // swiftlint:disable:next non_optional_string_data_conversion
+        """
+        {
+          "dataset":"working",
+          "piper_version":"1.0.0",
+          "language":{"code":"en-gb-x-rp"},
+          "audio":{"sample_rate":22050,"quality":"training"}
+        }
+        """.data(using: .utf8)!
+    }
+
+    func testDecodingStrippedLanguageBlock() throws {
+        let info = try JSONDecoder().decode(ModelInfo.self, from: strippedLanguageJSON)
+        XCTAssertEqual(info.language.code, "en-gb-x-rp")
+        XCTAssertEqual(info.language.family, "en")
+        XCTAssertEqual(info.language.region, "GB")
+    }
+
+    func testDecodingBareLanguageCode() throws {
+        // swiftlint:disable:next non_optional_string_data_conversion
+        let json = """
+        {"code":"de"}
+        """.data(using: .utf8)!
+        let language = try JSONDecoder().decode(Language.self, from: json)
+        XCTAssertEqual(language.code, "de")
+        XCTAssertEqual(language.family, "de")
+        XCTAssertEqual(language.region, "")
+    }
+
+    func testDecodingFullLanguageBlockUnchanged() throws {
+        let info = try JSONDecoder().decode(ModelInfo.self, from: sampleJSON)
+        XCTAssertEqual(info.language.code, "en_US")
+        XCTAssertEqual(info.language.family, "en")
+        XCTAssertEqual(info.language.region, "US")
+    }
+
+    func testModelPathsCatalogKeyRoundTrip() throws {
+        let tmp = FileManager.default.temporaryDirectory
+        let modelURL = tmp.appendingPathComponent(UUID().uuidString + ".onnx")
+        let jsonURL = tmp.appendingPathComponent(UUID().uuidString + ".onnx.json")
+        var paths = try XCTUnwrap(FileManager.ModelPaths(model: modelURL, json: jsonURL))
+        paths.catalogKey = "en_GB-dii-high"
+        let decoded = try JSONDecoder().decode(
+            FileManager.ModelPaths.self,
+            from: try JSONEncoder().encode(paths)
+        )
+        XCTAssertEqual(decoded.catalogKey, "en_GB-dii-high")
+    }
+
+    func testModelPathsCatalogKeyBackwardCompatible() throws {
+        // Entries persisted before catalogKey existed must still decode.
+        // swiftlint:disable:next non_optional_string_data_conversion
+        let legacy = """
+        {"model":"file:///tmp/a.onnx","json":"file:///tmp/a.onnx.json"}
+        """.data(using: .utf8)!
+        let decoded = try JSONDecoder().decode(FileManager.ModelPaths.self, from: legacy)
+        XCTAssertNil(decoded.catalogKey)
+    }
 }

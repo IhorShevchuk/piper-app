@@ -5,14 +5,9 @@ import Foundation
 import PiperAppUtils
 
 extension String {
-    var speakerId: Int32 {
-        guard let voiceId = components(separatedBy: ModelInfo.separator).last else {
-            return 0
-        }
-        guard let speakerId = voiceId.components(separatedBy: Constants.speakerIdSeparator).last,
-              let result = Int32(speakerId) else {
-            return 0
-        }
-        return result
+    /// Speaker ID parsed from a full voice identifier, or nil when the
+    /// identifier is malformed. Never silently falls back to 0.
+    var speakerId: Int32? {
+        try? ModelInfo.speakerId(from: self)
     }
 }

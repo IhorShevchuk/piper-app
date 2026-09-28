@@ -50,7 +50,7 @@ class VoiceItemHostModel: @unchecked Sendable, ObservableObject {
                         }
 
                     case .finished(let modelPath):
-                        await self.piper.install(paths: modelPath)
+                        await self.piper.install(paths: modelPath, catalogKey: voice.key)
                         try? FileManager.default.removeItem(at: modelPath.json)
                         try? FileManager.default.removeItem(at: modelPath.model)
                         self.delegate?.modelDidChange()
@@ -81,6 +81,11 @@ class VoiceItemHostModel: @unchecked Sendable, ObservableObject {
 
     private func installed(_ voice: Voice) -> FileManager.ModelPaths? {
         self.piper.installedVoices.first { modelPath in
+            // Prefer the catalog key recorded at install time: some model
+            // configs carry metadata that does not match the catalog entry.
+            if let catalogKey = modelPath.catalogKey {
+                return catalogKey == voice.key
+            }
             guard let modelInfo = modelPath.info else {
                 return false
             }

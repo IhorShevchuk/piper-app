@@ -129,6 +129,8 @@ extension Error {
             switch error {
             case .nilFileURL:
                 return "json_error_invalid_model_file_path".localized
+            case .invalidSpeakerId:
+                return "json_error_invalid_speaker_id".localized
             }
         }
 
