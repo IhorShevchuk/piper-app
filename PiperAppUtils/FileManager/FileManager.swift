@@ -8,6 +8,11 @@ extension FileManager {
         public let model: URL
         public let json: URL
         public let info: ModelInfo?
+        /// Key of the voice in the remote catalog (e.g. "en_GB-dii-high").
+        /// Set at install time so a catalog row can be matched to its
+        /// installed files even when the model config's own metadata
+        /// (dataset, quality) disagrees with the catalog entry.
+        public var catalogKey: String? = nil
         public init?(model: URL?, json: URL?) {
             guard let model, let json else {
                 return nil
@@ -110,18 +115,21 @@ extension FileManager.ModelPaths: Codable {
     enum CodingKeys: String, CodingKey {
         case model
         case json
+        case catalogKey
     }
     public init(from decoder: any Decoder) throws {
         let values = try decoder.container(keyedBy: CodingKeys.self)
         self.model = try values.decode(URL.self, forKey: .model)
         self.json = try values.decode(URL.self, forKey: .json)
         self.info = try? ModelInfo.create(from: self.json)
+        self.catalogKey = try values.decodeIfPresent(String.self, forKey: .catalogKey)
     }
 
     public func encode(to encoder: any Encoder) throws {
         var values = encoder.container(keyedBy: CodingKeys.self)
         try values.encode(model, forKey: .model)
         try values.encode(json, forKey: .json)
+        try values.encodeIfPresent(catalogKey, forKey: .catalogKey)
     }
 }
 

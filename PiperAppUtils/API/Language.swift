@@ -13,6 +13,22 @@ public struct Language: Decodable {
     public let family: String
     public let region: String
 
+    /// Community-trained configs sometimes ship a stripped language block
+    /// (e.g. `"language": {"code": "en-gb-x-rp"}` with no family/region).
+    /// Derive the missing parts from the code so such voices stay
+    /// downloadable instead of failing model validation.
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        code = try container.decode(String.self, forKey: .code)
+        let components = code.split(whereSeparator: { $0 == "_" || $0 == "-" }).map(String.init)
+        family = try container.decodeIfPresent(String.self, forKey: .family)
+            ?? components.first?.lowercased()
+            ?? code
+        region = try container.decodeIfPresent(String.self, forKey: .region)
+            ?? components.dropFirst().first?.uppercased()
+            ?? ""
+    }
+
     public var country: String {
         Locale.current.localizedString(forRegionCode: region) ?? region
     }

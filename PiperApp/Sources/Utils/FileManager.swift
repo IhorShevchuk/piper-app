@@ -11,7 +11,7 @@ extension FileManager {
         case cantParseModelInfo
     }
 
-    func install(paths: ModelPaths?) throws {
+    func install(paths: ModelPaths?, catalogKey: String? = nil) throws {
         guard let paths else {
             throw InstallError.invalidSourceFiles
         }
@@ -21,7 +21,17 @@ extension FileManager {
         }
 
         do {
-            if let installedPath = paths.info?.installedPath {
+            // Prefer the catalog key for de-duplication: some model configs
+            // (e.g. en_GB-dii-high) carry metadata that does not match the
+            // catalog entry, so ModelInfo.installedPath cannot find them.
+            let alreadyInstalled: ModelPaths?
+            if let catalogKey,
+               let match = FileManager.ModelPaths.installedModels.first(where: { $0.catalogKey == catalogKey }) {
+                alreadyInstalled = match
+            } else {
+                alreadyInstalled = paths.info?.installedPath
+            }
+            if let installedPath = alreadyInstalled {
                 try uninstall(paths: installedPath)
             }
         } catch {
@@ -49,7 +59,9 @@ extension FileManager {
             }
         }
         var installedModels = FileManager.ModelPaths.installedModels
-        installedModels.append(destination)
+        var installedEntry = destination
+        installedEntry.catalogKey = catalogKey
+        installedModels.append(installedEntry)
         FileManager.ModelPaths.installedModels = installedModels
     }
 
