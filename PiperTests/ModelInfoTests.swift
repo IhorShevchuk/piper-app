@@ -167,4 +167,90 @@ final class ModelInfoTests: XCTestCase {
         let decoded = try JSONDecoder().decode(FileManager.ModelPaths.self, from: legacy)
         XCTAssertNil(decoded.catalogKey)
     }
+
+    // MARK: - Duplicate detection
+
+    private var tempFiles: [URL] = []
+
+    override func tearDown() {
+        for url in tempFiles {
+            try? FileManager.default.removeItem(at: url)
+        }
+        tempFiles.removeAll()
+        super.tearDown()
+    }
+
+    private func modelPaths(json: Data, catalogKey: String?) throws -> FileManager.ModelPaths {
+        let tmp = FileManager.default.temporaryDirectory
+            .appendingPathComponent(UUID().uuidString + ".onnx.json")
+        try json.write(to: tmp)
+        tempFiles.append(tmp)
+        let modelURL = tmp.deletingLastPathComponent()
+            .appendingPathComponent(UUID().uuidString + ".onnx")
+        var paths = try XCTUnwrap(FileManager.ModelPaths(model: modelURL, json: tmp))
+        paths.catalogKey = catalogKey
+        return paths
+    }
+
+    func testDuplicateIgnoresDifferentKeyWithIdenticalConfig() throws {
+        // Regression test: en_GB-dii-high and en_GB-miro-high ship identical
+        // configs (dataset "working", quality "training"). Installing one must
+        // not uninstall the other.
+        let dii = try modelPaths(json: strippedLanguageJSON, catalogKey: "en_GB-dii-high")
+        let miro = try modelPaths(json: strippedLanguageJSON, catalogKey: "en_GB-miro-high")
+        let duplicate = FileManager.ModelPaths.duplicate(
+            forCatalogKey: "en_GB-miro-high",
+            info: miro.info,
+            in: [dii]
+        )
+        XCTAssertNil(duplicate)
+    }
+
+    func testDuplicateMatchesSameKey() throws {
+        let dii = try modelPaths(json: strippedLanguageJSON, catalogKey: "en_GB-dii-high")
+        let duplicate = FileManager.ModelPaths.duplicate(
+            forCatalogKey: "en_GB-dii-high",
+            info: dii.info,
+            in: [dii]
+        )
+        XCTAssertEqual(duplicate, dii)
+    }
+
+    func testDuplicateFallsBackToLegacyInstallWithoutKey() throws {
+        // Upgrade path: a voice installed before key tracking has no key recorded.
+        // Reinstalling it replaces the legacy entry instead of duplicating it.
+        let legacy = try modelPaths(json: strippedLanguageJSON, catalogKey: nil)
+        let duplicate = FileManager.ModelPaths.duplicate(
+            forCatalogKey: "en_GB-dii-high",
+            info: legacy.info,
+            in: [legacy]
+        )
+        XCTAssertEqual(duplicate, legacy)
+    }
+
+    func testDuplicateLegacyCallerUsesConfigIdentity() throws {
+        // Callers without a catalog key keep the previous behavior.
+        let installed = try modelPaths(json: strippedLanguageJSON, catalogKey: nil)
+        let duplicate = FileManager.ModelPaths.duplicate(
+            forCatalogKey: nil,
+            info: installed.info,
+            in: [installed]
+        )
+        XCTAssertEqual(duplicate, installed)
+    }
+
+    func testDuplicateNoMatchForDifferentConfig() throws {
+        let installed = try modelPaths(json: sampleJSON, catalogKey: "en_US-lessac-high")
+        let other = try modelPaths(json: strippedLanguageJSON, catalogKey: nil)
+        XCTAssertNil(FileManager.ModelPaths.duplicate(
+            forCatalogKey: "en_GB-dii-high",
+            info: other.info,
+            in: [installed]
+        ))
+        XCTAssertNil(FileManager.ModelPaths.duplicate(
+            forCatalogKey: nil,
+            info: other.info,
+            in: [installed]
+        ))
+    }
 }
