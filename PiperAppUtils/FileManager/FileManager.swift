@@ -80,6 +80,40 @@ extension FileManager {
                 self.installed = newValue
             }
         }
+
+        /// Finds the installed entry that installing a new model would replace.
+        ///
+        /// When the catalog key of the voice being installed is known, it is the
+        /// reliable identity: some model configs carry metadata that is identical
+        /// across catalog entries (e.g. `en_GB-dii-high` and `en_GB-miro-high`
+        /// both decode to dataset "working" and quality "training"), so
+        /// config-identity matching alone cannot tell such voices apart.
+        ///
+        /// - Parameters:
+        ///   - catalogKey: key of the catalog entry being installed, if known.
+        ///   - info: config identity of the model being installed.
+        ///   - installed: the currently installed models.
+        /// - Returns: the installed entry to uninstall before installing, or `nil`
+        ///   when the voice is not already installed.
+        public static func duplicate(
+            forCatalogKey catalogKey: String?,
+            info: ModelInfo?,
+            in installed: [ModelPaths]
+        ) -> ModelPaths? {
+            if let catalogKey {
+                if let keyMatch = installed.first(where: { $0.catalogKey == catalogKey }) {
+                    return keyMatch
+                }
+                // No key match: fall back to config-identity matching, but only
+                // against legacy installs that predate key tracking. An installed
+                // model carrying a different key is a different catalog entry,
+                // even when its config is identical.
+                guard let info else { return nil }
+                return installed.first(where: { $0.catalogKey == nil && $0.info == info })
+            }
+            guard let info else { return nil }
+            return installed.first(where: { $0.info == info })
+        }
     }
 
     enum Error: Swift.Error {

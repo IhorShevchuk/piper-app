@@ -21,16 +21,16 @@ extension FileManager {
         }
 
         do {
-            // Prefer the catalog key for de-duplication: some model configs
-            // (e.g. en_GB-dii-high) carry metadata that does not match the
-            // catalog entry, so ModelInfo.installedPath cannot find them.
-            let alreadyInstalled: ModelPaths?
-            if let catalogKey,
-               let match = FileManager.ModelPaths.installedModels.first(where: { $0.catalogKey == catalogKey }) {
-                alreadyInstalled = match
-            } else {
-                alreadyInstalled = paths.info?.installedPath
-            }
+            // Resolve which installed entry this download replaces, if any.
+            // The catalog key is the reliable identity: some model configs
+            // (e.g. en_GB-dii-high and en_GB-miro-high) decode to identical
+            // ModelInfo values, so config-identity matching alone would treat
+            // such voices as the same entry and uninstall each other.
+            let alreadyInstalled = FileManager.ModelPaths.duplicate(
+                forCatalogKey: catalogKey,
+                info: paths.info,
+                in: FileManager.ModelPaths.installedModels
+            )
             if let installedPath = alreadyInstalled {
                 try uninstall(paths: installedPath)
             }
