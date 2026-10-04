@@ -34,6 +34,7 @@ class VoicesListHostModel: @unchecked Sendable, ObservableObject {
                     self.languages = Dictionary(grouping: voices) { voice in
                         voice.language.code
                     }
+                    self.languages.removeValue(forKey: "ja_JA")
                     await MainActor.run {
                         self.viewModel.languages = Array(self.languages.keys).sorted(by: { lang1, lang2 in
                             return lang1.localizedLanguageFromCode < lang2.localizedLanguageFromCode
