@@ -12,7 +12,7 @@ extension FileManager {
         /// Set at install time so a catalog row can be matched to its
         /// installed files even when the model config's own metadata
         /// (dataset, quality) disagrees with the catalog entry.
-        public var catalogKey: String? = nil
+        public var catalogKey: String?
         public init?(model: URL?, json: URL?) {
             guard let model, let json else {
                 return nil
