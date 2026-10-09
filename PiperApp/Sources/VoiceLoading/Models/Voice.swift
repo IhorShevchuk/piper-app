@@ -10,6 +10,23 @@ class Voice: Decodable {
     let quality: String
     let language: PiperAppUtils.Language
     let files: [String: VoiceFile]
+    /// Effective license shown to the user: the most restrictive of the model
+    /// license and the training-data license. Optional so catalog entries
+    /// written before per-voice licenses were added still decode.
+    let license: String?
+    let modelLicense: String?
+    let trainingData: TrainingData?
+
+    enum CodingKeys: String, CodingKey {
+        case key
+        case name
+        case quality
+        case language
+        case files
+        case license
+        case modelLicense = "model_license"
+        case trainingData = "training_data"
+    }
     private var voiceSize: Int {
         return files.values.reduce(into: 0) { $0 += $1.size_bytes }
     }
