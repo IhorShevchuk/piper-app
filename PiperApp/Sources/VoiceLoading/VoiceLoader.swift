@@ -17,13 +17,21 @@ protocol VoiceLoadListener: AnyObject {
 class VoiceLoader: NSObject {
     /// In-flight downloads by catalog voice key, shared by every row:
     /// a voice downloads once and progress survives row rebuilds.
+    /// Each download gets a session token: after a cancel, the old
+    /// stream's late teardown must not be able to touch the state of
+    /// a new download of the same voice (and a stale cancellation
+    /// must not cancel the new download), so every mutation is
+    /// scoped to the session it belongs to.
     @Published private(set) var downloadProgress: [String: Double] = [:]
+    private var downloadSessions: [String: UUID] = [:]
 
     @MainActor
-    func beginDownload(for key: String) -> Bool {
-        guard downloadProgress[key] == nil else { return false }
+    func beginDownload(for key: String) -> UUID? {
+        guard downloadProgress[key] == nil else { return nil }
+        let session = UUID()
         downloadProgress[key] = 0
-        return true
+        downloadSessions[key] = session
+        return session
     }
 
     @MainActor
@@ -33,27 +41,31 @@ class VoiceLoader: NSObject {
     }
 
     @MainActor
-    func endDownload(for key: String) {
+    func endDownload(for key: String, session: UUID) {
+        guard downloadSessions[key] == session else { return }
+        downloadSessions[key] = nil
         downloadProgress[key] = nil
     }
 
-    /// The URLSession task currently fetching a file for each voice
-    /// download, so a download can be cancelled from any row.
-    private var activeDownloadTasks: [String: URLSessionDownloadTask] = [:]
-    private var downloadTaskKeys: [Int: String] = [:]
-    /// Voices whose download was cancelled; checked when the next
+    /// The URLSession task currently fetching a file for each download
+    /// session, so a download can be cancelled from any row.
+    private var activeDownloadTasks: [UUID: URLSessionDownloadTask] = [:]
+    private var downloadTaskSessions: [Int: UUID] = [:]
+    /// Sessions whose download was cancelled; checked when the next
     /// file's task starts, so a cancel tapped between the two files
     /// of a voice (config, then model) is not lost.
-    private var cancelledDownloads: Set<String> = []
+    private var cancelledSessions: Set<UUID> = []
 
-    /// Cancels the in-flight download of a voice, if any: the
-    /// registry entry goes away (rows return to the download state)
-    /// and the download stream throws URLError.cancelled.
+    /// Cancels the in-flight download of a voice, if any: the session
+    /// is invalidated and its registry entry goes away (rows return
+    /// to the download state), and the download stream throws
+    /// URLError.cancelled.
     @MainActor
     func cancelDownload(for key: String) {
-        cancelledDownloads.insert(key)
-        endDownload(for: key)
-        activeDownloadTasks[key]?.cancel()
+        guard let session = downloadSessions[key] else { return }
+        cancelledSessions.insert(session)
+        endDownload(for: key, session: session)
+        activeDownloadTasks[session]?.cancel()
     }
 
     private enum Error: Swift.Error {
@@ -131,15 +143,17 @@ class VoiceLoader: NSObject {
         return config.phonemeType?.lowercased() == "pinyin"
     }
 
-    func download(voice: Voice) -> AsyncThrowingStream<DownloadEvent, Swift.Error> {
+    func download(voice: Voice,
+                  session: UUID) -> AsyncThrowingStream<DownloadEvent, Swift.Error> {
         AsyncThrowingStream { continuation in
             Task {
-                await self.performDownload(voice: voice, continuation: continuation)
+                await self.performDownload(voice: voice, session: session, continuation: continuation)
             }
         }
     }
 
     private func performDownload(voice: Voice,
+                                 session: UUID,
                                  continuation: AsyncThrowingStream<DownloadEvent, Swift.Error>.Continuation) async {
         var downloadedFiles: [URL] = []
         do {
@@ -150,13 +164,13 @@ class VoiceLoader: NSObject {
                 throw Error.nilURL
             }
 
-            let jsonLocalURL = try await downloadVoiceConfig(voice: voice, continuation: continuation)
+            let jsonLocalURL = try await downloadVoiceConfig(voice: voice, session: session, continuation: continuation)
             downloadedFiles.append(jsonLocalURL)
 
             // Model is large → weight 95%
             let modelLocalURL = try await self.downloadFile(
                 from: modelURL,
-                key: voice.key,
+                session: session,
                 weight: 0.95,
                 baseProgress: 0.05,
                 continuation: continuation
@@ -179,13 +193,14 @@ class VoiceLoader: NSObject {
             }
             continuation.finish(throwing: error)
         }
-        cancelledDownloads.remove(voice.key)
-        activeDownloadTasks[voice.key] = nil
+        cancelledSessions.remove(session)
+        activeDownloadTasks[session] = nil
     }
 
     /// Downloads and validates a voice's config file (the small JSON),
     /// preparing extra data for voices that need it (Chinese G2PW).
     private func downloadVoiceConfig(voice: Voice,
+                                     session: UUID,
                                      continuation: AsyncThrowingStream<DownloadEvent, Swift.Error>.Continuation) async throws -> URL {
         guard let jsonPath = voice.jsonPath else {
             throw Error.loadingFailed
@@ -197,7 +212,7 @@ class VoiceLoader: NSObject {
         // JSON is tiny → weight 5%
         let jsonLocalURL = try await downloadFile(
             from: jsonURL,
-            key: voice.key,
+            session: session,
             weight: 0.05,
             baseProgress: 0.0,
             continuation: continuation
@@ -221,7 +236,7 @@ class VoiceLoader: NSObject {
 
     private func downloadFile(
         from url: URL,
-        key: String,
+        session: UUID,
         weight: Double,
         baseProgress: Double,
         continuation: AsyncThrowingStream<DownloadEvent, Swift.Error>.Continuation
@@ -229,8 +244,8 @@ class VoiceLoader: NSObject {
 
         let task = urlSession.downloadTask(with: url)
         let id = task.taskIdentifier
-        activeDownloadTasks[key] = task
-        downloadTaskKeys[id] = key
+        activeDownloadTasks[session] = task
+        downloadTaskSessions[id] = session
 
         let observation = task.progress.observe(\.fractionCompleted) { progress, _ in
             let total = baseProgress + progress.fractionCompleted * weight
@@ -242,7 +257,7 @@ class VoiceLoader: NSObject {
         return try await withCheckedThrowingContinuation { cont in
             continuations[id] = cont
             task.resume()
-            if cancelledDownloads.contains(key) {
+            if cancelledSessions.contains(session) {
                 task.cancel()
             }
         }
@@ -269,11 +284,11 @@ extension VoiceLoader: URLSessionDownloadDelegate {
     }
 
     private func clearDownloadTask(id: Int) {
-        if let key = downloadTaskKeys[id],
-           activeDownloadTasks[key]?.taskIdentifier == id {
-            activeDownloadTasks[key] = nil
+        if let session = downloadTaskSessions[id],
+           activeDownloadTasks[session]?.taskIdentifier == id {
+            activeDownloadTasks[session] = nil
         }
-        downloadTaskKeys[id] = nil
+        downloadTaskSessions[id] = nil
     }
 
     private func urlSession(
