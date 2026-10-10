@@ -9,5 +9,5 @@ struct VoiceViewModel {
     var modelInfo: ModelInfo?
     var isPlaying: Bool = false
     var selectedSpeaker: Int = 0
-    var demoText: String = "A rainbow is a meteorological phenomenon that is caused by reflection, refraction and dispersion of light in water droplets resulting in a spectrum of light appearing in the sky."
+    var demoText: String = DemoText.defaultText
 }

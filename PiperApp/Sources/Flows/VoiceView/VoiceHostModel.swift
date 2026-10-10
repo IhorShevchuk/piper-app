@@ -4,11 +4,6 @@
 import Foundation
 import Combine
 import PiperAppUtils
-#if canImport(UIKit)
-import UIKit
-#elseif canImport(AppKit)
-import AppKit
-#endif
 
 class VoiceHostModel: @unchecked Sendable, ObservableObject {
     @Published var viewModel: VoiceViewModel
@@ -40,20 +35,11 @@ class VoiceHostModel: @unchecked Sendable, ObservableObject {
     }
 
     func updateSample() {
-        guard let sampleJSONData = NSDataAsset(name: "Samples")?.data else {
+        guard let language = viewModel.paths.info?.language,
+              let sample = DemoText.text(for: language) else {
             return
         }
-
-        do {
-            let decoder = JSONDecoder()
-            let samples = try decoder.decode([String: String].self, from: sampleJSONData)
-            if  let code = viewModel.paths.info?.language.code,
-                let sample = samples[code] {
-                viewModel.demoText = sample
-            }
-        } catch {
-            Log.error("Failed to decode samples: \(error)")
-        }
+        viewModel.demoText = sample
     }
 
     func uninstall() {

@@ -8,13 +8,159 @@ import PiperAppUtils
 class MainHostModel: @unchecked Sendable, ObservableObject {
     @Published var viewModel: MainViewModel
     let piper: PiperManager
+    let loader: VoiceLoader
+    var languages: [String: [Voice]] = [:]
 
-    init(piper: PiperManager) {
+    init(piper: PiperManager,
+         loader: VoiceLoader = AppManager.shared.loader) {
         self.piper = piper
-        viewModel = MainViewModel(installedModels: piper.installedVoices.sorted(by: { model1, model2 in
-            return model1.modelTitle < model2.modelTitle
-        }))
+        self.loader = loader
+        viewModel = Self.makeViewModel(installed: piper.installedVoices)
         connect()
+        loadVoices()
+    }
+
+    /// Model configs do not always use the catalog's language code:
+    /// community configs ship codes like "en-gb-x-rp" where the catalog
+    /// says "en_GB". Reduce a code to family + region so installed
+    /// voices group under the same key the catalog uses.
+    static func canonicalLanguageCode(_ code: String) -> String {
+        let components = code.split(whereSeparator: { $0 == "_" || $0 == "-" }).map(String.init)
+        guard let family = components.first?.lowercased() else {
+            return code
+        }
+        guard components.count > 1 else {
+            return family
+        }
+        return "\(family)_\(components[1].uppercased())"
+    }
+
+    private static func makeViewModel(installed: [FileManager.ModelPaths]) -> MainViewModel {
+        let sorted = installed.sorted(by: { model1, model2 in
+            return model1.modelTitle < model2.modelTitle
+        })
+        var byLanguage: [String: [FileManager.ModelPaths]] = [:]
+        var ungrouped: [FileManager.ModelPaths] = []
+        for model in sorted {
+            if let code = model.info?.language.code {
+                byLanguage[canonicalLanguageCode(code), default: []].append(model)
+            } else {
+                ungrouped.append(model)
+            }
+        }
+        let groups = byLanguage
+            .map { MainViewModel.InstalledLanguage(code: $0.key, models: $0.value) }
+            .sorted(by: { group1, group2 in
+                return group1.code.localizedLanguageFromCode < group2.code.localizedLanguageFromCode
+            })
+        return MainViewModel(installedModels: sorted,
+                             installedByLanguage: groups,
+                             ungroupedInstalled: ungrouped)
+    }
+
+    func loadVoices() {
+        Task {
+            do {
+                let voices = try await self.loader.loadVoices()
+                self.languages = Dictionary(grouping: voices) { voice in
+                    Self.canonicalLanguageCode(voice.language.code)
+                }
+                // Japanese voices are not supported by the app yet, so
+                // they stay out of the languages list and search; the
+                // catalog entry is kept so an installed Japanese voice
+                // still resolves to its language.
+                let codes = self.languages.keys
+                    .filter { code in
+                        return !code.hasPrefix("ja_")
+                    }
+                    .sorted(by: { lang1, lang2 in
+                        return lang1.localizedLanguageFromCode < lang2.localizedLanguageFromCode
+                    })
+                await MainActor.run {
+                    self.updateCatalog(codes: codes, state: .loaded)
+                }
+            } catch {
+                Log.error("Failed to load voices: \(error)")
+                await MainActor.run {
+                    self.updateCatalog(codes: [], state: .failed)
+                }
+            }
+        }
+    }
+
+    private func updateCatalog(codes: [String], state: MainViewModel.CatalogState) {
+        var updated = viewModel
+        updated.languageCodes = codes
+        updated.catalogState = state
+        viewModel = updated
+    }
+
+    func voices(for languageCode: String) -> [Voice] {
+        return languages[languageCode]?
+            .filter { voice in
+                return voice.isSupported
+            }
+            .sorted(by: { voice1, voice2 in
+                return voice1.name < voice2.name
+            }) ?? []
+    }
+
+    /// Maps an installed language group to the catalog key its voices
+    /// list lives under: the canonical code when the catalog has it,
+    /// else the catalog's only language with the same family (a config
+    /// that ships just "uk" still finds "uk_UA").
+    func resolvedLanguageCode(for code: String) -> String {
+        let canonical = Self.canonicalLanguageCode(code)
+        if languages[canonical] != nil {
+            return canonical
+        }
+        let family = canonical.split(separator: "_").first.map(String.init) ?? canonical
+        let matches = languages.keys.filter { key in
+            return key.split(separator: "_").first.map(String.init) == family
+        }
+        return matches.count == 1 ? matches[0] : canonical
+    }
+
+    func installedPaths(for voice: Voice) -> FileManager.ModelPaths? {
+        VoiceItemHostModel.installedPaths(for: voice, in: piper.installedVoices)
+    }
+
+    func searchResults(for query: String) -> [Voice] {
+        let options: String.CompareOptions = [.caseInsensitive, .diacriticInsensitive]
+        let foldedQuery = query.folding(options: options, locale: .current)
+        guard !foldedQuery.isEmpty else {
+            return []
+        }
+        return languages.values.flatMap { $0 }
+            .filter { voice in
+                // Japanese voices are not supported by the app yet.
+                return voice.isSupported && voice.language.family != "ja"
+            }
+            .filter { voice in
+                if voice.name.folding(options: options, locale: .current).contains(foldedQuery) {
+                    return true
+                }
+                let language = voice.language
+                let candidates = [language.code,
+                                  language.family,
+                                  language.country,
+                                  language.language,
+                                  language.nameEnglish,
+                                  language.nameNative,
+                                  language.countryEnglish,
+                                  language.code.localizedLanguageFromCode].compactMap { $0 }
+                return candidates.contains { candidate in
+                    return candidate.folding(options: options, locale: .current).contains(foldedQuery)
+                }
+            }
+            .sorted(by: { voice1, voice2 in
+                let language1 = voice1.language.code.localizedLanguageFromCode
+                let language2 = voice2.language.code.localizedLanguageFromCode
+                if language1 != language2 {
+                    return language1 < language2
+                }
+                return voice1.name < voice2.name
+            })
     }
 
     func connect() {
@@ -79,9 +225,10 @@ extension MainHostModel: ModelChangeDelegate {
     func modelDidChange() {
         DispatchQueue.main.async { [weak self] in
             guard let self = self else { return }
-            self.viewModel = MainViewModel(installedModels: piper.installedVoices.sorted(by: { model1, model2 in
-                return model1.modelTitle < model2.modelTitle
-            }))
+            var updated = Self.makeViewModel(installed: self.piper.installedVoices)
+            updated.languageCodes = self.viewModel.languageCodes
+            updated.catalogState = self.viewModel.catalogState
+            self.viewModel = updated
         }
     }
 }

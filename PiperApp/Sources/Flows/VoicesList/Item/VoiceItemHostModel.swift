@@ -14,6 +14,13 @@ class VoiceItemHostModel: @unchecked Sendable, ObservableObject {
     weak var delegate: ModelChangeDelegate?
     private var avPlayerRateObserver: NSKeyValueObservation!
     private var avItemStateObserver: NSKeyValueObservation!
+    private var playingCancellable: AnyCancellable?
+    private var downloadsCancellable: AnyCancellable?
+    /// True while this row is playing a sample with the installed model
+    /// itself (through PiperManager) rather than the hosted sample file.
+    /// PiperManager.isPlaying is global, so rows use this flag to react
+    /// only to playback they started.
+    private var isPlayingInstalledSample = false
 
     private var audioPlayer: AVPlayer?
     init(piper: PiperManager,
@@ -25,6 +32,25 @@ class VoiceItemHostModel: @unchecked Sendable, ObservableObject {
         self.loader = loader
         self.delegate = delegate
         activatePlaybackMode()
+        playingCancellable = piper.$isPlaying.sink { [weak self] isPlaying in
+            guard let self = self, self.isPlayingInstalledSample else {
+                return
+            }
+            self.viewModel.isPlaying = isPlaying
+            if !isPlaying {
+                self.isPlayingInstalledSample = false
+            }
+        }
+        downloadsCancellable = loader.$downloadProgress.sink { [weak self] downloads in
+            guard let self = self else { return }
+            if let progress = downloads[self.viewModel.voice.key] {
+                self.viewModel.isDownloading = true
+                self.viewModel.downloadProgress = progress
+            } else {
+                self.viewModel.isDownloading = false
+                self.viewModel.downloadProgress = 0
+            }
+        }
     }
 
     deinit {
@@ -34,20 +60,18 @@ class VoiceItemHostModel: @unchecked Sendable, ObservableObject {
     func download(voice: Voice) {
         Task { [weak self] in
             guard let self else { return }
-            await MainActor.run { [weak self] in
-                guard let self else { return }
-                self.viewModel.isDownloading = true
+            // The loader's registry refuses a second download of the
+            // same voice; every row observes progress from there.
+            let started = await loader.beginDownload(for: voice.key)
+            guard started else { return }
+            defer {
+                Task { await self.loader.endDownload(for: voice.key) }
             }
             do {
                 for try await event in loader.download(voice: voice) {
-
                     switch event {
-
                     case .progress(let value):
-                        await MainActor.run { [weak self] in
-                            guard let self else { return }
-                            self.viewModel.downloadProgress = value
-                        }
+                        await loader.updateDownloadProgress(value, for: voice.key)
 
                     case .finished(let modelPath):
                         await self.piper.install(paths: modelPath, catalogKey: voice.key)
@@ -56,20 +80,28 @@ class VoiceItemHostModel: @unchecked Sendable, ObservableObject {
                         self.delegate?.modelDidChange()
                     }
                 }
+            } catch let error as URLError where error.code == .cancelled {
+                Log.debug("Download cancelled for voice: \(voice.key)")
+            } catch is CancellationError {
+                Log.debug("Download cancelled for voice: \(voice.key)")
             } catch {
                 Log.error("Failed to download voices: \(error)")
             }
+        }
+    }
 
-            await MainActor.run {
-                self.viewModel.downloadProgress = 0.0
-                self.viewModel.isDownloading = false
-            }
+    func cancelDownload(voice: Voice) {
+        Task {
+            await loader.cancelDownload(for: voice.key)
         }
     }
 
     func remove(voice: Voice) {
         guard let installed = installed(voice) else {
             return
+        }
+        if isPlayingInstalledSample {
+            stopPlaying()
         }
         piper.unstall(paths: installed)
         delegate?.modelDidChange()
@@ -80,7 +112,12 @@ class VoiceItemHostModel: @unchecked Sendable, ObservableObject {
     }
 
     private func installed(_ voice: Voice) -> FileManager.ModelPaths? {
-        self.piper.installedVoices.first { modelPath in
+        Self.installedPaths(for: voice, in: piper.installedVoices)
+    }
+
+    static func installedPaths(for voice: Voice,
+                               in installed: [FileManager.ModelPaths]) -> FileManager.ModelPaths? {
+        installed.first { modelPath in
             // Prefer the catalog key recorded at install time: some model
             // configs carry metadata that does not match the catalog entry.
             if let catalogKey = modelPath.catalogKey {
@@ -94,6 +131,13 @@ class VoiceItemHostModel: @unchecked Sendable, ObservableObject {
     }
 
     func stopPlaying() {
+        if isPlayingInstalledSample {
+            isPlayingInstalledSample = false
+            let piper = self.piper
+            Task {
+                await piper.stopPlaying()
+            }
+        }
         NotificationCenter.default.removeObserver(self, name: AVPlayerItem.didPlayToEndTimeNotification, object: nil)
         NotificationCenter.default.removeObserver(self, name: AVPlayerItem.failedToPlayToEndTimeNotification, object: nil)
         audioPlayer?.pause()
@@ -106,6 +150,14 @@ class VoiceItemHostModel: @unchecked Sendable, ObservableObject {
     }
 
     func playSample(voice: Voice) {
+        // An installed voice plays itself: synthesize the demo text with
+        // the local model (the same path as the voice detail screen)
+        // instead of streaming the hosted sample file.
+        if let modelInfo = installed(voice)?.info {
+            playInstalledSample(modelInfo: modelInfo)
+            return
+        }
+
         guard let sampleURL = loader.sampleURL(for: voice) else {
             return
         }
@@ -117,6 +169,18 @@ class VoiceItemHostModel: @unchecked Sendable, ObservableObject {
                                                name: AVPlayerItem.failedToPlayToEndTimeNotification,
                                                object: nil)
         playSample(voice: voice, url: sampleURL, fallbackAttempted: false)
+    }
+
+    private func playInstalledSample(modelInfo: ModelInfo) {
+        stopPlaying()
+        isPlayingInstalledSample = true
+        let demoText = DemoText.text(for: modelInfo.language) ?? DemoText.defaultText
+        let piper = self.piper
+        Task {
+            await piper.playSample(demoText: demoText,
+                                   speakerId: 0,
+                                   modelInfo: modelInfo)
+        }
     }
 
     private func playSample(voice: Voice, url: URL, fallbackAttempted: Bool) {

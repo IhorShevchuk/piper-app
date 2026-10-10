@@ -19,11 +19,9 @@ final class ScreenshotTests: XCTestCase {
         app.buttons["questionmark.circle"].activate()
         snapshot("03_Help")
         goBack()
-        app.buttons["download_voice_model"].activate()
         scrollDown()
-        snapshot("04_DownloadLanguages")
-        goBack()
-        
+        snapshot("04_Voices")
+
     }
     
     private func goBack() {

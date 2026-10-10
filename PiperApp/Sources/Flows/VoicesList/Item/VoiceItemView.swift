@@ -7,6 +7,9 @@ import PiperAppUtils
 struct VoiceItemView: View {
 
     @StateObject var hostModel: VoiceItemHostModel
+    /// Search results are a flat list without language sections, so
+    /// their rows name the voice's language explicitly.
+    var showsLanguage: Bool = false
     var voice: Voice {
         hostModel.viewModel.voice
     }
@@ -74,11 +77,21 @@ struct VoiceItemView: View {
                     }
                 }
             } else if hostModel.viewModel.isDownloading {
-                CircularProgressView(progress: hostModel.viewModel.downloadProgress)
+                Button {
+                    hostModel.cancelDownload(voice: voice)
+                } label: {
+                    ZStack {
+                        CircularProgressView(progress: hostModel.viewModel.downloadProgress)
+                            .frame(width: size, height: size)
+                        Image(systemName: "stop.fill")
+                            .imageScale(.small)
+                            .foregroundColor(.accentColor)
+                    }
                     .frame(width: size, height: size)
-                    .accessibilityElement()
-                    .accessibilityLabel("downloading")
-                    .accessibilityValue("\(Int(hostModel.viewModel.downloadProgress * 100))%")
+                }
+                .buttonStyle(.borderless)
+                .accessibilityLabel("cancel_download")
+                .accessibilityValue("\(Int(hostModel.viewModel.downloadProgress * 100))%")
             } else {
                 Button {
                     hostModel.download(voice: voice)
@@ -95,6 +108,11 @@ struct VoiceItemView: View {
 
     var body: some View {
         let voiceTitle = voice.name.capitalized + " " + voice.quality + " "
+        let languageName = voice.language.code.localizedLanguageFromCode
+        let baseAccessibilityLabel = showsLanguage ? voiceTitle + languageName : voiceTitle
+        let accessibilityLabel = voice.license.map {
+            "\(baseAccessibilityLabel), \("voice_license".localized): \($0)"
+        } ?? baseAccessibilityLabel
         HStack {
             Spacer()
                 .frame(width: 10)
@@ -105,8 +123,13 @@ struct VoiceItemView: View {
                     Spacer()
                 }
                 HStack {
-                    Text(voice.voiceSizeString)
-                        .font(.body)
+                    if showsLanguage {
+                        Text(languageName + " · " + voice.voiceSizeString)
+                            .font(.body)
+                    } else {
+                        Text(voice.voiceSizeString)
+                            .font(.body)
+                    }
                     Spacer()
                 }
                 if let license = voice.license {
@@ -119,7 +142,7 @@ struct VoiceItemView: View {
                 }
             }
             .accessibilityElement(children: .combine)
-            .accessibilityLabel(voice.license.map { "\(voiceTitle), \("voice_license".localized): \($0)" } ?? voiceTitle)
+            .accessibilityLabel(accessibilityLabel)
             .accessibilityHint("voice_item_hint")
             Spacer()
             playDemo()
