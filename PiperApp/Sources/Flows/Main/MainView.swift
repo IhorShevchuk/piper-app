@@ -61,6 +61,13 @@ struct MainView: View {
         }
     }
 
+    /// Sighted users see just the number on an installed-language row;
+    /// VoiceOver keeps the full localized "Installed voices: N".
+    private func installedAccessibilityLabel(for group: MainViewModel.InstalledLanguage) -> String {
+        let count = String.localized("installed_count_format", arguments: [group.models.count])
+        return "\(group.code.localizedLanguageFromCode), \(count)"
+    }
+
     @ViewBuilder
     private var installedContent: some View {
         if !hostModel.viewModel.installedModels.isEmpty {
@@ -74,10 +81,12 @@ struct MainView: View {
                             Text(group.code.localizedLanguageFromCode)
                                 .font(.title2)
                             Spacer()
-                            Text(String.localized("installed_count_format", arguments: [group.models.count]))
+                            Text("\(group.models.count)")
                                 .font(.body)
                                 .foregroundStyle(.secondary)
                         }
+                        .accessibilityElement(children: .ignore)
+                        .accessibilityLabel(Text(installedAccessibilityLabel(for: group)))
                     }
                 }
                 ForEach(hostModel.viewModel.ungroupedInstalled, id: \.info?.voiceId) { model in
