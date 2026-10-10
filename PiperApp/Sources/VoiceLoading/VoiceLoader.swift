@@ -64,19 +64,31 @@ class VoiceLoader: NSObject {
                    delegateQueue: operationQueue)
     }()
 
-    private func load<Item: Decodable>(url: URL?) async throws -> Item {
-        guard let url else {
-            throw Error.nilURL
-        }
-
-        let (data, _) = try await URLSession.shared.data(from: url)
-        let decoder = JSONDecoder()
-        return try decoder.decode(Item.self, from: data)
+    private var cacheURL: URL? {
+        FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first?
+            .appendingPathComponent("voices-catalog.json")
     }
 
     func loadVoices() async throws -> [Voice] {
-        let allVoices: [String: Voice] = try await load(url: Constants.voicesURL)
-        return Array(allVoices.values)
+        guard let url = Constants.voicesURL else {
+            throw Error.nilURL
+        }
+        do {
+            let (data, _) = try await URLSession.shared.data(from: url)
+            let allVoices = try JSONDecoder().decode([String: Voice].self, from: data)
+            if let cacheURL {
+                try? data.write(to: cacheURL, options: .atomic)
+            }
+            return Array(allVoices.values)
+        } catch {
+            // Offline or a broken response: use the last good catalog.
+            guard let cacheURL,
+                  let data = try? Data(contentsOf: cacheURL),
+                  let cached = try? JSONDecoder().decode([String: Voice].self, from: data) else {
+                throw error
+            }
+            return Array(cached.values)
+        }
     }
 
     func sampleURL(for voice: Voice) -> URL? {

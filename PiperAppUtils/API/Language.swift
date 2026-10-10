@@ -8,10 +8,16 @@ public struct Language: Decodable {
         case code
         case family
         case region
+        case nameEnglish = "name_english"
+        case nameNative = "name_native"
+        case countryEnglish = "country_english"
     }
     public let code: String
     public let family: String
     public let region: String
+    public let nameEnglish: String?
+    public let nameNative: String?
+    public let countryEnglish: String?
 
     /// Community-trained configs sometimes ship a stripped language block
     /// (e.g. `"language": {"code": "en-gb-x-rp"}` with no family/region).
@@ -27,6 +33,9 @@ public struct Language: Decodable {
         region = try container.decodeIfPresent(String.self, forKey: .region)
             ?? components.dropFirst().first?.uppercased()
             ?? ""
+        nameEnglish = try container.decodeIfPresent(String.self, forKey: .nameEnglish)
+        nameNative = try container.decodeIfPresent(String.self, forKey: .nameNative)
+        countryEnglish = try container.decodeIfPresent(String.self, forKey: .countryEnglish)
     }
 
     public var country: String {

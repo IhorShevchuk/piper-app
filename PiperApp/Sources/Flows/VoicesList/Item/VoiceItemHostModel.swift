@@ -102,7 +102,12 @@ class VoiceItemHostModel: @unchecked Sendable, ObservableObject {
     }
 
     private func installed(_ voice: Voice) -> FileManager.ModelPaths? {
-        self.piper.installedVoices.first { modelPath in
+        Self.installedPaths(for: voice, in: piper.installedVoices)
+    }
+
+    static func installedPaths(for voice: Voice,
+                               in installed: [FileManager.ModelPaths]) -> FileManager.ModelPaths? {
+        installed.first { modelPath in
             // Prefer the catalog key recorded at install time: some model
             // configs carry metadata that does not match the catalog entry.
             if let catalogKey = modelPath.catalogKey {
