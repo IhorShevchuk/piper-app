@@ -164,6 +164,7 @@ let project = Project(
             bundleId: "dev.ihor-shevchuk.piper.tests",
             sources: ["PiperTests/**"],
             dependencies: [
+                .target(name: projectName),
                 .target(name: sharedUtilsName),
                 .target(name: ttsLogicName)
             ],

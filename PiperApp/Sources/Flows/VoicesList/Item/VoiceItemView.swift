@@ -109,6 +109,10 @@ struct VoiceItemView: View {
     var body: some View {
         let voiceTitle = voice.name.capitalized + " " + voice.quality + " "
         let languageName = voice.language.code.localizedLanguageFromCode
+        let baseAccessibilityLabel = showsLanguage ? voiceTitle + languageName : voiceTitle
+        let accessibilityLabel = voice.license.map {
+            "\(baseAccessibilityLabel), \("voice_license".localized): \($0)"
+        } ?? baseAccessibilityLabel
         HStack {
             Spacer()
                 .frame(width: 10)
@@ -128,9 +132,17 @@ struct VoiceItemView: View {
                     }
                     Spacer()
                 }
+                if let license = voice.license {
+                    HStack {
+                        Text("\("voice_license".localized): \(license)")
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                        Spacer()
+                    }
+                }
             }
             .accessibilityElement(children: .combine)
-            .accessibilityLabel(showsLanguage ? voiceTitle + languageName : voiceTitle)
+            .accessibilityLabel(accessibilityLabel)
             .accessibilityHint("voice_item_hint")
             Spacer()
             playDemo()
