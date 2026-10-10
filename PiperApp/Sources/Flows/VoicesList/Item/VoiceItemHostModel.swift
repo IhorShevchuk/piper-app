@@ -15,6 +15,7 @@ class VoiceItemHostModel: @unchecked Sendable, ObservableObject {
     private var avPlayerRateObserver: NSKeyValueObservation!
     private var avItemStateObserver: NSKeyValueObservation!
     private var playingCancellable: AnyCancellable?
+    private var downloadsCancellable: AnyCancellable?
     /// True while this row is playing a sample with the installed model
     /// itself (through PiperManager) rather than the hosted sample file.
     /// PiperManager.isPlaying is global, so rows use this flag to react
@@ -40,6 +41,16 @@ class VoiceItemHostModel: @unchecked Sendable, ObservableObject {
                 self.isPlayingInstalledSample = false
             }
         }
+        downloadsCancellable = loader.$downloadProgress.sink { [weak self] downloads in
+            guard let self = self else { return }
+            if let progress = downloads[self.viewModel.voice.key] {
+                self.viewModel.isDownloading = true
+                self.viewModel.downloadProgress = progress
+            } else {
+                self.viewModel.isDownloading = false
+                self.viewModel.downloadProgress = 0
+            }
+        }
     }
 
     deinit {
@@ -49,20 +60,18 @@ class VoiceItemHostModel: @unchecked Sendable, ObservableObject {
     func download(voice: Voice) {
         Task { [weak self] in
             guard let self else { return }
-            await MainActor.run { [weak self] in
-                guard let self else { return }
-                self.viewModel.isDownloading = true
+            // The loader's registry refuses a second download of the
+            // same voice; every row observes progress from there.
+            let started = await loader.beginDownload(for: voice.key)
+            guard started else { return }
+            defer {
+                Task { await self.loader.endDownload(for: voice.key) }
             }
             do {
                 for try await event in loader.download(voice: voice) {
-
                     switch event {
-
                     case .progress(let value):
-                        await MainActor.run { [weak self] in
-                            guard let self else { return }
-                            self.viewModel.downloadProgress = value
-                        }
+                        await loader.updateDownloadProgress(value, for: voice.key)
 
                     case .finished(let modelPath):
                         await self.piper.install(paths: modelPath, catalogKey: voice.key)
@@ -73,11 +82,6 @@ class VoiceItemHostModel: @unchecked Sendable, ObservableObject {
                 }
             } catch {
                 Log.error("Failed to download voices: \(error)")
-            }
-
-            await MainActor.run {
-                self.viewModel.downloadProgress = 0.0
-                self.viewModel.isDownloading = false
             }
         }
     }
