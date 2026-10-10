@@ -23,11 +23,11 @@ struct MainView: View {
     }
 
     @ViewBuilder
-    func aboutButtonView() -> some View {
-        toolBarButtonView(imageName: "info.circle",
-                          accessibilityLabel: String(localized: "about_app"),
+    func settingsButtonView() -> some View {
+        toolBarButtonView(imageName: "gearshape",
+                          accessibilityLabel: String(localized: "settings"),
                           destination: {
-            AboutAppView(hostModel: AboutAppHostModel(piper: self.hostModel.piper))
+            SettingsView(hostModel: SettingsHostModel(piper: self.hostModel.piper))
         })
     }
 
@@ -190,7 +190,7 @@ struct MainView: View {
                     helpButtonView()
                 }
                 ToolbarItem(placement: .primaryAction) {
-                    aboutButtonView()
+                    settingsButtonView()
                 }
             }
         }

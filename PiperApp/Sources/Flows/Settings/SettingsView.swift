@@ -4,9 +4,10 @@
 import SwiftUI
 import PiperAppUtils
 
-struct AboutAppView: View {
+struct SettingsView: View {
 
-    @StateObject var hostModel: AboutAppHostModel
+    @StateObject var hostModel: SettingsHostModel
+    @AppStorage(ModelFormat.userDefaultsKey) private var modelFormat: ModelFormat = .standard
 
 #if os(iOS)
     private let platform = "iOS"
@@ -19,6 +20,19 @@ struct AboutAppView: View {
     var body: some View {
         NavigationStack {
             List {
+                Section {
+                    Picker("model_format", selection: $modelFormat) {
+                        Text("model_format_standard").tag(ModelFormat.standard)
+                        Text("model_format_compact").tag(ModelFormat.compact)
+                    }
+                    .pickerStyle(.inline)
+                    .labelsHidden()
+                } header: {
+                    Text("model_format")
+                } footer: {
+                    Text("model_format_description")
+                }
+
                 Section("credits_and_legal") {
                     VStack {
                         Text("license_audio_unit_title").font(.headline)
@@ -75,7 +89,7 @@ struct AboutAppView: View {
                     Link("share_feedback", destination: feedbackURL)
                 }
             }
-            .navigationTitle("about_app")
+            .navigationTitle("settings")
         } // NavigationStack
     }
 }

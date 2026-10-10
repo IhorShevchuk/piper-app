@@ -13,8 +13,8 @@ final class ScreenshotTests: XCTestCase {
 
     func testScreenshots() {
         snapshot("01_Main")
-        app.buttons["info.circle"].activate()
-        snapshot("02_About")
+        app.buttons["gearshape"].activate()
+        snapshot("02_Settings")
         goBack()
         app.buttons["questionmark.circle"].activate()
         snapshot("03_Help")
