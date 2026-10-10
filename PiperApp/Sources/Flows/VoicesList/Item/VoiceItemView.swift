@@ -7,6 +7,9 @@ import PiperAppUtils
 struct VoiceItemView: View {
 
     @StateObject var hostModel: VoiceItemHostModel
+    /// Search results are a flat list without language sections, so
+    /// their rows name the voice's language explicitly.
+    var showsLanguage: Bool = false
     var voice: Voice {
         hostModel.viewModel.voice
     }
@@ -95,6 +98,7 @@ struct VoiceItemView: View {
 
     var body: some View {
         let voiceTitle = voice.name.capitalized + " " + voice.quality + " "
+        let languageName = voice.language.code.localizedLanguageFromCode
         HStack {
             Spacer()
                 .frame(width: 10)
@@ -105,13 +109,18 @@ struct VoiceItemView: View {
                     Spacer()
                 }
                 HStack {
-                    Text(voice.voiceSizeString)
-                        .font(.body)
+                    if showsLanguage {
+                        Text(languageName + " · " + voice.voiceSizeString)
+                            .font(.body)
+                    } else {
+                        Text(voice.voiceSizeString)
+                            .font(.body)
+                    }
                     Spacer()
                 }
             }
             .accessibilityElement(children: .combine)
-            .accessibilityLabel(voiceTitle)
+            .accessibilityLabel(showsLanguage ? voiceTitle + languageName : voiceTitle)
             .accessibilityHint("voice_item_hint")
             Spacer()
             playDemo()
