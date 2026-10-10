@@ -62,33 +62,12 @@ struct MainView: View {
     }
 
     @ViewBuilder
-    private func voiceRow(_ voice: Voice, showsLanguage: Bool = false) -> some View {
-        let item = VoiceItemView(hostModel: VoiceItemHostModel(piper: hostModel.piper,
-                                                               loader: hostModel.loader,
-                                                               voice: voice,
-                                                               delegate: hostModel),
-                                 showsLanguage: showsLanguage)
-        if let paths = hostModel.installedPaths(for: voice) {
-            NavigationLink {
-                VoiceView(hostModel: VoiceHostModel(piper: hostModel.piper,
-                                                    modelPaths: paths,
-                                                    delegate: hostModel))
-            } label: {
-                item
-            }
-            .buttonStyle(.plain)
-        } else {
-            item
-        }
-    }
-
-    @ViewBuilder
     private var installedContent: some View {
         if !hostModel.viewModel.installedModels.isEmpty {
             Section("installed_languages") {
                 ForEach(hostModel.viewModel.installedByLanguage, id: \.code) { group in
                     NavigationLink {
-                        InstalledVoicesView(hostModel: hostModel, languageCode: group.code)
+                        LanguageVoicesView(hostModel: hostModel, languageCode: group.code)
                     } label: {
                         HStack {
                             Text(group.code.localizedLanguageFromCode)
@@ -142,10 +121,13 @@ struct MainView: View {
                     .font(.title2)
                     .accessibilityHidden(false)
             }
-            ForEach(hostModel.viewModel.languageCodes, id: \.self) { code in
-                Section(code.localizedLanguageFromCode) {
-                    ForEach(hostModel.voices(for: code), id: \.key) { voice in
-                        voiceRow(voice)
+            Section("languages") {
+                ForEach(hostModel.viewModel.languageCodes, id: \.self) { code in
+                    NavigationLink {
+                        LanguageVoicesView(hostModel: hostModel, languageCode: code)
+                    } label: {
+                        Text(code.localizedLanguageFromCode)
+                            .font(.title2)
                     }
                 }
             }
@@ -172,7 +154,7 @@ struct MainView: View {
         } else {
             Section {
                 ForEach(results, id: \.key) { voice in
-                    voiceRow(voice, showsLanguage: true)
+                    VoiceRowView(hostModel: hostModel, voice: voice, showsLanguage: true)
                 }
             }
         }
