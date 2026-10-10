@@ -67,7 +67,8 @@ struct MainView: View {
             Section("installed_languages") {
                 ForEach(hostModel.viewModel.installedByLanguage, id: \.code) { group in
                     NavigationLink {
-                        LanguageVoicesView(hostModel: hostModel, languageCode: group.code)
+                        LanguageVoicesView(hostModel: hostModel,
+                                           languageCode: hostModel.resolvedLanguageCode(for: group.code))
                     } label: {
                         HStack {
                             Text(group.code.localizedLanguageFromCode)
