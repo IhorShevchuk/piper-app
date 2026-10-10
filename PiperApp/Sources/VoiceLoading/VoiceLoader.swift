@@ -134,70 +134,89 @@ class VoiceLoader: NSObject {
     func download(voice: Voice) -> AsyncThrowingStream<DownloadEvent, Swift.Error> {
         AsyncThrowingStream { continuation in
             Task {
-                var downloadedFiles: [URL] = []
-                do {
-                    guard let modelPath = voice.modelPath,
-                          let jsonPath = voice.jsonPath else {
-                        throw Error.loadingFailed
-                    }
-
-                    guard let jsonURL = URL(string: "\(Constants.baseURL)/\(jsonPath)"),
-                          let modelURL = URL(string: "\(Constants.baseURL)/\(modelPath)") else {
-                        throw Error.nilURL
-                    }
-
-                    // JSON is tiny → weight 5%
-                    let jsonLocalURL = try await self.downloadFile(
-                        from: jsonURL,
-                        key: voice.key,
-                        weight: 0.05,
-                        baseProgress: 0.0,
-                        continuation: continuation
-                    )
-                    downloadedFiles.append(jsonLocalURL)
-
-                    if (try? ModelInfo.create(from: jsonLocalURL)) == nil {
-                        throw Error.wrongModelInfo
-                    }
-
-                    if isPinyinVoice(voice, configURL: jsonLocalURL) {
-                        do {
-                            try G2PWDataManager.ensureInstalled()
-                        } catch {
-                            Log.error("Failed to ensure g2pw data: \(error)")
-                        }
-                    }
-
-                    // Model is large → weight 95%
-                    let modelLocalURL = try await self.downloadFile(
-                        from: modelURL,
-                        key: voice.key,
-                        weight: 0.95,
-                        baseProgress: 0.05,
-                        continuation: continuation
-                    )
-                    downloadedFiles.append(modelLocalURL)
-
-                    guard let paths = FileManager.ModelPaths(model: modelLocalURL,
-                                                             json: jsonLocalURL) else {
-                        throw Error.loadingFailed
-                    }
-
-                    continuation.yield(.finished(paths))
-                    continuation.finish()
-
-                } catch {
-                    // A failed or cancelled download must not leave
-                    // partial temp files behind.
-                    for fileURL in downloadedFiles {
-                        try? FileManager.default.removeItem(at: fileURL)
-                    }
-                    continuation.finish(throwing: error)
-                }
-                self.cancelledDownloads.remove(voice.key)
-                self.activeDownloadTasks[voice.key] = nil
+                await self.performDownload(voice: voice, continuation: continuation)
             }
         }
+    }
+
+    private func performDownload(voice: Voice,
+                                 continuation: AsyncThrowingStream<DownloadEvent, Swift.Error>.Continuation) async {
+        var downloadedFiles: [URL] = []
+        do {
+            guard let modelPath = voice.modelPath else {
+                throw Error.loadingFailed
+            }
+            guard let modelURL = URL(string: "\(Constants.baseURL)/\(modelPath)") else {
+                throw Error.nilURL
+            }
+
+            let jsonLocalURL = try await downloadVoiceConfig(voice: voice, continuation: continuation)
+            downloadedFiles.append(jsonLocalURL)
+
+            // Model is large → weight 95%
+            let modelLocalURL = try await self.downloadFile(
+                from: modelURL,
+                key: voice.key,
+                weight: 0.95,
+                baseProgress: 0.05,
+                continuation: continuation
+            )
+            downloadedFiles.append(modelLocalURL)
+
+            guard let paths = FileManager.ModelPaths(model: modelLocalURL,
+                                                     json: jsonLocalURL) else {
+                throw Error.loadingFailed
+            }
+
+            continuation.yield(.finished(paths))
+            continuation.finish()
+
+        } catch {
+            // A failed or cancelled download must not leave
+            // partial temp files behind.
+            for fileURL in downloadedFiles {
+                try? FileManager.default.removeItem(at: fileURL)
+            }
+            continuation.finish(throwing: error)
+        }
+        cancelledDownloads.remove(voice.key)
+        activeDownloadTasks[voice.key] = nil
+    }
+
+    /// Downloads and validates a voice's config file (the small JSON),
+    /// preparing extra data for voices that need it (Chinese G2PW).
+    private func downloadVoiceConfig(voice: Voice,
+                                     continuation: AsyncThrowingStream<DownloadEvent, Swift.Error>.Continuation) async throws -> URL {
+        guard let jsonPath = voice.jsonPath else {
+            throw Error.loadingFailed
+        }
+        guard let jsonURL = URL(string: "\(Constants.baseURL)/\(jsonPath)") else {
+            throw Error.nilURL
+        }
+
+        // JSON is tiny → weight 5%
+        let jsonLocalURL = try await downloadFile(
+            from: jsonURL,
+            key: voice.key,
+            weight: 0.05,
+            baseProgress: 0.0,
+            continuation: continuation
+        )
+
+        if (try? ModelInfo.create(from: jsonLocalURL)) == nil {
+            try? FileManager.default.removeItem(at: jsonLocalURL)
+            throw Error.wrongModelInfo
+        }
+
+        if isPinyinVoice(voice, configURL: jsonLocalURL) {
+            do {
+                try G2PWDataManager.ensureInstalled()
+            } catch {
+                Log.error("Failed to ensure g2pw data: \(error)")
+            }
+        }
+
+        return jsonLocalURL
     }
 
     private func downloadFile(
