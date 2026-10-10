@@ -89,7 +89,7 @@ class MainHostModel: @unchecked Sendable, ObservableObject {
     }
 
     func searchResults(for query: String) -> [Voice] {
-        let options: String.FoldingOptions = [.caseInsensitive, .diacriticInsensitive]
+        let options: String.CompareOptions = [.caseInsensitive, .diacriticInsensitive]
         let foldedQuery = query.folding(options: options, locale: .current)
         guard !foldedQuery.isEmpty else {
             return []
