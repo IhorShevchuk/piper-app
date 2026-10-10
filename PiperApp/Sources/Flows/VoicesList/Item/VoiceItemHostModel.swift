@@ -61,14 +61,16 @@ class VoiceItemHostModel: @unchecked Sendable, ObservableObject {
         Task { [weak self] in
             guard let self else { return }
             // The loader's registry refuses a second download of the
-            // same voice; every row observes progress from there.
-            let started = await loader.beginDownload(for: voice.key)
-            guard started else { return }
+            // same voice; every row observes progress from there. The
+            // session token scopes this download's teardown so a late
+            // finish after a cancel cannot disturb a newer download.
+            let session = await loader.beginDownload(for: voice.key)
+            guard let session else { return }
             defer {
-                Task { await self.loader.endDownload(for: voice.key) }
+                Task { await self.loader.endDownload(for: voice.key, session: session) }
             }
             do {
-                for try await event in loader.download(voice: voice) {
+                for try await event in loader.download(voice: voice, session: session) {
                     switch event {
                     case .progress(let value):
                         await loader.updateDownloadProgress(value, for: voice.key)
