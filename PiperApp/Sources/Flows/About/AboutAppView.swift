@@ -52,6 +52,12 @@ struct AboutAppView: View {
                     }
                 }
 
+                NavigationLink {
+                    VoiceLicensesView(hostModel: VoiceLicensesHostModel())
+                } label: {
+                    Text("voice_licenses")
+                }
+
                 InfoViewRow(title: "audio_unit_status".localized, value: hostModel.viewModel.connectionStatus.string)
                 if hostModel.viewModel.connectionStatus != .connected {
                     Button {
