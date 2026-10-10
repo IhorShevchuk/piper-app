@@ -4,7 +4,7 @@
 import Foundation
 import PiperAppUtils
 
-struct AboutAppViewModel {
+struct SettingsViewModel {
     var appVersion: String
     var connectionStatus: PiperAudioUnit.Status
 }

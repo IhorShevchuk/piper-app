@@ -6,13 +6,13 @@ import Combine
 import PiperAppUtils
 import AVFoundation
 
-class AboutAppHostModel: @unchecked Sendable, ObservableObject {
-    @Published var viewModel: AboutAppViewModel
+class SettingsHostModel: @unchecked Sendable, ObservableObject {
+    @Published var viewModel: SettingsViewModel
     let piper: PiperManager
 
     @MainActor
     init(piper: PiperManager) {
-        viewModel = AboutAppViewModel(appVersion: Bundle.main.applicationVersion,
+        viewModel = SettingsViewModel(appVersion: Bundle.main.applicationVersion,
                                       connectionStatus: piper.audioUnit.status)
         self.piper = piper
     }
