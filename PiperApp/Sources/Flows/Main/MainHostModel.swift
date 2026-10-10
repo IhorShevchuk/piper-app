@@ -20,6 +20,21 @@ class MainHostModel: @unchecked Sendable, ObservableObject {
         loadVoices()
     }
 
+    /// Model configs do not always use the catalog's language code:
+    /// community configs ship codes like "en-gb-x-rp" where the catalog
+    /// says "en_GB". Reduce a code to family + region so installed
+    /// voices group under the same key the catalog uses.
+    static func canonicalLanguageCode(_ code: String) -> String {
+        let components = code.split(whereSeparator: { $0 == "_" || $0 == "-" }).map(String.init)
+        guard let family = components.first?.lowercased() else {
+            return code
+        }
+        guard components.count > 1 else {
+            return family
+        }
+        return "\(family)_\(components[1].uppercased())"
+    }
+
     private static func makeViewModel(installed: [FileManager.ModelPaths]) -> MainViewModel {
         let sorted = installed.sorted(by: { model1, model2 in
             return model1.modelTitle < model2.modelTitle
@@ -28,7 +43,7 @@ class MainHostModel: @unchecked Sendable, ObservableObject {
         var ungrouped: [FileManager.ModelPaths] = []
         for model in sorted {
             if let code = model.info?.language.code {
-                byLanguage[code, default: []].append(model)
+                byLanguage[canonicalLanguageCode(code), default: []].append(model)
             } else {
                 ungrouped.append(model)
             }
@@ -48,13 +63,19 @@ class MainHostModel: @unchecked Sendable, ObservableObject {
             do {
                 let voices = try await self.loader.loadVoices()
                 self.languages = Dictionary(grouping: voices) { voice in
-                    voice.language.code
+                    Self.canonicalLanguageCode(voice.language.code)
                 }
-                // Japanese voices are not supported by the app yet.
-                self.languages.removeValue(forKey: "ja_JA")
-                let codes = self.languages.keys.sorted(by: { lang1, lang2 in
-                    return lang1.localizedLanguageFromCode < lang2.localizedLanguageFromCode
-                })
+                // Japanese voices are not supported by the app yet, so
+                // they stay out of the languages list and search; the
+                // catalog entry is kept so an installed Japanese voice
+                // still resolves to its language.
+                let codes = self.languages.keys
+                    .filter { code in
+                        return !code.hasPrefix("ja_")
+                    }
+                    .sorted(by: { lang1, lang2 in
+                        return lang1.localizedLanguageFromCode < lang2.localizedLanguageFromCode
+                    })
                 await MainActor.run {
                     self.updateCatalog(codes: codes, state: .loaded)
                 }
@@ -84,6 +105,22 @@ class MainHostModel: @unchecked Sendable, ObservableObject {
             }) ?? []
     }
 
+    /// Maps an installed language group to the catalog key its voices
+    /// list lives under: the canonical code when the catalog has it,
+    /// else the catalog's only language with the same family (a config
+    /// that ships just "uk" still finds "uk_UA").
+    func resolvedLanguageCode(for code: String) -> String {
+        let canonical = Self.canonicalLanguageCode(code)
+        if languages[canonical] != nil {
+            return canonical
+        }
+        let family = canonical.split(separator: "_").first.map(String.init) ?? canonical
+        let matches = languages.keys.filter { key in
+            return key.split(separator: "_").first.map(String.init) == family
+        }
+        return matches.count == 1 ? matches[0] : canonical
+    }
+
     func installedPaths(for voice: Voice) -> FileManager.ModelPaths? {
         VoiceItemHostModel.installedPaths(for: voice, in: piper.installedVoices)
     }
@@ -96,7 +133,8 @@ class MainHostModel: @unchecked Sendable, ObservableObject {
         }
         return languages.values.flatMap { $0 }
             .filter { voice in
-                return voice.isSupported
+                // Japanese voices are not supported by the app yet.
+                return voice.isSupported && voice.language.family != "ja"
             }
             .filter { voice in
                 if voice.name.folding(options: options, locale: .current).contains(foldedQuery) {
