@@ -14,6 +14,12 @@ class VoiceItemHostModel: @unchecked Sendable, ObservableObject {
     weak var delegate: ModelChangeDelegate?
     private var avPlayerRateObserver: NSKeyValueObservation!
     private var avItemStateObserver: NSKeyValueObservation!
+    private var playingCancellable: AnyCancellable?
+    /// True while this row is playing a sample with the installed model
+    /// itself (through PiperManager) rather than the hosted sample file.
+    /// PiperManager.isPlaying is global, so rows use this flag to react
+    /// only to playback they started.
+    private var isPlayingInstalledSample = false
 
     private var audioPlayer: AVPlayer?
     init(piper: PiperManager,
@@ -25,6 +31,15 @@ class VoiceItemHostModel: @unchecked Sendable, ObservableObject {
         self.loader = loader
         self.delegate = delegate
         activatePlaybackMode()
+        playingCancellable = piper.$isPlaying.sink { [weak self] isPlaying in
+            guard let self = self, self.isPlayingInstalledSample else {
+                return
+            }
+            self.viewModel.isPlaying = isPlaying
+            if !isPlaying {
+                self.isPlayingInstalledSample = false
+            }
+        }
     }
 
     deinit {
@@ -71,6 +86,9 @@ class VoiceItemHostModel: @unchecked Sendable, ObservableObject {
         guard let installed = installed(voice) else {
             return
         }
+        if isPlayingInstalledSample {
+            stopPlaying()
+        }
         piper.unstall(paths: installed)
         delegate?.modelDidChange()
     }
@@ -94,6 +112,13 @@ class VoiceItemHostModel: @unchecked Sendable, ObservableObject {
     }
 
     func stopPlaying() {
+        if isPlayingInstalledSample {
+            isPlayingInstalledSample = false
+            let piper = self.piper
+            Task {
+                await piper.stopPlaying()
+            }
+        }
         NotificationCenter.default.removeObserver(self, name: AVPlayerItem.didPlayToEndTimeNotification, object: nil)
         NotificationCenter.default.removeObserver(self, name: AVPlayerItem.failedToPlayToEndTimeNotification, object: nil)
         audioPlayer?.pause()
@@ -106,6 +131,14 @@ class VoiceItemHostModel: @unchecked Sendable, ObservableObject {
     }
 
     func playSample(voice: Voice) {
+        // An installed voice plays itself: synthesize the demo text with
+        // the local model (the same path as the voice detail screen)
+        // instead of streaming the hosted sample file.
+        if let modelInfo = installed(voice)?.info {
+            playInstalledSample(modelInfo: modelInfo)
+            return
+        }
+
         guard let sampleURL = loader.sampleURL(for: voice) else {
             return
         }
@@ -117,6 +150,18 @@ class VoiceItemHostModel: @unchecked Sendable, ObservableObject {
                                                name: AVPlayerItem.failedToPlayToEndTimeNotification,
                                                object: nil)
         playSample(voice: voice, url: sampleURL, fallbackAttempted: false)
+    }
+
+    private func playInstalledSample(modelInfo: ModelInfo) {
+        stopPlaying()
+        isPlayingInstalledSample = true
+        let demoText = DemoText.text(for: modelInfo.language) ?? DemoText.defaultText
+        let piper = self.piper
+        Task {
+            await piper.playSample(demoText: demoText,
+                                   speakerId: 0,
+                                   modelInfo: modelInfo)
+        }
     }
 
     private func playSample(voice: Voice, url: URL, fallbackAttempted: Bool) {
