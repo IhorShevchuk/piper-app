@@ -80,9 +80,19 @@ class VoiceItemHostModel: @unchecked Sendable, ObservableObject {
                         self.delegate?.modelDidChange()
                     }
                 }
+            } catch let error as URLError where error.code == .cancelled {
+                Log.debug("Download cancelled for voice: \(voice.key)")
+            } catch is CancellationError {
+                Log.debug("Download cancelled for voice: \(voice.key)")
             } catch {
                 Log.error("Failed to download voices: \(error)")
             }
+        }
+    }
+
+    func cancelDownload(voice: Voice) {
+        Task {
+            await loader.cancelDownload(for: voice.key)
         }
     }
 
