@@ -37,6 +37,25 @@ class VoiceLoader: NSObject {
         downloadProgress[key] = nil
     }
 
+    /// The URLSession task currently fetching a file for each voice
+    /// download, so a download can be cancelled from any row.
+    private var activeDownloadTasks: [String: URLSessionDownloadTask] = [:]
+    private var downloadTaskKeys: [Int: String] = [:]
+    /// Voices whose download was cancelled; checked when the next
+    /// file's task starts, so a cancel tapped between the two files
+    /// of a voice (config, then model) is not lost.
+    private var cancelledDownloads: Set<String> = []
+
+    /// Cancels the in-flight download of a voice, if any: the
+    /// registry entry goes away (rows return to the download state)
+    /// and the download stream throws URLError.cancelled.
+    @MainActor
+    func cancelDownload(for key: String) {
+        cancelledDownloads.insert(key)
+        endDownload(for: key)
+        activeDownloadTasks[key]?.cancel()
+    }
+
     private enum Error: Swift.Error {
         case nilURL
         case loadingFailed
@@ -115,6 +134,7 @@ class VoiceLoader: NSObject {
     func download(voice: Voice) -> AsyncThrowingStream<DownloadEvent, Swift.Error> {
         AsyncThrowingStream { continuation in
             Task {
+                var downloadedFiles: [URL] = []
                 do {
                     guard let modelPath = voice.modelPath,
                           let jsonPath = voice.jsonPath else {
@@ -129,13 +149,14 @@ class VoiceLoader: NSObject {
                     // JSON is tiny → weight 5%
                     let jsonLocalURL = try await self.downloadFile(
                         from: jsonURL,
+                        key: voice.key,
                         weight: 0.05,
                         baseProgress: 0.0,
                         continuation: continuation
                     )
+                    downloadedFiles.append(jsonLocalURL)
 
                     if (try? ModelInfo.create(from: jsonLocalURL)) == nil {
-                        try? FileManager.default.removeItem(at: jsonLocalURL)
                         throw Error.wrongModelInfo
                     }
 
@@ -150,10 +171,12 @@ class VoiceLoader: NSObject {
                     // Model is large → weight 95%
                     let modelLocalURL = try await self.downloadFile(
                         from: modelURL,
+                        key: voice.key,
                         weight: 0.95,
                         baseProgress: 0.05,
                         continuation: continuation
                     )
+                    downloadedFiles.append(modelLocalURL)
 
                     guard let paths = FileManager.ModelPaths(model: modelLocalURL,
                                                              json: jsonLocalURL) else {
@@ -164,14 +187,22 @@ class VoiceLoader: NSObject {
                     continuation.finish()
 
                 } catch {
+                    // A failed or cancelled download must not leave
+                    // partial temp files behind.
+                    for fileURL in downloadedFiles {
+                        try? FileManager.default.removeItem(at: fileURL)
+                    }
                     continuation.finish(throwing: error)
                 }
+                self.cancelledDownloads.remove(voice.key)
+                self.activeDownloadTasks[voice.key] = nil
             }
         }
     }
 
     private func downloadFile(
         from url: URL,
+        key: String,
         weight: Double,
         baseProgress: Double,
         continuation: AsyncThrowingStream<DownloadEvent, Swift.Error>.Continuation
@@ -179,6 +210,8 @@ class VoiceLoader: NSObject {
 
         let task = urlSession.downloadTask(with: url)
         let id = task.taskIdentifier
+        activeDownloadTasks[key] = task
+        downloadTaskKeys[id] = key
 
         let observation = task.progress.observe(\.fractionCompleted) { progress, _ in
             let total = baseProgress + progress.fractionCompleted * weight
@@ -190,6 +223,9 @@ class VoiceLoader: NSObject {
         return try await withCheckedThrowingContinuation { cont in
             continuations[id] = cont
             task.resume()
+            if cancelledDownloads.contains(key) {
+                task.cancel()
+            }
         }
     }
 }
@@ -210,6 +246,15 @@ extension VoiceLoader: URLSessionDownloadDelegate {
         continuations[id] = nil
         observations[id]?.invalidate()
         observations[id] = nil
+        clearDownloadTask(id: id)
+    }
+
+    private func clearDownloadTask(id: Int) {
+        if let key = downloadTaskKeys[id],
+           activeDownloadTasks[key]?.taskIdentifier == id {
+            activeDownloadTasks[key] = nil
+        }
+        downloadTaskKeys[id] = nil
     }
 
     private func urlSession(
@@ -222,5 +267,6 @@ extension VoiceLoader: URLSessionDownloadDelegate {
         continuations[id] = nil
         observations[id]?.invalidate()
         observations[id] = nil
+        clearDownloadTask(id: id)
     }
 }

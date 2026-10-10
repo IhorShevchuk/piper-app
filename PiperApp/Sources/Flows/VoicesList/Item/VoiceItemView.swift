@@ -77,11 +77,21 @@ struct VoiceItemView: View {
                     }
                 }
             } else if hostModel.viewModel.isDownloading {
-                CircularProgressView(progress: hostModel.viewModel.downloadProgress)
+                Button {
+                    hostModel.cancelDownload(voice: voice)
+                } label: {
+                    ZStack {
+                        CircularProgressView(progress: hostModel.viewModel.downloadProgress)
+                            .frame(width: size, height: size)
+                        Image(systemName: "stop.fill")
+                            .imageScale(.small)
+                            .foregroundColor(.accentColor)
+                    }
                     .frame(width: size, height: size)
-                    .accessibilityElement()
-                    .accessibilityLabel("downloading")
-                    .accessibilityValue("\(Int(hostModel.viewModel.downloadProgress * 100))%")
+                }
+                .buttonStyle(.borderless)
+                .accessibilityLabel("cancel_download")
+                .accessibilityValue("\(Int(hostModel.viewModel.downloadProgress * 100))%")
             } else {
                 Button {
                     hostModel.download(voice: voice)
