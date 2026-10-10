@@ -25,10 +25,7 @@ struct SettingsView: View {
                         Text("model_format_standard").tag(ModelFormat.standard)
                         Text("model_format_compact").tag(ModelFormat.compact)
                     }
-                    .pickerStyle(.inline)
-                    .labelsHidden()
-                } header: {
-                    Text("model_format")
+                    .pickerStyle(.menu)
                 } footer: {
                     Text("model_format_description")
                 }

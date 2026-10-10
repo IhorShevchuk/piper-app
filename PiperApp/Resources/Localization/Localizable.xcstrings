@@ -834,6 +834,125 @@
         }
       }
     },
+    "app_help_line_6" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لتوفير المساحة، عيّن **تنسيق الصوت** على **مضغوط** في **الإعدادات**: ستكون تنزيلات الأصوات الجديدة أصغر وستستخدم ذاكرة أقل."
+          }
+        },
+        "bn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "জায়গা বাঁচাতে, **সেটিংসে** **ভয়েস ফরম্যাট** **কমপ্যাক্ট** হিসেবে সেট করুন: নতুন ভয়েস ডাউনলোডগুলি ছোট হবে এবং কম মেমরি ব্যবহার করবে।"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Um Speicherplatz zu sparen, stelle das **Stimmformat** in den **Einstellungen** auf **Kompakt**: Neue Stimm-Downloads sind dann kleiner und verbrauchen weniger Speicher."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "To save space, set **Voice format** to **Compact** in **Settings**: new voice downloads will be smaller and use less memory."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Para ahorrar espacio, ajusta **Formato de voz** a **Compacto** en **Ajustes**: las nuevas descargas de voces serán más pequeñas y usarán menos memoria."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pour économiser de l'espace, réglez **Format de voix** sur **Compact** dans **Réglages** : les nouveaux téléchargements de voix seront plus petits et utiliseront moins de mémoire."
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "जगह बचाने के लिए, **सेटिंग्स** में **वॉइस प्रारूप** को **कॉम्पैक्ट** पर सेट करें: नए वॉइस डाउनलोड छोटे होंगे और कम मेमोरी का उपयोग करेंगे।"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Helytakarékosság érdekében állítsd a **Hangformátumot** **Kompakt** értékre a **Beállításokban**: az új hangletöltések kisebbek lesznek és kevesebb memóriát használnak."
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Untuk menghemat ruang, atur **Format suara** ke **Ringkas** di **Pengaturan**: unduhan suara baru akan lebih kecil dan menggunakan lebih sedikit memori."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Per risparmiare spazio, imposta **Formato della voce** su **Compatto** in **Impostazioni**: i nuovi download delle voci saranno più piccoli e useranno meno memoria."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "容量を節約するには、**設定**で**音声形式**を**コンパクト**に設定してください。新しい音声ダウンロードが小さくなり、使用メモリも少なくなります。"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Om ruimte te besparen, stel je **Stemformaat** in op **Compact** in **Instellingen**: nieuwe stemdownloads zijn dan kleiner en gebruiken minder geheugen."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aby zaoszczędzić miejsce, ustaw **Format głosu** na **Kompaktowy** w **Ustawieniach**: nowe głosy do pobrania będą mniejsze i zajmą mniej pamięci."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Para economizar espaço, defina **Formato de voz** como **Compacto** em **Ajustes**: os novos downloads de vozes serão menores e usarão menos memória."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "För att spara utrymme, ställ in **Röstformat** på **Kompakt** i **Inställningar**: nya rösthämtningar blir mindre och använder mindre minne."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yer kazanmak için **Ayarlar** bölümünde **Ses biçimini** **Kompakt** olarak ayarlayın: yeni ses indirmeleri daha küçük olacak ve daha az bellek kullanacaktır."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Щоб заощадити місце, встановіть **Формат голосу** на **Компактний** у **Налаштуваннях**: нові завантаження голосів будуть меншими та споживатимуть менше пам'яті."
+          }
+        },
+        "ur-PK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "جگہ بچانے کے لیے، **ترتیبات** میں **آواز فارمیٹ** کو **کمپیکٹ** پر سیٹ کریں: نئے صوتی ڈاؤن لوڈز چھوٹے ہوں گے اور کم میموری استعمال کریں گے۔"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "要节省空间，请在**设置**中将**语音格式**设为**紧凑**:新的语音下载将更小，占用内存更少。"
+          }
+        }
+      }
+    },
     "app_help_title" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -5493,115 +5612,115 @@
         "ar" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ينطبق على التنزيلات الجديدة. تحتفظ الأصوات المثبتة بتنسيقها. النماذج المضغوطة أصغر وتستخدم ذاكرة أقل، بجودة أقل قليلاً."
+            "value" : "ينطبق على التنزيلات الجديدة. تحتفظ الأصوات المثبتة بتنسيقها. الأصوات المضغوطة أصغر وتستخدم ذاكرة أقل، بجودة أقل قليلاً."
           }
         },
         "bn" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "নতুন ডাউনলোডের ক্ষেত্রে প্রযোজ্য। ইনস্টল করা ভয়েস তাদের ফরম্যাট রাখে। কমপ্যাক্ট মডেলগুলি ছোট এবং কম মেমরি ব্যবহার করে, কিছুটা কম মানের সাথে।"
+            "value" : "নতুন ডাউনলোডের ক্ষেত্রে প্রযোজ্য। ইনস্টল করা ভয়েস তাদের ফরম্যাট রাখে। কমপ্যাক্ট ভয়েসগুলি ছোট এবং কম মেমরি ব্যবহার করে, কিছুটা কম মানের সাথে।"
           }
         },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Gilt für neue Downloads. Installierte Stimmen behalten ihr Format. Kompakte Modelle sind kleiner und verbrauchen weniger Speicher, bei leicht reduzierter Qualität."
+            "value" : "Gilt für neue Downloads. Installierte Stimmen behalten ihr Format. Kompakte Stimmen sind kleiner und verbrauchen weniger Speicher, bei leicht reduzierter Qualität."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Applies to new downloads. Installed voices keep their format. Compact models are smaller and use less memory, with slightly reduced quality."
+            "value" : "Applies to new downloads. Installed voices keep their format. Compact voices are smaller and use less memory, with slightly reduced quality."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Se aplica a las nuevas descargas. Las voces instaladas conservan su formato. Los modelos compactos son más pequeños y usan menos memoria, con una calidad ligeramente reducida."
+            "value" : "Se aplica a las nuevas descargas. Las voces instaladas conservan su formato. Las voces compactas son más pequeños y usan menos memoria, con una calidad ligeramente reducida."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "S'applique aux nouveaux téléchargements. Les voix installées conservent leur format. Les modèles compacts sont plus petits et utilisent moins de mémoire, avec une qualité légèrement réduite."
+            "value" : "S'applique aux nouveaux téléchargements. Les voix installées conservent leur format. Les voix compactes sont plus petits et utilisent moins de mémoire, avec une qualité légèrement réduite."
           }
         },
         "hi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "नए डाउनलोड पर लागू होता है। इंस्टॉल की गई आवाज़ें अपना प्रारूप बनाए रखती हैं। कॉम्पैक्ट मॉडल छोटे होते हैं और थोड़ी कम गुणवत्ता के साथ कम मेमोरी का उपयोग करते हैं।"
+            "value" : "नए डाउनलोड पर लागू होता है। इंस्टॉल की गई आवाज़ें अपना प्रारूप बनाए रखती हैं। कॉम्पैक्ट वॉइस छोटे होते हैं और थोड़ी कम गुणवत्ता के साथ कम मेमोरी का उपयोग करते हैं।"
           }
         },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Az új letöltésekre vonatkozik. A telepített hangok megtartják formátumukat. A kompakt modellek kisebbek és kevesebb memóriát használnak, kissé csökkent minőséggel."
+            "value" : "Az új letöltésekre vonatkozik. A telepített hangok megtartják formátumukat. A kompakt hangok kisebbek és kevesebb memóriát használnak, kissé csökkent minőséggel."
           }
         },
         "id" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Berlaku untuk unduhan baru. Suara yang terpasang mempertahankan formatnya. Model ringkas lebih kecil dan menggunakan lebih sedikit memori, dengan kualitas sedikit berkurang."
+            "value" : "Berlaku untuk unduhan baru. Suara yang terpasang mempertahankan formatnya. Suara ringkas lebih kecil dan menggunakan lebih sedikit memori, dengan kualitas sedikit berkurang."
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Si applica ai nuovi download. Le voci installate mantengono il loro formato. I modelli compatti sono più piccoli e usano meno memoria, con una qualità leggermente ridotta."
+            "value" : "Si applica ai nuovi download. Le voci installate mantengono il loro formato. Le voci compatte sono più piccoli e usano meno memoria, con una qualità leggermente ridotta."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "新しいダウンロードに適用されます。インストール済みの音声は形式を保持します。コンパクトモデルは小さく、使用メモリも少なくなりますが、品質はわずかに低下します。"
+            "value" : "新しいダウンロードに適用されます。インストール済みの音声は形式を保持します。コンパクト音声は小さく、使用メモリも少なくなりますが、品質はわずかに低下します。"
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Geldt voor nieuwe downloads. Geïnstalleerde stemmen behouden hun formaat. Compacte modellen zijn kleiner en gebruiken minder geheugen, met iets lagere kwaliteit."
+            "value" : "Geldt voor nieuwe downloads. Geïnstalleerde stemmen behouden hun formaat. Compacte stemmen zijn kleiner en gebruiken minder geheugen, met iets lagere kwaliteit."
           }
         },
         "pl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dotyczy nowych pobrań. Zainstalowane głosy zachowują swój format. Modele kompaktowe są mniejsze i zużywają mniej pamięci, przy nieco obniżonej jakości."
+            "value" : "Dotyczy nowych pobrań. Zainstalowane głosy zachowują swój format. Głosy kompaktowe są mniejsze i zużywają mniej pamięci, przy nieco obniżonej jakości."
           }
         },
         "pt" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Aplica-se a novos downloads. As vozes instaladas mantêm o seu formato. Os modelos compactos são menores e usam menos memória, com qualidade ligeiramente reduzida."
+            "value" : "Aplica-se a novos downloads. As vozes instaladas mantêm o seu formato. As vozes compactas são menores e usam menos memória, com qualidade ligeiramente reduzida."
           }
         },
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Gäller för nya hämtningar. Installerade röster behåller sitt format. Kompakta modeller är mindre och använder mindre minne, med något lägre kvalitet."
+            "value" : "Gäller för nya hämtningar. Installerade röster behåller sitt format. Kompakta röster är mindre och använder mindre minne, med något lägre kvalitet."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Yeni indirmeler için geçerlidir. Yüklü sesler biçimlerini korur. Kompakt modeller daha küçüktür ve biraz daha düşük kaliteyle daha az bellek kullanır."
+            "value" : "Yeni indirmeler için geçerlidir. Yüklü sesler biçimlerini korur. Kompakt sesler daha küçüktür ve biraz daha düşük kaliteyle daha az bellek kullanır."
           }
         },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Застосовується до нових завантажень. Встановлені голоси зберігають свій формат. Компактні моделі менші та споживають менше пам'яті, з дещо нижчою якістю."
+            "value" : "Застосовується до нових завантажень. Встановлені голоси зберігають свій формат. Компактні голоси менші та споживають менше пам'яті, з дещо нижчою якістю."
           }
         },
         "ur-PK" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "نئے ڈاؤن لوڈز پر لاگو ہوتا ہے۔ انسٹال شدہ آوازیں اپنا فارمیٹ برقرار رکھتی ہیں۔ کمپیکٹ ماڈل چھوٹے ہوتے ہیں اور قدرے کم معیار کے ساتھ کم میموری استعمال کرتے ہیں۔"
+            "value" : "نئے ڈاؤن لوڈز پر لاگو ہوتا ہے۔ انسٹال شدہ آوازیں اپنا فارمیٹ برقرار رکھتی ہیں۔ کمپیکٹ آوازیں چھوٹی ہوتی ہیں اور قدرے کم معیار کے ساتھ کم میموری استعمال کرتی ہیں۔"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "适用于新下载。已安装的语音保持其格式。紧凑模型更小，占用内存更少，质量略有降低。"
+            "value" : "适用于新下载。已安装的语音保持其格式。紧凑语音更小，占用内存更少，质量略有降低。"
           }
         }
       }
@@ -5731,115 +5850,115 @@
         "ar" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "تنسيق النموذج"
+            "value" : "تنسيق الصوت"
           }
         },
         "bn" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "মডেল ফরম্যাট"
+            "value" : "ভয়েস ফরম্যাট"
           }
         },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Modellformat"
+            "value" : "Stimmformat"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Model format"
+            "value" : "Voice format"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Formato del modelo"
+            "value" : "Formato de voz"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Format du modèle"
+            "value" : "Format de voix"
           }
         },
         "hi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "मॉडल प्रारूप"
+            "value" : "वॉइस प्रारूप"
           }
         },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Modellformátum"
+            "value" : "Hangformátum"
           }
         },
         "id" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Format model"
+            "value" : "Format suara"
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Formato del modello"
+            "value" : "Formato della voce"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "モデル形式"
+            "value" : "音声形式"
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Modelformaat"
+            "value" : "Stemformaat"
           }
         },
         "pl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Format modelu"
+            "value" : "Format głosu"
           }
         },
         "pt" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Formato do modelo"
+            "value" : "Formato de voz"
           }
         },
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Modellformat"
+            "value" : "Röstformat"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Model biçimi"
+            "value" : "Ses biçimi"
           }
         },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Формат моделі"
+            "value" : "Формат голосу"
           }
         },
         "ur-PK" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ماڈل فارمیٹ"
+            "value" : "آواز فارمیٹ"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "模型格式"
+            "value" : "语音格式"
           }
         }
       }
