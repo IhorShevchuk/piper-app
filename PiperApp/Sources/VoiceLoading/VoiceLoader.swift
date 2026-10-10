@@ -2,6 +2,7 @@
 // Copyright (c) 2026 Ihor Shevchuk
 
 import Foundation
+import Combine
 import PiperAppUtils
 
 enum DownloadEvent {
@@ -14,6 +15,28 @@ protocol VoiceLoadListener: AnyObject {
 }
 
 class VoiceLoader: NSObject {
+    /// In-flight downloads by catalog voice key, shared by every row:
+    /// a voice downloads once and progress survives row rebuilds.
+    @Published private(set) var downloadProgress: [String: Double] = [:]
+
+    @MainActor
+    func beginDownload(for key: String) -> Bool {
+        guard downloadProgress[key] == nil else { return false }
+        downloadProgress[key] = 0
+        return true
+    }
+
+    @MainActor
+    func updateDownloadProgress(_ progress: Double, for key: String) {
+        guard downloadProgress[key] != nil else { return }
+        downloadProgress[key] = progress
+    }
+
+    @MainActor
+    func endDownload(for key: String) {
+        downloadProgress[key] = nil
+    }
+
     private enum Error: Swift.Error {
         case nilURL
         case loadingFailed
