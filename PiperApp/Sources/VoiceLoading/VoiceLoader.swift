@@ -68,6 +68,67 @@ class VoiceLoader: NSObject {
         activeDownloadTasks[session]?.cancel()
     }
 
+    /// Catalog keys of installed voices a newer catalog build exists
+    /// for. Rows and the voice detail screen observe this the same
+    /// way they observe the download registry.
+    @Published private(set) var updateAvailableKeys: Set<String> = []
+
+    /// File digests already computed, keyed by path: a digest is
+    /// recomputed only when the file's size or modification date
+    /// changes (an install replaces both), so repeat checks are cheap.
+    private var digestCache: [String: (size: Int, modified: Date, digest: String)] = [:]
+    private let digestCacheLock = NSLock()
+
+    /// Compares every installed voice against the catalog on a
+    /// background task and publishes the stale voices' keys.
+    func checkForUpdates(voices: [Voice], installed: [FileManager.ModelPaths]) {
+        guard !voices.isEmpty else {
+            return
+        }
+        Task.detached(priority: .utility) { [weak self] in
+            guard let self else { return }
+            let keys = VoiceUpdateChecker.updateAvailableKeys(
+                voices: voices,
+                installed: installed
+            ) { paths in
+                VoiceUpdateChecker.InstalledFiles(
+                    modelSize: self.fileSize(at: paths.model),
+                    modelMD5: self.cachedMD5Digest(of: paths.model),
+                    configMD5: self.cachedMD5Digest(of: paths.json)
+                )
+            }
+            await MainActor.run {
+                self.updateAvailableKeys = keys
+            }
+        }
+    }
+
+    private func fileSize(at url: URL) -> Int? {
+        let attributes = try? FileManager.default.attributesOfItem(atPath: url.path)
+        return (attributes?[.size] as? NSNumber)?.intValue
+    }
+
+    private func cachedMD5Digest(of url: URL) -> String? {
+        let attributes = try? FileManager.default.attributesOfItem(atPath: url.path)
+        guard let size = (attributes?[.size] as? NSNumber)?.intValue,
+              let modified = attributes?[.modificationDate] as? Date else {
+            return VoiceUpdateChecker.md5Digest(ofFileAt: url)
+        }
+        digestCacheLock.lock()
+        let cached = digestCache[url.path]
+        digestCacheLock.unlock()
+        if let cached, cached.size == size, cached.modified == modified {
+            return cached.digest
+        }
+        guard let digest = VoiceUpdateChecker.md5Digest(ofFileAt: url) else {
+            return nil
+        }
+        digestCacheLock.lock()
+        digestCache[url.path] = (size: size, modified: modified, digest: digest)
+        digestCacheLock.unlock()
+        return digest
+    }
+
     private enum Error: Swift.Error {
         case nilURL
         case loadingFailed

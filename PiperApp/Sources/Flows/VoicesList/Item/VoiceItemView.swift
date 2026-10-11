@@ -55,52 +55,87 @@ struct VoiceItemView: View {
     }
 
     @State var unstallConfirmationShown: Bool = false
+
+    @ViewBuilder
+    private func cancelDownloadButton(size: Double) -> some View {
+        Button {
+            hostModel.cancelDownload(voice: voice)
+        } label: {
+            ZStack {
+                CircularProgressView(progress: hostModel.viewModel.downloadProgress)
+                    .frame(width: size, height: size)
+                Image(systemName: "stop.fill")
+                    .imageScale(.small)
+                    .foregroundColor(.accentColor)
+            }
+            .frame(width: size, height: size)
+        }
+        .buttonStyle(.borderless)
+        .accessibilityLabel("cancel_download")
+        .accessibilityValue("\(Int(hostModel.viewModel.downloadProgress * 100))%")
+    }
+
+    @ViewBuilder
+    private func updateButton() -> some View {
+        Button {
+            hostModel.download(voice: voice)
+        } label: {
+            imageView(systemName: "arrow.down.circle.fill")
+                .accessibilityLabel("update_voice")
+                .accessibilityHint("update_voice_hint")
+        }
+        .buttonStyle(.borderless)
+    }
+
+    @ViewBuilder
+    private func uninstallButton() -> some View {
+        Button {
+            unstallConfirmationShown.toggle()
+        } label: {
+            imageView(systemName: "trash")
+                .accessibilityLabel("uninstall_voice")
+                .accessibilityHint("uninstall_voice_hint")
+        }
+        .buttonStyle(.borderless)
+        .alert("uninstall_voice", isPresented: $unstallConfirmationShown) {
+            Button("uninstall_button", role: .destructive) {
+                hostModel.remove(voice: voice)
+            }
+            Button("cancel", role: .cancel) {
+                unstallConfirmationShown.toggle()
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func downloadButton() -> some View {
+        Button {
+            hostModel.download(voice: voice)
+        } label: {
+            imageView(systemName: "square.and.arrow.down")
+                .accessibilityLabel("download_voice")
+                .accessibilityHint("download_voice_hint")
+        }
+        .buttonStyle(.borderless)
+    }
+
     @ViewBuilder
     private func download() -> some View {
         let size = 50.0
         HStack {
-            if hostModel.isInstalled(voice) {
-                Button {
-                    unstallConfirmationShown.toggle()
-                } label: {
-                    imageView(systemName: "trash")
-                        .accessibilityLabel("uninstall_voice")
-                        .accessibilityHint("uninstall_voice_hint")
+            // Downloading is checked first: an update is a download
+            // of an installed voice, and its progress (tap to
+            // cancel) must win over the installed-state controls.
+            if hostModel.viewModel.isDownloading {
+                cancelDownloadButton(size: size)
+            } else if hostModel.isInstalled(voice) {
+                if hostModel.viewModel.updateAvailable {
+                    updateButton()
+                } else {
+                    uninstallButton()
                 }
-                .buttonStyle(.borderless)
-                .alert("uninstall_voice", isPresented: $unstallConfirmationShown) {
-                    Button("uninstall_button", role: .destructive) {
-                        hostModel.remove(voice: voice)
-                    }
-                    Button("cancel", role: .cancel) {
-                        unstallConfirmationShown.toggle()
-                    }
-                }
-            } else if hostModel.viewModel.isDownloading {
-                Button {
-                    hostModel.cancelDownload(voice: voice)
-                } label: {
-                    ZStack {
-                        CircularProgressView(progress: hostModel.viewModel.downloadProgress)
-                            .frame(width: size, height: size)
-                        Image(systemName: "stop.fill")
-                            .imageScale(.small)
-                            .foregroundColor(.accentColor)
-                    }
-                    .frame(width: size, height: size)
-                }
-                .buttonStyle(.borderless)
-                .accessibilityLabel("cancel_download")
-                .accessibilityValue("\(Int(hostModel.viewModel.downloadProgress * 100))%")
             } else {
-                Button {
-                    hostModel.download(voice: voice)
-                } label: {
-                    imageView(systemName: "square.and.arrow.down")
-                        .accessibilityLabel("download_voice")
-                        .accessibilityHint("download_voice_hint")
-                }
-                .buttonStyle(.borderless)
+                downloadButton()
             }
         }
 
@@ -110,9 +145,13 @@ struct VoiceItemView: View {
         let voiceTitle = voice.name.capitalized + " " + voice.quality + " "
         let languageName = voice.language.code.localizedLanguageFromCode
         let baseAccessibilityLabel = showsLanguage ? voiceTitle + languageName : voiceTitle
-        let accessibilityLabel = voice.license.map {
+        var accessibilityLabel = voice.license.map {
             "\(baseAccessibilityLabel), \("voice_license".localized): \($0)"
         } ?? baseAccessibilityLabel
+        let showsUpdate = hostModel.viewModel.updateAvailable && hostModel.isInstalled(voice)
+        if showsUpdate {
+            accessibilityLabel += ", \("update_available".localized)"
+        }
         HStack {
             Spacer()
                 .frame(width: 10)
@@ -131,6 +170,14 @@ struct VoiceItemView: View {
                             .font(.body)
                     }
                     Spacer()
+                }
+                if showsUpdate {
+                    HStack {
+                        Text("update_available")
+                            .font(.subheadline)
+                            .foregroundColor(.accentColor)
+                        Spacer()
+                    }
                 }
                 if let license = voice.license {
                     HStack {

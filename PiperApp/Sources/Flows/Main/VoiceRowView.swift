@@ -23,7 +23,9 @@ struct VoiceRowView: View {
             NavigationLink {
                 VoiceView(hostModel: VoiceHostModel(piper: hostModel.piper,
                                                     modelPaths: paths,
-                                                    delegate: hostModel))
+                                                    delegate: hostModel,
+                                                    voice: voice,
+                                                    loader: hostModel.loader))
             } label: {
                 item
             }

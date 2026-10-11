@@ -10,6 +10,9 @@ class MainHostModel: @unchecked Sendable, ObservableObject {
     let piper: PiperManager
     let loader: VoiceLoader
     var languages: [String: [Voice]] = [:]
+    /// The last catalog loaded, kept so update checks can re-run
+    /// when the installed set changes without refetching it.
+    private var catalogVoices: [Voice] = []
     private var defaultsObserver: NSObjectProtocol?
 
     init(piper: PiperManager,
@@ -72,6 +75,8 @@ class MainHostModel: @unchecked Sendable, ObservableObject {
         Task {
             do {
                 let voices = try await self.loader.loadVoices()
+                self.catalogVoices = voices
+                self.loader.checkForUpdates(voices: voices, installed: self.piper.installedVoices)
                 self.languages = Dictionary(grouping: voices) { voice in
                     Self.canonicalLanguageCode(voice.language.code)
                 }
@@ -239,6 +244,10 @@ extension MainHostModel: ModelChangeDelegate {
             updated.languageCodes = self.viewModel.languageCodes
             updated.catalogState = self.viewModel.catalogState
             self.viewModel = updated
+            // An install or uninstall (an update is both) changes
+            // which installed voices are stale.
+            self.loader.checkForUpdates(voices: self.catalogVoices,
+                                        installed: self.piper.installedVoices)
         }
     }
 }
