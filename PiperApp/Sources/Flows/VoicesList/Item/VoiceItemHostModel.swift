@@ -16,6 +16,7 @@ class VoiceItemHostModel: @unchecked Sendable, ObservableObject {
     private var avItemStateObserver: NSKeyValueObservation!
     private var playingCancellable: AnyCancellable?
     private var downloadsCancellable: AnyCancellable?
+    private var updatesCancellable: AnyCancellable?
     /// True while this row is playing a sample with the installed model
     /// itself (through PiperManager) rather than the hosted sample file.
     /// PiperManager.isPlaying is global, so rows use this flag to react
@@ -50,6 +51,10 @@ class VoiceItemHostModel: @unchecked Sendable, ObservableObject {
                 self.viewModel.isDownloading = false
                 self.viewModel.downloadProgress = 0
             }
+        }
+        updatesCancellable = loader.$updateAvailableKeys.sink { [weak self] keys in
+            guard let self = self else { return }
+            self.viewModel.updateAvailable = keys.contains(self.viewModel.voice.key)
         }
     }
 

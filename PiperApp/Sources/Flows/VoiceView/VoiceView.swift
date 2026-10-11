@@ -86,10 +86,40 @@ struct VoiceView: View {
         }
     }
 
+    @ViewBuilder
+    func update() -> some View {
+        Section {
+            if hostModel.viewModel.isUpdating {
+                HStack {
+                    ProgressView(value: hostModel.viewModel.updateProgress)
+                    Button("cancel_download") {
+                        hostModel.cancelUpdate()
+                    }
+                    .buttonStyle(.borderless)
+                }
+                .accessibilityElement(children: .contain)
+            } else {
+                Button {
+                    hostModel.downloadUpdate()
+                } label: {
+                    CenteredContent {
+                        Text("update_voice")
+                    }
+                }
+            }
+        } footer: {
+            Text("update_voice_description")
+        }
+    }
+
     var body: some View {
         List {
             if let modelInfo = hostModel.viewModel.modelInfo {
                 ModelInfoView(info: modelInfo, detailed: true)
+            }
+
+            if hostModel.viewModel.updateAvailable {
+                update()
             }
 
             playSampleView()

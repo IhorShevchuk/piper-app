@@ -78,6 +78,22 @@ class Voice: Decodable {
     var jsonPath: String? {
         Array(files.keys).json
     }
+    /// The catalog's standard (FP16) model file entry, whatever the
+    /// current format setting selects for download: update detection
+    /// always compares against the builds the catalog describes.
+    var catalogModelFile: VoiceFile? {
+        guard let modelPath = Array(files.keys).model else {
+            return nil
+        }
+        return files[modelPath]
+    }
+    /// The catalog's config file entry (shared by every format).
+    var catalogJSONFile: VoiceFile? {
+        guard let jsonPath else {
+            return nil
+        }
+        return files[jsonPath]
+    }
 }
 
 extension Voice: Equatable {
