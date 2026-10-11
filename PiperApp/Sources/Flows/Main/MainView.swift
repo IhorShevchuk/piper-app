@@ -126,7 +126,7 @@ struct MainView: View {
                 }
             }
         case .loaded:
-            Section("languages") {
+            Section("all_languages") {
                 ForEach(hostModel.viewModel.languageCodes, id: \.self) { code in
                     NavigationLink {
                         LanguageVoicesView(hostModel: hostModel, languageCode: code)
