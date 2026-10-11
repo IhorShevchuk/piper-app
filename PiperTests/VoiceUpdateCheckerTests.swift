@@ -47,16 +47,15 @@ final class VoiceUpdateCheckerTests: XCTestCase {
         // The same production-safety rule as licenses and variants:
         // digests feed update detection only, never equality/hash.
         let voice = try decodeVoice()
-        let noDigestJSON = catalogJSON
-        var json = try JSONSerialization.jsonObject(with: noDigestJSON) as? [String: Any]
-        var files = json?["files"] as? [String: Any]
-        for path in files?.keys ?? [] {
-            var file = files?[path] as? [String: Any]
-            file?["md5_digest"] = "ffff"
-            files?[path] = file
+        var json = try XCTUnwrap(JSONSerialization.jsonObject(with: catalogJSON) as? [String: Any])
+        var files = try XCTUnwrap(json["files"] as? [String: Any])
+        for path in Array(files.keys) {
+            var file = try XCTUnwrap(files[path] as? [String: Any])
+            file["md5_digest"] = "ffff"
+            files[path] = file
         }
-        json?["files"] = files
-        let otherData = try JSONSerialization.data(withJSONObject: json as Any)
+        json["files"] = files
+        let otherData = try JSONSerialization.data(withJSONObject: json)
         let other = try JSONDecoder().decode(Voice.self, from: otherData)
         XCTAssertEqual(voice, other)
         XCTAssertEqual(voice.hashValue, other.hashValue)
