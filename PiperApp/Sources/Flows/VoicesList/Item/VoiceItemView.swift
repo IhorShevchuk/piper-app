@@ -145,13 +145,12 @@ struct VoiceItemView: View {
         let voiceTitle = voice.name.capitalized + " " + voice.quality + " "
         let languageName = voice.language.code.localizedLanguageFromCode
         let baseAccessibilityLabel = showsLanguage ? voiceTitle + languageName : voiceTitle
-        var accessibilityLabel = voice.license.map {
-            "\(baseAccessibilityLabel), \("voice_license".localized): \($0)"
-        } ?? baseAccessibilityLabel
+        let licenseSuffix = voice.license.map {
+            ", \("voice_license".localized): \($0)"
+        } ?? ""
         let showsUpdate = hostModel.viewModel.updateAvailable && hostModel.isInstalled(voice)
-        if showsUpdate {
-            accessibilityLabel += ", \("update_available".localized)"
-        }
+        let updateSuffix = showsUpdate ? ", \("update_available".localized)" : ""
+        let accessibilityLabel = baseAccessibilityLabel + licenseSuffix + updateSuffix
         HStack {
             Spacer()
                 .frame(width: 10)

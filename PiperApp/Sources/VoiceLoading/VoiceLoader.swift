@@ -76,7 +76,13 @@ class VoiceLoader: NSObject {
     /// File digests already computed, keyed by path: a digest is
     /// recomputed only when the file's size or modification date
     /// changes (an install replaces both), so repeat checks are cheap.
-    private var digestCache: [String: (size: Int, modified: Date, digest: String)] = [:]
+    private struct DigestCacheEntry {
+        let size: Int
+        let modified: Date
+        let digest: String
+    }
+
+    private var digestCache: [String: DigestCacheEntry] = [:]
     private let digestCacheLock = NSLock()
 
     /// Compares every installed voice against the catalog on a
@@ -124,7 +130,7 @@ class VoiceLoader: NSObject {
             return nil
         }
         digestCacheLock.lock()
-        digestCache[url.path] = (size: size, modified: modified, digest: digest)
+        digestCache[url.path] = DigestCacheEntry(size: size, modified: modified, digest: digest)
         digestCacheLock.unlock()
         return digest
     }
