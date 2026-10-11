@@ -10,12 +10,22 @@ class MainHostModel: @unchecked Sendable, ObservableObject {
     let piper: PiperManager
     let loader: VoiceLoader
     var languages: [String: [Voice]] = [:]
+    private var defaultsObserver: NSObjectProtocol?
 
     init(piper: PiperManager,
          loader: VoiceLoader = AppManager.shared.loader) {
         self.piper = piper
         self.loader = loader
         viewModel = Self.makeViewModel(installed: piper.installedVoices)
+        // Voice sizes follow the Model format setting; refresh the
+        // list when it changes in Settings.
+        defaultsObserver = NotificationCenter.default.addObserver(
+            forName: UserDefaults.didChangeNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            self?.objectWillChange.send()
+        }
         connect()
         loadVoices()
     }

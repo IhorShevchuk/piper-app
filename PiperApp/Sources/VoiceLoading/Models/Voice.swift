@@ -16,6 +16,22 @@ class Voice: Decodable {
     let license: String?
     let modelLicense: String?
     let trainingData: TrainingData?
+    /// Alternative model builds from the catalog's `variants` field,
+    /// keyed by format ("int8"). Optional so older catalog entries
+    /// still decode, and deliberately excluded from Equatable and
+    /// Hashable: a voice's identity stays on the original fields,
+    /// whichever build ends up downloaded.
+    let variants: [String: VoiceVariant]?
+
+    struct VoiceVariant: Decodable {
+        let model: String
+        let sizeBytes: Int
+
+        enum CodingKeys: String, CodingKey {
+            case model
+            case sizeBytes = "size_bytes"
+        }
+    }
 
     enum CodingKeys: String, CodingKey {
         case key
@@ -26,15 +42,38 @@ class Voice: Decodable {
         case license
         case modelLicense = "model_license"
         case trainingData = "training_data"
+        case variants
     }
+
+    /// The INT8 build of this voice, when the catalog offers one.
+    var compactVariant: VoiceVariant? {
+        variants?["int8"]
+    }
+
+    /// Whether downloads and sizes currently follow the Compact
+    /// setting for this voice: the setting is on and a variant exists.
+    private var compactSelected: Bool {
+        ModelFormat.current == .compact && compactVariant != nil
+    }
+
     private var voiceSize: Int {
-        return files.values.reduce(into: 0) { $0 += $1.size_bytes }
+        let total = files.values.reduce(into: 0) { $0 += $1.size_bytes }
+        if compactSelected,
+           let variant = compactVariant,
+           let modelPath = Array(files.keys).model,
+           let modelFile = files[modelPath] {
+            return total - modelFile.size_bytes + variant.sizeBytes
+        }
+        return total
     }
     var voiceSizeString: String {
         ByteCountFormatter.string(fromByteCount: Int64(voiceSize), countStyle: .binary)
     }
     var modelPath: String? {
-        Array(files.keys).model
+        if compactSelected, let variant = compactVariant {
+            return variant.model
+        }
+        return Array(files.keys).model
     }
     var jsonPath: String? {
         Array(files.keys).json
