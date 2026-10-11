@@ -95,6 +95,47 @@ final class VoiceDecodingTests: XCTestCase {
         XCTAssertNil(voice.trainingData)
     }
 
+    /// Entry with an INT8 variant, as the catalog writes it for voices
+    /// that offer a Compact build (same identity as the legacy entry).
+    private var variantJSON: Data {
+        // swiftlint:disable:next non_optional_string_data_conversion
+        """
+        {
+          "key":"de_DE-thorsten-medium",
+          "name":"thorsten",
+          "quality":"medium",
+          "language":{"code":"de_DE","family":"de","region":"DE"},
+          "files":{
+            "de/de_DE/thorsten/medium/de_DE-thorsten-medium.onnx":{"size_bytes":31951473,"md5_digest":"bfab926dffc60c6006a92d8681046485"}
+          },
+          "variants":{
+            "int8":{"model":"de/de_DE/thorsten/medium/de_DE-thorsten-medium.int8.onnx","size_bytes":17900000}
+          }
+        }
+        """.data(using: .utf8)!
+    }
+
+    func testDecodingVariantEntry() throws {
+        let voice = try JSONDecoder().decode(Voice.self, from: variantJSON)
+        XCTAssertEqual(voice.compactVariant?.model,
+                       "de/de_DE/thorsten/medium/de_DE-thorsten-medium.int8.onnx")
+        XCTAssertEqual(voice.compactVariant?.sizeBytes, 17900000)
+    }
+
+    func testDecodingWithoutVariants() throws {
+        let voice = try JSONDecoder().decode(Voice.self, from: legacyJSON)
+        XCTAssertNil(voice.compactVariant)
+    }
+
+    func testEqualityIgnoresVariants() throws {
+        // Same production-safety rule as the license fields: which builds
+        // a voice offers must not change its identity.
+        let legacy = try JSONDecoder().decode(Voice.self, from: legacyJSON)
+        let withVariant = try JSONDecoder().decode(Voice.self, from: variantJSON)
+        XCTAssertEqual(legacy, withVariant)
+        XCTAssertEqual(legacy.hashValue, withVariant.hashValue)
+    }
+
     func testEqualityIgnoresLicenseFields() throws {
         // Production safety: Voice equality/hash feed installed-voice matching
         // and must stay on the original fields only, so the same voice decoded
