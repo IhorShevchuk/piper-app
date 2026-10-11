@@ -1,121 +1,240 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "all_languages" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "جميع اللغات"
+          }
+        },
+        "bn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "সব ভাষা"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alle Sprachen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "All Languages"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Todos los idiomas"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toutes les langues"
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "सभी भाषाएँ"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Összes nyelv"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tutte le lingue"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "すべての言語"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alle talen"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Semua Bahasa"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wszystkie języki"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alla språk"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Todos os idiomas"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tüm diller"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Усі мови"
+          }
+        },
+        "ur-PK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تمام زبانیں"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "所有语言"
+          }
+        }
+      }
+    },
     "app_help_line_1" : {
       "extractionState" : "manual",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "قم بتثبيت صوت لبدء استخدام التطبيق: اضغط على لغة ضمن **اللغات**، ثم اضغط على زر التنزيل بجوار الصوت."
+            "value" : "قم بتثبيت صوت لبدء استخدام التطبيق: اضغط على لغة ضمن **جميع اللغات**، ثم اضغط على زر التنزيل بجوار الصوت."
           }
         },
         "bn" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "অ্যাপটি ব্যবহার শুরু করতে একটি ভয়েস ইনস্টল করুন: **ভাষাগুলো** থেকে একটি ভাষা বেছে নিন, তারপর একটি ভয়েসের পাশে ডাউনলোড বোতামে ট্যাপ করুন।"
+            "value" : "অ্যাপটি ব্যবহার শুরু করতে একটি ভয়েস ইনস্টল করুন: **সব ভাষা** থেকে একটি ভাষা বেছে নিন, তারপর একটি ভয়েসের পাশে ডাউনলোড বোতামে ট্যাপ করুন।"
           }
         },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Installiere eine Stimme, um die App zu nutzen: Tippe unter **Sprachen** auf eine Sprache und dann auf die Download-Schaltfläche neben einer Stimme."
+            "value" : "Installiere eine Stimme, um die App zu nutzen: Tippe unter **Alle Sprachen** auf eine Sprache und dann auf die Download-Schaltfläche neben einer Stimme."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Install a voice to start using the app: tap a language under **Languages**, then tap the download button next to a voice."
+            "value" : "Install a voice to start using the app: tap a language under **All Languages**, then tap the download button next to a voice."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Instala una voz para empezar a usar la aplicación: toca un idioma en **Idiomas** y luego toca el botón de descarga junto a una voz."
+            "value" : "Instala una voz para empezar a usar la aplicación: toca un idioma en **Todos los idiomas** y luego toca el botón de descarga junto a una voz."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Installez une voix pour commencer à utiliser l'application : touchez une langue dans **Langues**, puis touchez le bouton de téléchargement à côté d'une voix."
+            "value" : "Installez une voix pour commencer à utiliser l'application : touchez une langue dans **Toutes les langues**, puis touchez le bouton de téléchargement à côté d'une voix."
           }
         },
         "hi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ऐप का उपयोग शुरू करने के लिए आवाज़ इंस्टॉल करें: **भाषाएँ** में से एक भाषा पर टैप करें, फिर किसी आवाज़ के पास दिए गए डाउनलोड बटन पर टैप करें।"
+            "value" : "ऐप का उपयोग शुरू करने के लिए आवाज़ इंस्टॉल करें: **सभी भाषाएँ** में से एक भाषा पर टैप करें, फिर किसी आवाज़ के पास दिए गए डाउनलोड बटन पर टैप करें।"
           }
         },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "A használat megkezdéséhez telepítsen egy hangot: koppintson egy nyelvre a **Nyelvek** alatt, majd koppintson egy hang melletti letöltés gombra."
+            "value" : "A használat megkezdéséhez telepítsen egy hangot: koppintson egy nyelvre az **Összes nyelv** alatt, majd koppintson egy hang melletti letöltés gombra."
           }
         },
         "id" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Instal suara untuk mulai menggunakan aplikasi: ketuk bahasa di **Bahasa**, lalu ketuk tombol unduh di samping suara."
+            "value" : "Instal suara untuk mulai menggunakan aplikasi: ketuk bahasa di **Semua Bahasa**, lalu ketuk tombol unduh di samping suara."
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Installa una voce per iniziare a usare l'app: tocca una lingua in **Lingue**, poi tocca il pulsante di download accanto a una voce."
+            "value" : "Installa una voce per iniziare a usare l'app: tocca una lingua in **Tutte le lingue**, poi tocca il pulsante di download accanto a una voce."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "アプリの使用を開始するには、音声をインストールしてください。**言語** で言語をタップし、音声の横にあるダウンロードボタンをタップします。"
+            "value" : "アプリの使用を開始するには、音声をインストールしてください。**すべての言語** で言語をタップし、音声の横にあるダウンロードボタンをタップします。"
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Installeer een stem om de app te gaan gebruiken: tik op een taal onder **Talen** en tik vervolgens op de downloadknop naast een stem."
+            "value" : "Installeer een stem om de app te gaan gebruiken: tik op een taal onder **Alle talen** en tik vervolgens op de downloadknop naast een stem."
           }
         },
         "pl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Zainstaluj głos, aby rozpocząć korzystanie z aplikacji: stuknij język w sekcji **Języki**, a następnie stuknij przycisk pobierania obok głosu."
+            "value" : "Zainstaluj głos, aby rozpocząć korzystanie z aplikacji: stuknij język w sekcji **Wszystkie języki**, a następnie stuknij przycisk pobierania obok głosu."
           }
         },
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Installera en röst för att börja använda appen: tryck på ett språk under **Språk** och tryck sedan på hämtningsknappen bredvid en röst."
+            "value" : "Installera en röst för att börja använda appen: tryck på ett språk under **Alla språk** och tryck sedan på hämtningsknappen bredvid en röst."
           }
         },
         "pt" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Instale uma voz para começar a usar o app: toque em um idioma em **Idiomas** e depois toque no botão de download ao lado de uma voz."
+            "value" : "Instale uma voz para começar a usar o app: toque em um idioma em **Todos os idiomas** e depois toque no botão de download ao lado de uma voz."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Uygulamayı kullanmaya başlamak için bir ses yükleyin: **Diller** bölümünde bir dile dokunun, ardından bir sesin yanındaki indirme düğmesine dokunun."
+            "value" : "Uygulamayı kullanmaya başlamak için bir ses yükleyin: **Tüm diller** bölümünde bir dile dokunun, ardından bir sesin yanındaki indirme düğmesine dokunun."
           }
         },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Встановіть голос, щоб почати користуватися застосунком: торкніться мови в розділі **Мови**, а потім торкніться кнопки завантаження поруч із голосом."
+            "value" : "Встановіть голос, щоб почати користуватися застосунком: торкніться мови в розділі **Усі мови**, а потім торкніться кнопки завантаження поруч із голосом."
           }
         },
         "ur-PK" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ایپ کا استعمال شروع کرنے کے لیے آواز انسٹال کریں: **زبانیں** میں ایک زبان پر ٹیپ کریں، پھر آواز کے ساتھ ڈاؤن لوڈ بٹن پر ٹیپ کریں۔"
+            "value" : "ایپ کا استعمال شروع کرنے کے لیے آواز انسٹال کریں: **تمام زبانیں** میں ایک زبان پر ٹیپ کریں، پھر آواز کے ساتھ ڈاؤن لوڈ بٹن پر ٹیپ کریں۔"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "安装语音以开始使用应用程序：点击 **语言** 下的一种语言，然后点击语音旁边的下载按钮。"
+            "value" : "安装语音以开始使用应用程序：点击 **所有语言** 下的一种语言，然后点击语音旁边的下载按钮。"
           }
         }
       }
