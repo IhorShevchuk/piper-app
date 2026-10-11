@@ -27,7 +27,8 @@ struct MainView: View {
         toolBarButtonView(imageName: "gearshape",
                           accessibilityLabel: String(localized: "settings"),
                           destination: {
-            SettingsView(hostModel: SettingsHostModel(piper: self.hostModel.piper))
+            SettingsView(hostModel: SettingsHostModel(piper: self.hostModel.piper,
+                                                      modelChangeDelegate: self.hostModel))
         })
     }
 
@@ -37,15 +38,6 @@ struct MainView: View {
                           accessibilityLabel: String(localized: "app_help_title"),
                           destination: {
             HelpView()
-        })
-    }
-
-    @ViewBuilder
-    func importButtonView() -> some View {
-        toolBarButtonView(imageName: "square.and.arrow.down.on.square",
-                          accessibilityLabel: String(localized: "update_model_in_app"),
-                          destination: {
-            ImportVoiceHostModelView(hostModel: ImportVoiceHostModel(piper: hostModel.piper, delegate: hostModel))
         })
     }
 
@@ -173,9 +165,6 @@ struct MainView: View {
             .navigationTitle("piper_app_name")
             .searchable(text: $searchText, prompt: Text("search_voices"))
             .toolbar {
-                ToolbarItem(placement: .primaryAction) {
-                    importButtonView()
-                }
                 ToolbarItem(placement: .primaryAction) {
                     helpButtonView()
                 }

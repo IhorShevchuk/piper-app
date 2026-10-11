@@ -30,6 +30,15 @@ struct SettingsView: View {
                     Text("model_format_description")
                 }
 
+                Section {
+                    NavigationLink {
+                        ImportVoiceHostModelView(hostModel: ImportVoiceHostModel(piper: hostModel.piper,
+                                                                                 delegate: hostModel.modelChangeDelegate))
+                    } label: {
+                        Text("update_model_in_app")
+                    }
+                }
+
                 Section("credits_and_legal") {
                     VStack {
                         Text("license_audio_unit_title").font(.headline)

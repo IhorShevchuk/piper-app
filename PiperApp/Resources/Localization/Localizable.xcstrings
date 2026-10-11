@@ -840,115 +840,115 @@
         "ar" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "يمكن تثبيت أصوات مخصصة باستخدام **استيراد نموذج من الملفات** عن طريق اختيار نموذج `.onnx` وتكوين `.json` الخاص به."
+            "value" : "يمكن تثبيت أصوات مخصصة باستخدام **استيراد نموذج من الملفات** في **الإعدادات** عن طريق اختيار نموذج `.onnx` وتكوين `.json` الخاص به."
           }
         },
         "bn" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "একটি `.onnx` মডেল এবং এর `.json` কনফিগারেশন নির্বাচন করে **Import Model from Files** ব্যবহার করে কাস্টম ভয়েস ইনস্টল করা যেতে পারে।"
+            "value" : "একটি `.onnx` মডেল এবং এর `.json` কনফিগারেশন নির্বাচন করে **সেটিংসে** **Import Model from Files** ব্যবহার করে কাস্টম ভয়েস ইনস্টল করা যেতে পারে।"
           }
         },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Eigene Stimmen können über **Modell aus Dateien importieren** installiert werden, indem ein `.onnx`-Modell und die zugehörige `.json`-Konfiguration ausgewählt werden."
+            "value" : "Eigene Stimmen können in den **Einstellungen** über **Modell aus Dateien importieren** installiert werden, indem ein `.onnx`-Modell und die zugehörige `.json`-Konfiguration ausgewählt werden."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Custom voices can be installed using **Import Model from Files** by selecting a `.onnx` model and its `.json` configuration."
+            "value" : "Custom voices can be installed in **Settings** using **Import Model from Files** by selecting a `.onnx` model and its `.json` configuration."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Se pueden instalar voces personalizadas usando **Importar modelo desde archivos** seleccionando un modelo `.onnx` y su configuración `.json`."
+            "value" : "Se pueden instalar voces personalizadas desde **Ajustes** usando **Importar modelo desde archivos** seleccionando un modelo `.onnx` y su configuración `.json`."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Des voix personnalisées peuvent être installées via **Importer le modèle depuis les fichiers** en sélectionnant un modèle `.onnx` et sa configuration `.json`."
+            "value" : "Des voix personnalisées peuvent être installées dans **Réglages** via **Importer le modèle depuis les fichiers** en sélectionnant un modèle `.onnx` et sa configuration `.json`."
           }
         },
         "hi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "कस्टम आवाज़ें **फ़ाइलों से मॉडल आयात करें** का उपयोग करके एक `.onnx` मॉडल और उसके `.json` कॉन्फ़िगरेशन का चयन करके इंस्टॉल की जा सकती हैं।"
+            "value" : "कस्टम आवाज़ें **सेटिंग** में **फ़ाइलों से मॉडल आयात करें** का उपयोग करके एक `.onnx` मॉडल और उसके `.json` कॉन्फ़िगरेशन का चयन करके इंस्टॉल की जा सकती हैं।"
           }
         },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Egyéni hangok telepíthetők a **Modell importálása fájlokból** opcióval, egy `.onnx` modell és a hozzá tartozó `.json` konfiguráció kiválasztásával."
+            "value" : "Egyéni hangok telepíthetők a **Beállításokban** a **Modell importálása fájlokból** opcióval, egy `.onnx` modell és a hozzá tartozó `.json` konfiguráció kiválasztásával."
           }
         },
         "id" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Suara kustom dapat diinstal menggunakan **Impor Model dari Berkas** dengan memilih model `.onnx` dan konfigurasi `.json`-nya."
+            "value" : "Suara kustom dapat diinstal di **Pengaturan** menggunakan **Impor Model dari Berkas** dengan memilih model `.onnx` dan konfigurasi `.json`-nya."
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Le voci personalizzate possono essere installate utilizzando **Importa modello da file** selezionando un modello `.onnx` e la sua configurazione `.json`."
+            "value" : "Le voci personalizzate possono essere installate in **Impostazioni** utilizzando **Importa modello da file** selezionando un modello `.onnx` e la sua configurazione `.json`."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "カスタム音声は、`.onnx` モデルとその `.json` 設定を選択して、**ファイルからモデルをインポート** を使用してインストールできます。"
+            "value" : "カスタム音声は、`.onnx` モデルとその `.json` 設定を選択して、**設定**の **ファイルからモデルをインポート** を使用してインストールできます。"
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Aangepaste stemmen kunnen worden geïnstalleerd met **Importeer model uit bestanden** door een `.onnx`-model en de bijbehorende `.json`-configuratie te selecteren."
+            "value" : "Aangepaste stemmen kunnen worden geïnstalleerd in **Instellingen** met **Importeer model uit bestanden** door een `.onnx`-model en de bijbehorende `.json`-configuratie te selecteren."
           }
         },
         "pl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Własne głosy można zainstalować za pomocą **Importuj model z plików**, wybierając model `.onnx` i jego konfigurację `.json`."
+            "value" : "Własne głosy można zainstalować w **Ustawieniach** za pomocą **Importuj model z plików**, wybierając model `.onnx` i jego konfigurację `.json`."
           }
         },
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Anpassade röster kan installeras via **Importera modell från filer** genom att välja en `.onnx`-modell och dess `.json`-konfiguration."
+            "value" : "Anpassade röster kan installeras i **Inställningar** via **Importera modell från filer** genom att välja en `.onnx`-modell och dess `.json`-konfiguration."
           }
         },
         "pt" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Vozes personalizadas podem ser instaladas usando **Importar Modelo de Arquivos** selecionando um modelo `.onnx` e sua configuração `.json`."
+            "value" : "Vozes personalizadas podem ser instaladas em **Ajustes** usando **Importar Modelo de Arquivos** selecionando um modelo `.onnx` e sua configuração `.json`."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Özel sesler, bir `.onnx` modeli ve `.json` yapılandırmasını seçerek **Dosyalardan Model İçe Aktar** ile yüklenebilir."
+            "value" : "Özel sesler, bir `.onnx` modeli ve `.json` yapılandırmasını seçerek **Ayarlar** bölümündeki **Dosyalardan Model İçe Aktar** ile yüklenebilir."
           }
         },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Користувальницькі голоси можуть бути встановлені за допомогою **Імпортувати з файлів**, обравши модель `.onnx` і її конфігурацію `.json`."
+            "value" : "Користувальницькі голоси можуть бути встановлені у **Налаштуваннях** за допомогою **Імпортувати з файлів**, обравши модель `.onnx` і її конфігурацію `.json`."
           }
         },
         "ur-PK" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "**Import Model from Files** کا استعمال کرتے ہوئے ایک **.onnx** ماڈل اور اس کی **.json** کنفیگریشن کو منتخب کر کے کسٹم آوازیں انسٹال کی جا سکتی ہیں۔"
+            "value" : "**ترتیبات** میں **Import Model from Files** کا استعمال کرتے ہوئے ایک **.onnx** ماڈل اور اس کی **.json** کنفیگریشن کو منتخب کر کے کسٹم آوازیں انسٹال کی جا سکتی ہیں۔"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "通过选择`.onnx`模型及其`.json`配置，可以使用 **从文件中导入模型** 安装自定义语音。"
+            "value" : "通过选择`.onnx`模型及其`.json`配置，可以在**设置**中使用 **从文件中导入模型** 安装自定义语音。"
           }
         }
       }

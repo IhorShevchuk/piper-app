@@ -9,12 +9,17 @@ import AVFoundation
 class SettingsHostModel: @unchecked Sendable, ObservableObject {
     @Published var viewModel: SettingsViewModel
     let piper: PiperManager
+    /// Notified when a voice is imported from Settings, so the main
+    /// list behind it refreshes its installed voices.
+    weak var modelChangeDelegate: ModelChangeDelegate?
 
     @MainActor
-    init(piper: PiperManager) {
+    init(piper: PiperManager,
+         modelChangeDelegate: ModelChangeDelegate? = nil) {
         viewModel = SettingsViewModel(appVersion: Bundle.main.applicationVersion,
                                       connectionStatus: piper.audioUnit.status)
         self.piper = piper
+        self.modelChangeDelegate = modelChangeDelegate
     }
 
     func connect() {
