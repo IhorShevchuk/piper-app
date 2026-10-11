@@ -7,115 +7,115 @@
         "ar" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "قم بتثبيت صوت من قائمة **تحميل نموذج الصوت** لبدء استخدام التطبيق."
+            "value" : "قم بتثبيت صوت لبدء استخدام التطبيق: اضغط على لغة ضمن **اللغات**، ثم اضغط على زر التنزيل بجوار الصوت."
           }
         },
         "bn" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "অ্যাপটি ব্যবহার শুরু করতে **ভয়েস মডেল ডাউনলোড করুন** মেনু থেকে একটি ভয়েস ইনস্টল করুন।"
+            "value" : "অ্যাপটি ব্যবহার শুরু করতে একটি ভয়েস ইনস্টল করুন: **ভাষাগুলো** থেকে একটি ভাষা বেছে নিন, তারপর একটি ভয়েসের পাশে ডাউনলোড বোতামে ট্যাপ করুন।"
           }
         },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Installiere eine Stimme aus dem Menü **Sprachmodell herunterladen**, um die App zu nutzen."
+            "value" : "Installiere eine Stimme, um die App zu nutzen: Tippe unter **Sprachen** auf eine Sprache und dann auf die Download-Schaltfläche neben einer Stimme."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Install a voice from **Download Voice Model** menu to start using the app."
+            "value" : "Install a voice to start using the app: tap a language under **Languages**, then tap the download button next to a voice."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Instala una voz desde el menú **Descargar modelo de voz** para empezar a usar la aplicación."
+            "value" : "Instala una voz para empezar a usar la aplicación: toca un idioma en **Idiomas** y luego toca el botón de descarga junto a una voz."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Installez une voix à partir du menu **Télécharger le modèle de voix** pour commencer à utiliser l'application."
+            "value" : "Installez une voix pour commencer à utiliser l'application : touchez une langue dans **Langues**, puis touchez le bouton de téléchargement à côté d'une voix."
           }
         },
         "hi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ऐप का उपयोग शुरू करने के लिए **वॉयस मॉडल डाउनलोड करें** मेनू से आवाज़ इंस्टॉल करें।"
+            "value" : "ऐप का उपयोग शुरू करने के लिए आवाज़ इंस्टॉल करें: **भाषाएँ** में से एक भाषा पर टैप करें, फिर किसी आवाज़ के पास दिए गए डाउनलोड बटन पर टैप करें।"
           }
         },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "A használat megkezdéséhez telepítsen egy hangot a **Hangmodell letöltése** menüből."
+            "value" : "A használat megkezdéséhez telepítsen egy hangot: koppintson egy nyelvre a **Nyelvek** alatt, majd koppintson egy hang melletti letöltés gombra."
           }
         },
         "id" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Instal suara dari menu **Unduh Model Suara** untuk mulai menggunakan aplikasi."
+            "value" : "Instal suara untuk mulai menggunakan aplikasi: ketuk bahasa di **Bahasa**, lalu ketuk tombol unduh di samping suara."
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Installa una voce dal menu **Scarica modello vocale** per iniziare a usare l'app."
+            "value" : "Installa una voce per iniziare a usare l'app: tocca una lingua in **Lingue**, poi tocca il pulsante di download accanto a una voce."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "アプリの使用を開始するには、**音声モデルをダウンロード** メニューから音声をインストールしてください。"
+            "value" : "アプリの使用を開始するには、音声をインストールしてください。**言語** で言語をタップし、音声の横にあるダウンロードボタンをタップします。"
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Installeer een stem uit het menu **Download spraakmodel** om de app te gaan gebruiken."
+            "value" : "Installeer een stem om de app te gaan gebruiken: tik op een taal onder **Talen** en tik vervolgens op de downloadknop naast een stem."
           }
         },
         "pl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Zainstaluj głos z menu **Pobierz model głosu**, aby rozpocząć korzystanie z aplikacji."
+            "value" : "Zainstaluj głos, aby rozpocząć korzystanie z aplikacji: stuknij język w sekcji **Języki**, a następnie stuknij przycisk pobierania obok głosu."
           }
         },
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Installera en röst från menyn **Ladda ner röstmodell** för att börja använda appen."
+            "value" : "Installera en röst för att börja använda appen: tryck på ett språk under **Språk** och tryck sedan på hämtningsknappen bredvid en röst."
           }
         },
         "pt" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Instale uma voz do menu **Baixar Modelo de Voz** para começar a usar o app."
+            "value" : "Instale uma voz para começar a usar o app: toque em um idioma em **Idiomas** e depois toque no botão de download ao lado de uma voz."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Uygulamayı kullanmaya başlamak için **Ses Modelini İndir** menüsünden bir ses yükleyin."
+            "value" : "Uygulamayı kullanmaya başlamak için bir ses yükleyin: **Diller** bölümünde bir dile dokunun, ardından bir sesin yanındaki indirme düğmesine dokunun."
           }
         },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Встановіть голос за допомогою **Завантажити голосову модель**, щоб почати користуватися застосунком."
+            "value" : "Встановіть голос, щоб почати користуватися застосунком: торкніться мови в розділі **Мови**, а потім торкніться кнопки завантаження поруч із голосом."
           }
         },
         "ur-PK" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ایپ کا استعمال شروع کرنے کے لیے **ڈاؤن لوڈ وائس ماڈل** مینو سے آواز انسٹال کریں۔"
+            "value" : "ایپ کا استعمال شروع کرنے کے لیے آواز انسٹال کریں: **زبانیں** میں ایک زبان پر ٹیپ کریں، پھر آواز کے ساتھ ڈاؤن لوڈ بٹن پر ٹیپ کریں۔"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "从 **Download Voice Model** 菜单安装语音以开始使用应用程序。"
+            "value" : "安装语音以开始使用应用程序：点击 **语言** 下的一种语言，然后点击语音旁边的下载按钮。"
           }
         }
       }
@@ -949,6 +949,125 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "要节省空间，请在**设置**中将**语音格式**设为**紧凑**:新的语音下载将更小，占用内存更少。"
+          }
+        }
+      }
+    },
+    "app_help_line_7" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "استخدم **البحث** في أعلى الشاشة الرئيسية للعثور على صوت بالاسم أو اللغة. اضغط على حلقة التقدم لإلغاء تنزيل جارٍ."
+          }
+        },
+        "bn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "নাম বা ভাষা দিয়ে ভয়েস খুঁজতে প্রধান স্ক্রিনের উপরে **ভয়েস খুঁজুন** ব্যবহার করুন। চলমান ডাউনলোড বাতিল করতে প্রগ্রেস রিংয়ে ট্যাপ করুন।"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nutze **Stimmen suchen** oben auf dem Hauptbildschirm, um eine Stimme nach Name oder Sprache zu finden. Tippe auf den Fortschrittsring, um einen laufenden Download abzubrechen."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Use **Search** at the top of the main screen to find a voice by name or language. Tap the progress ring to cancel a download in progress."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Usa **Buscar voces** en la parte superior de la pantalla principal para encontrar una voz por nombre o idioma. Toca el anillo de progreso para cancelar una descarga en curso."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Utilisez **Rechercher des voix** en haut de l'écran principal pour trouver une voix par nom ou par langue. Touchez l'anneau de progression pour annuler un téléchargement en cours."
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "नाम या भाषा से आवाज़ खोजने के लिए मुख्य स्क्रीन के शीर्ष पर **वॉइस खोजें** का उपयोग करें। चल रहे डाउनलोड को रद्द करने के लिए प्रगति रिंग पर टैप करें।"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Használja a főképernyő tetején lévő **Hangok keresése** funkciót, ha név vagy nyelv alapján keres hangot. A folyamatjelző gyűrűre koppintva megszakíthat egy folyamatban lévő letöltést."
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gunakan **Cari suara** di bagian atas layar utama untuk menemukan suara berdasarkan nama atau bahasa. Ketuk cincin kemajuan untuk membatalkan unduhan yang sedang berlangsung."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Usa **Cerca voci** nella parte superiore della schermata principale per trovare una voce per nome o lingua. Tocca l'anello di avanzamento per annullare un download in corso."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "名前や言語で音声を探すには、メイン画面上部の **音声を検索** を使用してください。進行中のダウンロードをキャンセルするには、進行状況リングをタップしてください。"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gebruik **Stemmen zoeken** bovenaan het hoofdscherm om een stem op naam of taal te vinden. Tik op de voortgangsring om een lopende download te annuleren."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Użyj **Szukaj głosów** u góry ekranu głównego, aby znaleźć głos po nazwie lub języku. Stuknij pierścień postępu, aby anulować trwające pobieranie."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Use **Pesquisar vozes** na parte superior da tela principal para encontrar uma voz por nome ou idioma. Toque no anel de progresso para cancelar um download em andamento."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Använd **Sök röster** högst upp på huvudskärmen för att hitta en röst efter namn eller språk. Tryck på förloppsringen för att avbryta en pågående hämtning."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ada veya dile göre ses bulmak için ana ekranın üst kısmındaki **Sesleri ara** özelliğini kullanın. Devam eden bir indirmeyi iptal etmek için ilerleme halkasına dokunun."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Використовуйте **Пошук голосів** у верхній частині головного екрана, щоб знайти голос за назвою або мовою. Торкніться кільця прогресу, щоб скасувати поточне завантаження."
+          }
+        },
+        "ur-PK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "نام یا زبان کے ذریعے آواز تلاش کرنے کے لیے مرکزی اسکرین کے اوپر **آوازیں تلاش کریں** استعمال کریں۔ جاری ڈاؤن لوڈ منسوخ کرنے کے لیے پروگریس رنگ پر ٹیپ کریں۔"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "使用主屏幕顶部的 **搜索语音** 按名称或语言查找语音。点击进度环可取消正在进行的下载。"
           }
         }
       }
@@ -6207,115 +6326,115 @@
         "ar" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "**لم يتم تثبيت أي أصوات بعد.**\nاستخدم زر **تحميل نموذج الصوت** أدناه لإضافة صوت."
+            "value" : "**لم يتم تثبيت أي أصوات بعد.**\nاختر لغة أدناه لإضافة صوت."
           }
         },
         "bn" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "**এখনো কোনো ভয়েস ইনস্টল করা হয়নি।**\nএকটি ভয়েস যোগ করতে নিচের **ভয়েস মডেল ডাউনলোড করুন** বোতামটি ব্যবহার করুন।"
+            "value" : "**এখনো কোনো ভয়েস ইনস্টল করা হয়নি।**\nএকটি ভয়েস যোগ করতে নিচে একটি ভাষা বেছে নিন।"
           }
         },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "**Es sind noch keine Stimmen installiert.**\nNutze die Schaltfläche **Sprachmodell herunterladen** unten, um eine Stimme hinzuzufügen."
+            "value" : "**Es sind noch keine Stimmen installiert.**\nWähle unten eine Sprache, um eine Stimme hinzuzufügen."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "**No voices are installed yet.**\nUse the **Download Voice Model** button below to add a voice."
+            "value" : "**No voices are installed yet.**\nChoose a language below to add a voice."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "**Aún no hay voces instaladas.**\nUsa el botón **Descargar modelo de voz** de abajo para añadir una voz."
+            "value" : "**Aún no hay voces instaladas.**\nElige un idioma abajo para añadir una voz."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "**Aucune voix n'est installée.**\nUtilisez le bouton **Télécharger le modèle de voix** ci-dessous pour ajouter une voix."
+            "value" : "**Aucune voix n'est installée.**\nChoisissez une langue ci-dessous pour ajouter une voix."
           }
         },
         "hi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "**अभी तक कोई आवाज़ इंस्टॉल नहीं की गई है।**\nआवाज़ जोड़ने के लिए नीचे दिए गए **वॉयस मॉडल डाउनलोड करें** बटन का उपयोग करें।"
+            "value" : "**अभी तक कोई आवाज़ इंस्टॉल नहीं की गई है।**\nआवाज़ जोड़ने के लिए नीचे एक भाषा चुनें।"
           }
         },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "**Még nincsenek hangok telepítve.**\nHang hozzáadásához használja az alábbi **Hangmodell letöltése** gombot."
+            "value" : "**Még nincsenek hangok telepítve.**\nHang hozzáadásához válasszon egy nyelvet alább."
           }
         },
         "id" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "**Belum ada suara yang diinstal.**\nGunakan tombol **Unduh Model Suara** di bawah ini untuk menambahkan suara."
+            "value" : "**Belum ada suara yang diinstal.**\nPilih bahasa di bawah ini untuk menambahkan suara."
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "**Nessuna voce ancora installata.**\nUsa il pulsante **Scarica modello vocale** qui sotto per aggiungere una voce."
+            "value" : "**Nessuna voce ancora installata.**\nScegli una lingua qui sotto per aggiungere una voce."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "**音声がまだインストールされていません。**\n下の **音声モデルをダウンロード** ボタンを使用して音声を追加してください。"
+            "value" : "**音声がまだインストールされていません。**\n下で言語を選択して音声を追加してください。"
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "**Er zijn nog geen stemmen geïnstalleerd.**\nGebruik de knop **Download spraakmodel** hieronder om een stem toe te voegen."
+            "value" : "**Er zijn nog geen stemmen geïnstalleerd.**\nKies hieronder een taal om een stem toe te voegen."
           }
         },
         "pl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "**Żadne głosy nie są jeszcze zainstalowane.**\nUżyj przycisku **Pobierz model głosu** poniżej, aby dodać głos."
+            "value" : "**Żadne głosy nie są jeszcze zainstalowane.**\nWybierz język poniżej, aby dodać głos."
           }
         },
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "**Inga röster är installerade än.**\nAnvänd knappen **Ladda ner röstmodell** nedan för att lägga till en röst."
+            "value" : "**Inga röster är installerade än.**\nVälj ett språk nedan för att lägga till en röst."
           }
         },
         "pt" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "**Nenhuma voz está instalada ainda.**\nUse o botão **Baixar Modelo de Voz** abaixo para adicionar uma voz."
+            "value" : "**Nenhuma voz está instalada ainda.**\nEscolha um idioma abaixo para adicionar uma voz."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "**Henüz hiçbir ses yüklenmedi.**\nBir ses eklemek için aşağıdaki **Ses Modelini İndir** düğmesini kullanın."
+            "value" : "**Henüz hiçbir ses yüklenmedi.**\nSes eklemek için aşağıdan bir dil seçin."
           }
         },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "**Жодного голосу ще не встановлено.**  \nЩоб додати голос, скористайтеся кнопкою **Завантажити голосову модель** нижче."
+            "value" : "**Жодного голосу ще не встановлено.**\nЩоб додати голос, виберіть мову нижче."
           }
         },
         "ur-PK" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "**ابھی تک کوئی آوازیں انسٹال نہیں ہیں۔**\nآواز شامل کرنے کے لیے نیچے **وائس ماڈل ڈاؤن لوڈ کریں** بٹن کا استعمال کریں۔"
+            "value" : "**ابھی تک کوئی آوازیں انسٹال نہیں ہیں۔**\nآواز شامل کرنے کے لیے نیچے ایک زبان منتخب کریں۔"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "**尚未安装声音。**\n使用下面的 **下载语音模型** 按钮添加语音。"
+            "value" : "**尚未安装声音。**\n在下面选择一种语言以添加语音。"
           }
         }
       }

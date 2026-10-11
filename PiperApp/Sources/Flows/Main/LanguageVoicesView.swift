@@ -12,10 +12,31 @@ struct LanguageVoicesView: View {
     @ObservedObject var hostModel: MainHostModel
     let languageCode: String
 
+    private var voices: [Voice] {
+        hostModel.voices(for: languageCode)
+    }
+
     var body: some View {
         List {
-            ForEach(hostModel.voices(for: languageCode), id: \.key) { voice in
-                VoiceRowView(hostModel: hostModel, voice: voice)
+            if voices.isEmpty {
+                Text("no_voices")
+                    .font(.title2)
+            } else {
+                Section {
+                    Text("warning_not_tested_voices")
+                        .font(.title2)
+                        .accessibilityHidden(false)
+                }
+                Section {
+                    ForEach(voices, id: \.key) { voice in
+                        VoiceRowView(hostModel: hostModel, voice: voice)
+                    }
+                }
+                Section {
+                    Text("warning_big_voice_files")
+                        .font(.title2)
+                        .accessibilityHidden(false)
+                }
             }
         }
         .navigationTitle(languageCode.localizedLanguageFromCode)
