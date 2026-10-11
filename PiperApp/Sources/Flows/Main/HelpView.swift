@@ -21,6 +21,8 @@ struct HelpView: View {
                 VStack(alignment: .leading, spacing: 12) {
                     helpItem(text: String(localized: "app_help_line_1"),
                              icon: "square.and.arrow.down")
+                    helpItem(text: String(localized: "app_help_line_7"),
+                             icon: "magnifyingglass")
                     helpItem(text: String(localized: "app_help_line_6"),
                              icon: "arrow.down.circle")
 #if os(iOS)

@@ -126,11 +126,6 @@ struct MainView: View {
                 }
             }
         case .loaded:
-            Section {
-                Text("warning_not_tested_voices")
-                    .font(.title2)
-                    .accessibilityHidden(false)
-            }
             Section("languages") {
                 ForEach(hostModel.viewModel.languageCodes, id: \.self) { code in
                     NavigationLink {
@@ -140,11 +135,6 @@ struct MainView: View {
                             .font(.title2)
                     }
                 }
-            }
-            Section {
-                Text("warning_big_voice_files")
-                    .font(.title2)
-                    .accessibilityHidden(false)
             }
         }
     }
