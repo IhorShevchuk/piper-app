@@ -66,7 +66,7 @@ struct SettingsView: View {
                     HStack {
                         Spacer()
                         AboutLibView(libTitle: String(localized: "license_main_app_\(platform)_title"),
-                                     url: "https://github.com/IhorShevchuk/piper-app",
+                                     url: "https://github.com/piper-tts-apps/piper-app-apple",
                                      description: String(localized: "license_main_app_description"))
                         Spacer()
                     }

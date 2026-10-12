@@ -18,7 +18,7 @@
   </a>
 </p>
 
-[![Build](https://github.com/IhorShevchuk/piper-app/actions/workflows/build.yml/badge.svg?branch=main)](https://github.com/IhorShevchuk/piper-app/actions/workflows/build.yml)
+[![Build](https://github.com/piper-tts-apps/piper-app-apple/actions/workflows/build.yml/badge.svg?branch=main)](https://github.com/piper-tts-apps/piper-app-apple/actions/workflows/build.yml)
 
 # 📥 Cloning & Building Piper
 
@@ -34,8 +34,8 @@
 ## Getting the Sources
 
 ```bash
-git clone https://github.com/IhorShevchuk/piper-app.git
-cd piper-app
+git clone https://github.com/piper-tts-apps/piper-app-apple.git
+cd piper-app-apple
 ```
 
 ---

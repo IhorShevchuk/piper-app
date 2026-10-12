@@ -75,4 +75,4 @@ SOFTWARE.
 
 ---
 
-**Repository:** [https://github.com/IhorShevchuk/piper-app](https://github.com/IhorShevchuk/piper-app)
+**Repository:** [https://github.com/piper-tts-apps/piper-app-apple](https://github.com/piper-tts-apps/piper-app-apple)
