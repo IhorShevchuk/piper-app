@@ -5,8 +5,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/piper-tts-apps/espeak-ng-spm.git",
       "state" : {
-        "revision" : "8ffabfe9998f6d7f5fb768f5489ea4b7873e2829",
-        "version" : "2026.4.7"
+        "revision" : "adad732ec1e4709383e282e11842b64e8b42dc2d",
+        "version" : "2026.9.11"
       }
     },
     {
@@ -14,8 +14,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/piper-tts-apps/piper-objc",
       "state" : {
-        "revision" : "f7f7ab3452834d752f8d7db8511eac42a77e41a8",
-        "version" : "0.2.44"
+        "revision" : "cf9881d8c6834023c8a6fe7e0b6f9d4cc324ee79",
+        "version" : "0.2.47"
       }
     },
     {
@@ -23,8 +23,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/piper-tts-apps/piper1-gpl-spm.git",
       "state" : {
-        "revision" : "763a24657c3e7c7de8e07ef0aff6a3ba0594cddb",
-        "version" : "0.1.17"
+        "revision" : "3f4a62e910b01e51cd7c49f6107b583f7e668058",
+        "version" : "0.1.20"
       }
     }
   ],
