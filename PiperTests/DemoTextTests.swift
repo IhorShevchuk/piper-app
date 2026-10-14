@@ -1,0 +1,85 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Ihor Shevchuk
+
+import XCTest
+@testable import Piper
+import PiperAppUtils
+#if canImport(UIKit)
+import UIKit
+#elseif canImport(AppKit)
+import AppKit
+#endif
+
+final class DemoTextTests: XCTestCase {
+
+    private let samples: [String: String] = [
+        "de": "German sample",
+        "en_GB": "English sample",
+        "es_ES": "Spanish sample",
+        "ja_JA": "Japanese sample",
+        "pt_BR": "Brazilian Portuguese sample",
+        "pt_PT": "European Portuguese sample"
+    ]
+
+    private func language(code: String, family: String, region: String) -> Language {
+        Language(code: code, family: family, region: region)
+    }
+
+    func testExactCodeWins() {
+        let lang = language(code: "pt_PT", family: "pt", region: "PT")
+        XCTAssertEqual(DemoText.sampleText(in: samples, for: lang), "European Portuguese sample")
+    }
+
+    func testBareFamilyKey() {
+        let lang = language(code: "de_DE", family: "de", region: "DE")
+        XCTAssertEqual(DemoText.sampleText(in: samples, for: lang), "German sample")
+    }
+
+    /// Regression: Spanish voices from Mexico and Argentina fell back
+    /// to the English default because `Samples` only carries `es_ES`
+    /// and there is no bare `es` key.
+    func testRegionalFallbackSpanishMexico() {
+        let lang = language(code: "es_MX", family: "es", region: "MX")
+        XCTAssertEqual(DemoText.sampleText(in: samples, for: lang), "Spanish sample")
+    }
+
+    func testRegionalFallbackSpanishArgentina() {
+        let lang = language(code: "es_AR", family: "es", region: "AR")
+        XCTAssertEqual(DemoText.sampleText(in: samples, for: lang), "Spanish sample")
+    }
+
+    func testRegionalFallbackEnglishUS() {
+        let lang = language(code: "en_US", family: "en", region: "US")
+        XCTAssertEqual(DemoText.sampleText(in: samples, for: lang), "English sample")
+    }
+
+    /// A future `ja_JP` catalog code must keep resolving to the sample
+    /// stored under the historical `ja_JA` key.
+    func testRegionalFallbackJapaneseRename() {
+        let lang = language(code: "ja_JP", family: "ja", region: "JP")
+        XCTAssertEqual(DemoText.sampleText(in: samples, for: lang), "Japanese sample")
+    }
+
+    func testRegionalFallbackIsDeterministic() {
+        let lang = language(code: "pt_AO", family: "pt", region: "AO")
+        XCTAssertEqual(DemoText.sampleText(in: samples, for: lang), "Brazilian Portuguese sample")
+    }
+
+    func testNoSampleForLanguageReturnsNil() {
+        let lang = language(code: "ko_KR", family: "ko", region: "KR")
+        XCTAssertNil(DemoText.sampleText(in: samples, for: lang))
+    }
+
+    /// The bundled `Samples` asset itself: every Spanish voice in the
+    /// catalog must resolve to the Spanish text, never the default.
+    func testBundledSpanishSamplesResolve() throws {
+        let dataAsset = NSDataAsset(name: "Samples")
+        try XCTSkipUnless(dataAsset != nil, "Samples asset not available in this test host")
+        let samples = try JSONDecoder().decode([String: String].self, from: XCTUnwrap(dataAsset?.data))
+        for code in ["es_ES", "es_MX", "es_AR"] {
+            let region = String(code.suffix(2))
+            let lang = language(code: code, family: "es", region: region)
+            XCTAssertEqual(DemoText.sampleText(in: samples, for: lang), samples["es_ES"])
+        }
+    }
+}
